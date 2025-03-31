@@ -100,6 +100,7 @@ El `rpcclient` nos ofrece muchas solicitudes diferentes con las cuales podemos e
 | netsharegetinfo <share> | Proporciona información sobre un recurso compartido específico. |
 | enumdomusers            | Enumera todos los usuarios del dominio.                         |
 | queryuser <RID>         | Proporciona información sobre un usuario específico.            |
+
 Sin embargo, también puede ocurrir que no todos los comandos estén disponibles para nosotros, ya que existen ciertas restricciones basadas en el usuario. No obstante, la consulta `queryuser <RID>` suele estar permitida en función del RID. Por ello, podemos utilizar `rpcclient` para forzar (bruteforce) los RIDs y obtener información. Dado que puede que no sepamos quién tiene asignado cada RID, sabemos que obtendremos información tan pronto como consultemos un RID asignado.
 
 Existen varias maneras y herramientas que podemos usar para esto. Para quedarnos con la herramienta actual, podemos crear un bucle `for` en Bash en el que enviamos un comando al servicio usando `rpcclient` y filtramos los resultados.
@@ -121,3 +122,43 @@ amr251@htb[/htb]$ for i in $(seq 500 1100);do rpcclient -N -U "" 10.129.14.128 -
 ```
 
 
+##### Otras herramientas
+
+Existen múltiples herramientas para enumerar información, como [SMBMap](https://github.com/ShawnDEvans/smbmap) y [CrackMapExec](https://github.com/byt3bl33d3r/CrackMapExec)  
+
+**SMBMap**
+
+```shell-session
+amr251@htb[/htb]$ smbmap -H 10.129.14.128
+
+[+] Finding open SMB ports....
+[+] User SMB session established on 10.129.14.128...
+```
+
+**CrackMapExec**
+
+```shell-session
+amr251@htb[/htb]$ crackmapexec smb 10.129.14.128 --shares -u '' -p ''
+
+SMB         10.129.14.128   445    DEVSMB           [*] Windows 6.1 Build 0 (name:DEVSMB) (domain:) (signing:False) (SMBv1:False)
+SMB         10.129.14.128   445    DEVSMB           [+] \: 
+SMB         10.129.14.128   445    DEVSMB           [+] Enumerated shares
+```
+
+Otra herramienta interesante se llama [enum4linux-ng](https://github.com/cddmp/enum4linux-ng), que automatiza muchísimas consultas, devolviendo mucha información. Simplemente lo clonamos de github y con `pip3` en un entorno virtual, lo instalamos.
+
+```shell-session
+amr251@htb[/htb]$ git clone https://github.com/cddmp/enum4linux-ng.git
+amr251@htb[/htb]$ cd enum4linux-ng
+amr251@htb[/htb]$ pip3 install -r requirements.txt
+```
+
+Recordar que para crear un entorno virtual en Python, se siguen estos pasos:
+
+```bash
+1. python3 -m venv venv
+2. source venv/bin/activate
+3. pip3 install <...>
+```
+
+Cuando terminemos, escribimos `deactivate`.

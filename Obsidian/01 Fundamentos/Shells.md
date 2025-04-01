@@ -10,7 +10,7 @@
 
 ## Tipos de shell
 
-Principalmente se utilizan 2 tipos de shell: **reverse shell** y **bind shell**, aunque también existen las **forward shell**. Esta última es útil si nos encontramos frente a un firewall que necesitamos evadir, y buscamos la forma de tener una TTY interactiva. Veamos las diferencias de los shells TCP.
+Principalmente se utilizan 2 tipos de shell: **reverse shell** y **bind shell**, aunque ta,mbién existen las **forward shell**. Esta última es útil si nos encontramos frente a un firewall que necesitamos evadir, y buscamos la forma de tener una TTY interactiva. Veamos las diferencias de los shells TCP.
 
 ##### 1. Reverse Shell
 
@@ -31,7 +31,7 @@ nc -nlvp 4444
 | Flag    | Descripción                                                                                   |
 | ------- | --------------------------------------------------------------------------------------------- |
 | -l      | Modo escucha, para esperar que se conecte una conexión entrante.                              |
-| -v      | Modo verboso, para que se muestre información detallada cuando se reciba una conexión.        |
+| -v      | Modo verbose, para que se muestre información detallada cuando se reciba una conexión.        |
 | -n      | Deshabilita la resolución DNS y se conecta únicamente por IP, acelerando la conexión.         |
 | -p 4444 | Número de puerto en el que netcat está escuchando, al que se debe enviar la conexión inversa. |
 

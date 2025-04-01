@@ -6,7 +6,7 @@
 -------
 > ​El **Protocolo de Transferencia de Archivos (FTP)** es uno de los protocolos más antiguos de Internet, operando en la capa de aplicación del modelo TCP/IP, al igual que HTTP o POP. FTP permite la transferencia de archivos entre un cliente y un servidor, ofreciendo características como autenticación de usuarios y soporte para diversos comandos que facilitan la gestión de archivos y directorios. Por defecto, se encuentra en el puerto 21. 
 
-##### TFTP
+### TFTP
 
 Por otro lado, el **Protocolo de Transferencia de Archivos Trivial (TFTP)** es una versión simplificada de FTP. Aunque también facilita la transferencia de archivos entre procesos cliente y servidor, carece de funcionalidades avanzadas como la autenticación de usuarios y el listado de directorios. Además, mientras que FTP utiliza el protocolo TCP, TFTP opera sobre UDP, lo que lo hace menos confiable debido a la ausencia de mecanismos de control de errores integrados. ​
 
@@ -30,7 +30,7 @@ ftp -p <IP>
 ```
 
 Si el servidor permite autenticación anónima, pondremos como usuario `anonymous` y la contraseña no será necesaria. 
-##### Configuración de vsFTPd para Acceso Anónimo
+### Configuración de vsFTPd para Acceso Anónimo
 
 El servidor vsFTPd (Very Secure FTP Daemon) permite la configuración de accesos anónimos mediante diversas directivas en su archivo de configuración (`/etc/vsftpd.conf`). A continuación, se describen algunas de las configuraciones más relevantes
 
@@ -43,7 +43,7 @@ El servidor vsFTPd (Very Secure FTP Daemon) permite la configuración de accesos
 |`anon_root=/home/usuario/ftp`|Directorio raíz para los usuarios anónimos.|
 |`write_enable=YES`|¿Permitir el uso de comandos FTP: STOR, DELE, RNFR, RNTO, MKD, RMD, APPE y SITE?|
 
-##### Descargar todos los archivos
+### Descargar todos los archivos
 
 ```bash
 wget -m --no-passive ftp://anonymous:anonymous@10.129.14.136
@@ -71,7 +71,7 @@ Después, podemos con el comando `tree .` ver todo el contenido de forma sencill
 5 directories, 9 files
 ```
 
-##### Interacción con el servidor
+### Interacción con el servidor
 
 ```shell-session
 amr251@htb[/htb]$ nc -nv 10.129.14.136 21

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "01 Fundamentos/Shells.md",
+                "file": "01 Fundamentos/Protocolos/Transferencia de datos (FTP).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Shells"
+              "title": "Transferencia de datos (FTP)"
             }
           },
           {
@@ -27,16 +27,30 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "01 Fundamentos/Protocolos/Server Message Block (SMB).md",
+                "file": "01 Fundamentos/Protocolos/Domain Name Server (DNS).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Server Message Block (SMB)"
+              "title": "Domain Name Server (DNS)"
+            }
+          },
+          {
+            "id": "2e6db1f3749efa7e",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "01 Fundamentos/Protocolos/Domain Name Server (DNS).md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Domain Name Server (DNS)"
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -178,20 +192,23 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "94d4f5cc8f364abe",
+  "active": "2e6db1f3749efa7e",
   "lastOpenFiles": [
-    "01 Fundamentos/Protocolos/Transferencia de datos (FTP).md",
+    "Sin título.md",
+    "01 Fundamentos/Protocolos/Domain Name Server (DNS).md",
+    "01 Fundamentos/Protocolos/Network File System (NFS).md",
     "01 Fundamentos/Protocolos/Server Message Block (SMB).md",
+    "01 Fundamentos/Protocolos/Transferencia de datos (FTP).md",
+    "01 Fundamentos/Redes.md",
+    "01 Fundamentos/Shells.md",
     "01 Fundamentos/Protocolos",
     "01 Fundamentos/Tests de penetración.md",
     "03 Vulnerabilidades/Privilegios/Escalada de privilegios.md",
     "05 Pruebas prácticas/HTB/Resolución general.md",
-    "01 Fundamentos/Shells.md",
     "03 Vulnerabilidades/Buffer Overflow/Buffer Overflow.md",
     "03 Vulnerabilidades/Enumeración/Enumeración del sistema.md",
     "05 Pruebas prácticas/HTB/Máquinas/Nibbles.md",
     "Snippets/BSPWM - Atajos.md",
-    "01 Fundamentos/Redes.md",
     "05 Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_7.png",
     "05 Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_6.png",
     "05 Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_5.png",
@@ -219,10 +236,7 @@
     "03 Vulnerabilidades/OWASP 10/Local File Injection (LFI).md",
     "02 Herramientas/Netcat.md",
     "02 Herramientas/Docker.md",
-    "02 Herramientas/Burpsuite.md",
     "03 Vulnerabilidades/Buffer Overflow",
-    "03 Vulnerabilidades/OWASP 10/Local File Inclusion (LFI).md",
-    "Snippets/BSPWM.md",
     "03 Vulnerabilidades/Privilegios",
     "01 Fundamentos/imgs",
     "05 Pruebas prácticas/CTFs"

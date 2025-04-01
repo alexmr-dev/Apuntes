@@ -2,7 +2,7 @@
 
 Con el proyecto de software libre **Samba**, también existe una solución que permite el uso de SMB en distribuciones de Linux y Unix, posibilitando así la comunicación multiplataforma a través de SMB.
 
-##### Samba
+### Samba
 
 Como se mencionó anteriormente, existe una implementación alternativa del servidor SMB llamada Samba, desarrollada para sistemas operativos basados en Unix. Samba implementa el protocolo de red **Common Internet File System (CIFS)**. CIFS es un dialecto de SMB, lo que significa que es una implementación específica del protocolo SMB creada originalmente por Microsoft. Esto permite que Samba se comunique de manera efectiva con sistemas Windows más recientes, por lo que a menudo se le conoce como **SMB/CIFS**.
 
@@ -23,7 +23,7 @@ IBM desarrolló una **interfaz de programación de aplicaciones (API)** para la 
 | guest ok = yes                     | ¿Permitir conexión sin necesidad de contraseña?                          |
 | read only = yes                    | ¿Permitir solo lectura de archivos a los usuarios?                       |
 | create mask = 0700                 | ¿Qué permisos se establecerán para los archivos recién creados?          |
-##### Configuraciones peligrosas
+### Configuración peligrosa
 
 | Configuración             | Descripción                                                                 |
 | ------------------------- | --------------------------------------------------------------------------- |
@@ -38,7 +38,7 @@ IBM desarrolló una **interfaz de programación de aplicaciones (API)** para la 
 | magic script = script.sh  | ¿Qué script debe ejecutarse cuando el script se cierra?                     |
 | magic output = script.out | ¿Dónde debe almacenarse la salida del script mágico?                        |
 
-##### SMBclient - Conectando
+### SMBclient - Conectando
 
 ```shell-session
 amr251@htb[/htb]$ smbclient -N -L //10.129.14.128
@@ -55,7 +55,7 @@ SMB1 disabled -- no workgroup available
 
 Podemos ver que ahora tenemos cinco recursos compartidos diferentes en el servidor Samba a partir del resultado. Entre ellos, `print$` e `IPC$` ya están incluidos por defecto en la configuración básica, como ya hemos visto. Dado que estamos tratando con el recurso compartido `[notes]`, iniciemos sesión e inspeccionémoslo utilizando el mismo programa cliente. Si no estamos familiarizados con el programa cliente, podemos usar el comando `help` tras un inicio de sesión exitoso para listar todos los comandos posibles que podemos ejecutar.
 
-##### Descargando archivos desde SMB
+### Descargando archivos desde SMB
 
 ```shell-session
 smb: \> get prep-prod.txt 
@@ -81,7 +81,7 @@ notes        75691   10.10.14.4   Do Sep 23 00:12:06 2021 CEST     -            
 No locked files
 ```
 
-##### RPCclient
+### RPCclient
 
 El Llamado a Procedimiento Remoto (RPC) es un concepto y, por lo tanto, también una herramienta central para realizar estructuras operativas y de trabajo compartido en redes y arquitecturas cliente-servidor. El proceso de comunicación a través de RPC incluye el paso de parámetros y la devolución de un valor de función.
 
@@ -121,8 +121,7 @@ amr251@htb[/htb]$ for i in $(seq 500 1100);do rpcclient -N -U "" 10.129.14.128 -
         group_rid:      0x201
 ```
 
-
-##### Otras herramientas
+### Otras herramientas
 
 Existen múltiples herramientas para enumerar información, como [SMBMap](https://github.com/ShawnDEvans/smbmap) y [CrackMapExec](https://github.com/byt3bl33d3r/CrackMapExec)  
 
@@ -151,6 +150,7 @@ Otra herramienta interesante se llama [enum4linux-ng](https://github.com/cddmp/e
 amr251@htb[/htb]$ git clone https://github.com/cddmp/enum4linux-ng.git
 amr251@htb[/htb]$ cd enum4linux-ng
 amr251@htb[/htb]$ pip3 install -r requirements.txt
+amr251@htb[/htb]$ ./enum4linux-ng.py 10.129.14.128 -A
 ```
 
 Recordar que para crear un entorno virtual en Python, se siguen estos pasos:

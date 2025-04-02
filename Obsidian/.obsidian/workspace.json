@@ -13,29 +13,30 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "01 Fundamentos/Protocolos/IPMI - Intelligent Platform Management Interface.md",
+                "file": "01 Fundamentos/Shells.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "IPMI - Intelligent Platform Management Interface"
+              "title": "Shells"
             }
           },
           {
-            "id": "2e6db1f3749efa7e",
+            "id": "94d4f5cc8f364abe",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "01 Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
+                "file": "01 Fundamentos/Protocolos/Windows - Administración remota de protocolos.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "IMAP & POP3 - Internet Mapping Access Protocol"
+              "title": "Windows - Administración remota de protocolos"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -92,7 +93,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.5026054382324
+    "width": 300
   },
   "right": {
     "id": "e2e59f4aea713209",
@@ -177,28 +178,34 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "8708ceeda4eba248",
+  "active": "94d4f5cc8f364abe",
   "lastOpenFiles": [
-    "01 Fundamentos/Protocolos/Oracle TNS.md",
-    "01 Fundamentos/Protocolos/IPMI - Intelligent Platform Management Interface.md",
+    "01 Fundamentos/Protocolos/Linux - Administración remota de protocolos.md",
+    "01 Fundamentos/Protocolos/Windows - Administración remota de protocolos.md",
+    "01 Fundamentos/Protocolos/Simple Mail Transfer Protocol (SMTP).md",
     "01 Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
-    "01 Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
-    "03 Vulnerabilidades/Privilegios/Escalada de privilegios.md",
     "01 Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
     "01 Fundamentos/Protocolos/SMB - Server Message Block.md",
+    "01 Fundamentos/Protocolos/Oracle TNS.md",
     "01 Fundamentos/Protocolos/NFS - Network File System.md",
-    "01 Fundamentos/Protocolos/DNS - Domain Name Server.md",
+    "01 Fundamentos/Protocolos/IPMI - Intelligent Platform Management Interface.md",
+    "01 Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
     "01 Fundamentos/Protocolos/FTP - Transferencia de datos.md",
-    "Sin título.md",
-    "01 Fundamentos/Redes.md",
-    "01 Fundamentos/Shells.md",
+    "01 Fundamentos/Protocolos/DNS - Domain Name Server.md",
+    "01 Fundamentos/Protocolos/Domain Name Server (DNS).md",
+    "01 Fundamentos/Protocolos/Server Message Block (SMB).md",
+    "01 Fundamentos/Protocolos/Network File System (NFS).md",
+    "01 Fundamentos/Protocolos/Transferencia de datos (FTP).md",
     "01 Fundamentos/Protocolos",
     "01 Fundamentos/Tests de penetración.md",
+    "03 Vulnerabilidades/Privilegios/Escalada de privilegios.md",
     "05 Pruebas prácticas/HTB/Resolución general.md",
+    "01 Fundamentos/Shells.md",
     "03 Vulnerabilidades/Buffer Overflow/Buffer Overflow.md",
     "03 Vulnerabilidades/Enumeración/Enumeración del sistema.md",
     "05 Pruebas prácticas/HTB/Máquinas/Nibbles.md",
     "Snippets/BSPWM - Atajos.md",
+    "01 Fundamentos/Redes.md",
     "05 Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_7.png",
     "05 Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_6.png",
     "05 Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_5.png",
@@ -211,12 +218,6 @@
     "05 Pruebas prácticas/HTB/Máquinas",
     "05 Pruebas prácticas/HTB",
     "05 Pruebas prácticas/VulnHub",
-    "05 Pruebas prácticas/CTFs/HTB/Resolución general.md",
-    "Snippets/Scripts.md",
-    "02 Herramientas/Nmap.md",
-    "03 Vulnerabilidades/Exploits/PATH Hijacking.md",
-    "03 Vulnerabilidades/OWASP 10/ShellShock.md",
-    "03 Vulnerabilidades/OWASP 10/Cross-Site Scripting (XSS).md",
     "03 Vulnerabilidades/Buffer Overflow/IMGS/Pasted image 20250313155652.png",
     "03 Vulnerabilidades/Buffer Overflow/IMGS",
     "03 Vulnerabilidades/Buffer Overflow/IMGS/Pasted image 20250313171434.png",

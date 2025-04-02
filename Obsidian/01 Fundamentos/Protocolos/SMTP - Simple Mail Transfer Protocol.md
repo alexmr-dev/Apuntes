@@ -174,3 +174,5 @@ NSE: Loaded 1 scripts for scanning.
 ...SNIP...
 ```
 
+También podemos usar la herramienta Metasploit y utilizar el plugin para enumerar usuarios de un servicio SMTP.  
+

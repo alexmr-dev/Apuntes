@@ -2,7 +2,7 @@
 
 ---
 -----
-> El Sistema de Archivos de Red (NFS, por sus siglas en inglés) es un sistema de archivos de red desarrollado por Sun Microsystems y tiene el mismo propósito que [[Server Message Block (SMB)]]. Su objetivo es acceder a sistemas de archivos a través de una red como si fueran locales. Sin embargo, utiliza un protocolo completamente diferente. NFS se utiliza entre sistemas Linux y Unix. Esto significa que los clientes NFS no pueden comunicarse directamente con los servidores SMB. **NFS** es un estándar de Internet que regula los procedimientos en un sistema de archivos distribuido. Mientras que la versión 3.0 del protocolo NFS (NFSv3), que ha estado en uso durante muchos años, autentica la computadora cliente, esto cambia con NFSv4. Aquí, al igual que con el protocolo SMB de Windows, el usuario debe autenticarse.
+> El Sistema de Archivos de Red (NFS, por sus siglas en inglés) es un sistema de archivos de red desarrollado por Sun Microsystems y tiene el mismo propósito que [[SMB - Server Message Block]]. Su objetivo es acceder a sistemas de archivos a través de una red como si fueran locales. Sin embargo, utiliza un protocolo completamente diferente. NFS se utiliza entre sistemas Linux y Unix. Esto significa que los clientes NFS no pueden comunicarse directamente con los servidores SMB. **NFS** es un estándar de Internet que regula los procedimientos en un sistema de archivos distribuido. Mientras que la versión 3.0 del protocolo NFS (NFSv3), que ha estado en uso durante muchos años, autentica la computadora cliente, esto cambia con NFSv4. Aquí, al igual que con el protocolo SMB de Windows, el usuario debe autenticarse.
 
 ### Configuración por defecto
 

@@ -1,6 +1,6 @@
 > El Server Message Block (SMB) es un protocolo cliente-servidor que regula el acceso a archivos, directorios completos y otros recursos de red, como impresoras, routers o interfaces compartidas en la red. El intercambio de información entre diferentes procesos del sistema también puede manejarse mediante el protocolo SMB.
 
-Con el proyecto de software libre **Samba**, también existe una solución que permite el uso de SMB en distribuciones de Linux y Unix, posibilitando así la comunicación multiplataforma a través de SMB.
+Con el proyecto de software libre **Samba**, también existe una solución que permite el uso de SMB en distribuciones de Linux y Unix, posibilitando así la comunicación multiplataforma a través de SMB. Por defecto, se encuentra en los puertos `139` (HTTP) y `445` (HTTPS)
 
 ### Samba
 

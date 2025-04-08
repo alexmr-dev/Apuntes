@@ -90,6 +90,8 @@ whoami
 root
 ```
 
+Recordar que, si vemos una terminal así, podemos escribir `script /dev/null` para tener una shell algo más funcional.
+
 ### Claves SSH
 
 Si tenemos acceso al directorio `.ssh` para un usuario específico,  podemos leer su clave privada encontrada en `/home/user/.ssh/id_rsa` o `/root/.ssh/id_rsa` y usarlo para acceder al servidor. Si podemos acceder a `/root/.ssh` y leer el archivo `id_rsa`, lo podemos copiar y usar el parámetro `-i` para iniciar sesión con el mismo, haciéndolo desde nuestra máquina local:

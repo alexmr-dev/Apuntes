@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Shells.md",
+                "file": "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Shells"
+              "title": "Escalada de privilegios"
             }
           },
           {
@@ -179,11 +179,11 @@
   },
   "active": "8708ceeda4eba248",
   "lastOpenFiles": [
+    "Fundamentos/Shells.md",
     "Herramientas/Netcat.md",
     "Snippets/BSPWM - Atajos.md",
     "Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
     "Fundamentos/Protocolos/Windows - Administración remota de protocolos.md",
-    "Fundamentos/Shells.md",
     "Fundamentos/imgs/Pasted image 20250409220234.png",
     "Fundamentos/imgs/Pasted image 20250409210001.png",
     "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",

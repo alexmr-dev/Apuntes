@@ -33,14 +33,15 @@ En Linux y Windows existen métodos para ejecutar scripts a intervalos específi
 - Agregar nuevas tareas programadas/cron jobs.
 - Engañar al sistema para que ejecute un software malicioso.
 
-La forma más sencilla es verificar si se nos permite agregar nuevas tareas programadas. En Linux, una forma común de mantener tareas programadas es mediante Cron Jobs. Existen directorios específicos que podemos utilizar para agregar nuevos cron jobs si tenemos permisos de escritura sobre ellos. Estos incluyen:
+Imaginemos que nos encontramos con que el usuario `root` tiene asociada una crontab en la que ejecuta un script cada minuto. Si conseguimos editar dicho script, podremos hacer que el usuario administrador lo ejecute. Por ejemplo, si nos encontramos un script de Python que tiene una crontab asociada y lo editamos:
 
-- `/etc/crontab`
-- `/etc/cron.d`
-- `/var/spool/cron/crontabs/root`
+```python
+import os;
 
-Si podemos escribir en un directorio que es llamado por un cron job, podemos escribir un script bash con un comando de reverse shell, lo que debería enviarnos una reverse shell cuando se ejecute.
+os.system('chmod 4755 /bin/bash')
+```
 
+Haremos que `root` convierta en SUID la bash, por lo que podremos posteriormente hacer `/bin/bash -p` para convertirnos en root. 
 ### PATH Hijacking
 
 Esta técnica permite manipular la variable de entorno PATH para ejecutar nuestros propios comandos. Es muy útil si por ejemplo, se están ejecutando comandos que confían en el PATH establecido y no en la ruta absoluta. Imaginemos que existe un binario con permisos SUID que confía en el PATH, como por ejemplo, el binario `cat`. Podemos crear un archivo a nuestro antojo en la carpeta `/tmp`, que probablemente permita escritura dentro. 

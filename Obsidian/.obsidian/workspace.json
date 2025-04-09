@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
+                "file": "Herramientas/Netcat.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Windows - Métodos de transferencia de archivos"
+              "title": "Netcat"
             }
           },
           {
@@ -27,15 +27,16 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Protocolos/SMB - Server Message Block.md",
+                "file": "Fundamentos/Tests de penetración.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "SMB - Server Message Block"
+              "title": "Tests de penetración"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -67,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "impacket",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -177,14 +178,20 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "8708ceeda4eba248",
+  "active": "aef5154be08ce0da",
   "lastOpenFiles": [
-    "Fundamentos/Protocolos/FTP - Transferencia de datos.md",
+    "Pruebas prácticas/HTB/Resolución general.md",
     "Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
-    "Transferencia de archivos/Imgs",
-    "Transferencia de archivos/Imgs/Pasted image 20250408154651.png",
-    "Fundamentos/Puertos comunes.md",
+    "Transferencia de archivos/Imgs/Pasted image 20250409125008.png",
+    "Herramientas/Netcat.md",
+    "Vulnerabilidades/Enumeración/Enumeración del sistema.md",
+    "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
     "Fundamentos/Protocolos/SMB - Server Message Block.md",
+    "Transferencia de archivos/Imgs/Pasted image 20250408154651.png",
+    "Vulnerabilidades/OWASP 10/SQL Injection (SQLi).md",
+    "Fundamentos/Protocolos/FTP - Transferencia de datos.md",
+    "Transferencia de archivos/Imgs",
+    "Fundamentos/Puertos comunes.md",
     "Transferencia de archivos",
     "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
     "Fundamentos/Operadores de búsqueda.md",
@@ -202,13 +209,9 @@
     "Vulnerabilidades/OWASP 10/ShellShock.md",
     "Vulnerabilidades/OWASP 10/Cross-Site Request Forgery (CSRF).md",
     "Fundamentos/Tests de penetración.md",
-    "Herramientas/Netcat.md",
     "Fundamentos/Shells.md",
     "Fundamentos/imgs/ssh_func_asim.png",
     "Fundamentos/imgs/ssh_func.png",
-    "Snippets/BSPWM - Atajos.md",
-    "Snippets/Scripts.md",
-    "Pruebas prácticas/HTB/Máquinas/Nibbles.md",
     "Fundamentos/Protocolos",
     "Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_7.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_6.png",
@@ -216,7 +219,6 @@
     "Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_2.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_4.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_3.png",
-    "Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_1.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs",
     "Pruebas prácticas/HTB/Máquinas",
     "Pruebas prácticas/HTB",

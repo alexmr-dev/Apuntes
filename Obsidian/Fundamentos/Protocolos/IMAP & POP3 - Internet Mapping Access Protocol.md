@@ -109,8 +109,6 @@ depth=0 C = US, ST = California, L = Sacramento, O = Inlanefreight, OU = Custome
 | `DELE`      | Marca un mensaje para su eliminación.                          |
 | `RSET`      | Cancela las eliminaciones marcadas en el buzón.                |
 | `QUIT`      | Finaliza la sesión y desconecta del servidor.                  |
-
-
 #### OpenSSL - Interacción encriptada de IMAP POP3
 
 ```shell-session
@@ -122,6 +120,5 @@ depth=0 C = US, ST = California, L = Sacramento, O = Inlanefreight, OU = Custome
 ...SNIP...
 ```
 
-#### Comandos IMAP
 
 

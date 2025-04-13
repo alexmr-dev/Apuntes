@@ -8,31 +8,31 @@
         "type": "tabs",
         "children": [
           {
-            "id": "8708ceeda4eba248",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Escalada de privilegios"
-            }
-          },
-          {
             "id": "aef5154be08ce0da",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Snippets/BSPWM - Atajos.md",
+                "file": "Herramientas/Metasploit.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "BSPWM - Atajos"
+              "title": "Metasploit"
+            }
+          },
+          {
+            "id": "b3a3350bfa6e85a2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Pruebas prácticas/HTB/Máquinas/TwoMillion.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "TwoMillion"
             }
           }
         ]
@@ -177,53 +177,53 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "8708ceeda4eba248",
+  "active": "6aed747ae172ff7c",
   "lastOpenFiles": [
+    "Herramientas/IMGs/Pasted image 20250413222241.png",
+    "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
+    "Pruebas prácticas/HTB/Máquinas/TwoMillion.md",
+    "Herramientas/Nmap.md",
+    "Herramientas/Metasploit.md",
+    "Herramientas/IMGs",
+    "Herramientas/IMGs/Pasted image 20250412213121.png",
+    "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
+    "Snippets/BSPWM - Atajos.md",
+    "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_7.png",
+    "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_6.png",
+    "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_5.png",
+    "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_4.png",
+    "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_3.png",
+    "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_2.png",
+    "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_1.png",
+    "Pasted image 20250412170226.png",
+    "Pruebas prácticas/HTB/Máquinas/Nibbles.md",
+    "Vulnerabilidades/OWASP 10/ShellShock.md",
+    "Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
     "Fundamentos/Shells.md",
     "Herramientas/Netcat.md",
-    "Snippets/BSPWM - Atajos.md",
     "Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
     "Fundamentos/Protocolos/Windows - Administración remota de protocolos.md",
     "Fundamentos/imgs/Pasted image 20250409220234.png",
-    "Fundamentos/imgs/Pasted image 20250409210001.png",
-    "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
     "Fundamentos/Tests de penetración.md",
     "Pruebas prácticas/HTB/Resolución general.md",
-    "Transferencia de archivos/Imgs/Pasted image 20250409125008.png",
     "Vulnerabilidades/Enumeración/Enumeración del sistema.md",
     "Fundamentos/Protocolos/SMB - Server Message Block.md",
-    "Transferencia de archivos/Imgs/Pasted image 20250408154651.png",
     "Vulnerabilidades/OWASP 10/SQL Injection (SQLi).md",
     "Fundamentos/Protocolos/FTP - Transferencia de datos.md",
     "Transferencia de archivos/Imgs",
     "Fundamentos/Puertos comunes.md",
     "Transferencia de archivos",
-    "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
     "Fundamentos/Operadores de búsqueda.md",
     "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
     "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
-    "Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
     "Fundamentos/Protocolos/DNS - Domain Name Server.md",
     "Fundamentos/Protocolos/IPMI - Intelligent Platform Management Interface.md",
-    "Fundamentos/Protocolos/Linux - Administración remota de protocolos.md",
-    "Fundamentos/Protocolos/SSH - Secure Shell.md",
-    "Fundamentos/Protocolos/Oracle TNS.md",
-    "Fundamentos/Protocolos/NFS - Network File System.md",
-    "Fundamentos/Redes.md",
-    "Vulnerabilidades/OWASP 10/ShellShock.md",
-    "Fundamentos/imgs/ssh_func_asim.png",
-    "Fundamentos/imgs/ssh_func.png",
     "Fundamentos/Protocolos",
-    "Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_7.png",
-    "Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_6.png",
-    "Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_5.png",
-    "Pruebas prácticas/HTB/Máquinas/IMGs/Nibbles_2.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs",
     "Pruebas prácticas/HTB/Máquinas",
     "Pruebas prácticas/HTB",
     "05 Pruebas prácticas/VulnHub",
     "Vulnerabilidades/Buffer Overflow/IMGS",
-    "Vulnerabilidades/Buffer Overflow",
-    "Vulnerabilidades/Privilegios"
+    "Vulnerabilidades/Buffer Overflow"
   ]
 }

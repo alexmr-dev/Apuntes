@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Herramientas/Netcat.md",
+                "file": "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Netcat"
+              "title": "RDP - Remote Desktop Protocol"
             }
           },
           {
@@ -27,16 +27,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
+                "file": "Fundamentos/Passwords/Rompiendo contraseñas.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Linux - Administración remota de protocolos"
+              "title": "Rompiendo contraseñas"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -68,7 +67,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "crackmap",
+                "query": "crackmapexec",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -89,7 +88,8 @@
               "title": "Marcadores"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -178,23 +178,26 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "d5161bc0c89b4b04",
+  "active": "aef5154be08ce0da",
   "lastOpenFiles": [
-    "Herramientas/Netcat.md",
-    "Herramientas/Nmap.md",
-    "Fundamentos/Passwords/Creando wordlists.md",
-    "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
     "Fundamentos/Passwords/Windows - Administración remota de protocolos.md",
+    "Fundamentos/Protocolos/SMB - Server Message Block.md",
+    "Fundamentos/imgs/Pasted image 20250422125303.png",
+    "Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
+    "Fundamentos/Passwords/Rompiendo contraseñas.md",
+    "Fundamentos/Passwords/Hydra.md",
+    "Fundamentos/Passwords/John the Ripper.md",
+    "Fundamentos/Passwords/Creando wordlists.md",
+    "Herramientas/Netcat.md",
+    "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
+    "Herramientas/Nmap.md",
     "Fundamentos/Passwords/WinRM - Administración remota de Windows.md",
     "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
-    "Fundamentos/Passwords/Hydra.md",
     "Fundamentos/Shells.md",
     "Fundamentos/Tests de penetración.md",
     "Fundamentos/Protocolos/SSH - Secure Shell.md",
-    "Fundamentos/Passwords/John the Ripper.md",
     "Fundamentos/Protocolos/Oracle TNS - Transparent Network Substrate.md",
     "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
-    "Fundamentos/Protocolos/SMB - Server Message Block.md",
     "Pruebas prácticas/HTB/Máquinas/TwoMillion.md",
     "Herramientas/Docker.md",
     "Fundamentos/Passwords",
@@ -202,7 +205,6 @@
     "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
     "Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
     "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
-    "Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
     "Herramientas/IMGs/Pasted image 20250413222241.png",
     "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
     "Herramientas/IMGs",
@@ -215,9 +217,6 @@
     "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_3.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_2.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_1.png",
-    "Pasted image 20250412170226.png",
-    "Pruebas prácticas/HTB/Máquinas/Nibbles.md",
-    "Vulnerabilidades/OWASP 10/ShellShock.md",
     "Transferencia de archivos/Imgs",
     "Transferencia de archivos",
     "Fundamentos/Protocolos",

@@ -1,19 +1,21 @@
+## John the Ripper
+
 ***
 > John the Ripper es una herramienta que nos permite comprobar la fuerza de contraseñas y romper contraseñas encriptadas o hasheadas mediante fuerza bruta o ataques de diccionario.
 
-### 🗂️ Ataques de Diccionario (Dictionary Attacks)
+##### 🗂️ Ataques de Diccionario (Dictionary Attacks)
 
 Ataque que prueba contraseñas comunes desde un diccionario. Es eficaz si las contraseñas no son complejas. Se mitiga usando contraseñas únicas, complejas y 2FA. 
 
-### 🛠️ Ataques de Fuerza Bruta (Brute Force Attacks)
+##### 🛠️ Ataques de Fuerza Bruta (Brute Force Attacks)
 
 Los ataques de fuerza bruta prueban todas las combinaciones posibles de caracteres para encontrar una contraseña. Este proceso es muy lento y se usa solo cuando no hay otra opción. Cuanto más larga y compleja sea una contraseña, más difícil será romperla. Se recomienda usar contraseñas de al menos 8 caracteres que incluyan letras, números y símbolos.
 
-### 🌈 Ataques con Tablas Rainbow (Rainbow Table Attacks)
+##### 🌈 Ataques con Tablas Rainbow (Rainbow Table Attacks)
 
 Los ataques con tablas rainbow utilizan tablas precalculadas que relacionan hashes con sus contraseñas originales. Son más rápidos que la fuerza bruta, pero limitados por el tamaño de la tabla: solo funcionan si el hash está incluido en la tabla. Mientras más grande sea la tabla, más efectividad tiene el ataque.
 
-### Rompiendo contraseñas
+##### Rompiendo contraseñas
 
 El uso de la herramienta sigue la siguiente estructura:
 
@@ -128,7 +130,7 @@ Adicionalmente, podemos usar diferentes modos con nuestros propios diccionarios 
 | `hccap2john`             | Convierte capturas de handshake WPA/WPA2 para John              |
 | `office2john`            | Convierte documentos de Microsoft Office para John              |
 | `wpa2john`               | Convierte handshakes WPA/WPA2 para John                         |
-### Rompiendo contraseñas
+##### Comandos útiles
 
 | **Command**| **Description**|
 |-|-|
@@ -149,3 +151,107 @@ Adicionalmente, podemos usar diferentes modos con nuestros propios diccionarios 
 | `bitlocker2john -i Backup.vhd > backup.hashes`               | Uses Bitlocker2john script to extract hashes from a VHD file and directs the output to a file called backup.hashes. |
 | `file GZIP.gzip`                                             | Uses the Linux-based file tool to gather file format information. |
 | `for i in $(cat rockyou.txt);do openssl enc -aes-256-cbc -d -in GZIP.gzip -k $i 2>/dev/null \| tar xz;done` | Script that runs a for-loop to extract files from an archive. |
+## Hydra
+
+> Esta herramienta es parecida a [[John the Ripper]]. Intenta adivinar contraseñas mediante fuerza bruta. A continuación se proporcionan diferentes formas con las que podemos usarla.
+##### SSH
+
+Consultar [[SSH - Secure Shell]]
+
+```shell-session
+amr251@htb[/htb]$ hydra -L user.list -P password.list ssh://10.129.42.197
+
+{...}
+[22][ssh] host: 10.129.42.197   login: user   password: password
+1 of 1 target successfully completed, 1 valid password found
+```
+
+##### RDP
+
+Consultar [[RDP - Remote Desktop Protocol]]
+
+```shell-session
+amr251@htb[/htb]$ hydra -L user.list -P password.list rdp://10.129.42.197
+
+{...}
+
+[3389][rdp] host: 10.129.42.197   login: user   password: password
+1 of 1 target successfully completed, 1 valid password found
+```
+
+##### SMB
+
+Consultar [[SMB - Server Message Block]]
+
+```shell-session
+amr251@htb[/htb]$ hydra -L user.list -P password.list smb://10.129.42.197
+
+{...}
+
+[445][smb] host: 10.129.42.197   login: user   password: password
+1 of 1 target successfully completed, 1 valid passwords found
+```
+
+## Creando wordlists
+
+> Dado que muchas personas prefieren mantener sus contraseñas lo más simples posible, a pesar de las políticas de seguridad, es posible crear reglas para generar contraseñas débiles. Según estadísticas de WPengine, la mayoría de las contraseñas no superan los diez caracteres.
+
+Hashcat permite crear listas de contraseñas personalizadas aplicando **reglas de mutación** sobre palabras base.
+### Reglas básicas de mutación (Hashcat)
+
+| Función | Descripción                                         |
+| ------- | --------------------------------------------------- |
+| `:`     | No hace nada (mantiene la palabra original)         |
+| `l`     | Convierte todas las letras a minúsculas             |
+| `u`     | Convierte todas las letras a mayúsculas             |
+| `c`     | Capitaliza la primera letra, el resto en minúsculas |
+| `sXY`   | Sustituye todas las apariciones de `X` por `Y`      |
+| `$!`    | Añade el carácter `!` al final de la palabra        |
+### Reglas - Hashcat
+
+```shell-session
+amr251@htb[/htb]$ hashcat --force password.list -r custom.rule --stdout | sort -u > mut_password.list
+amr251@htb[/htb]$ cat mut_password.list
+
+password
+Password
+passw0rd
+Passw0rd
+p@ssword
+P@ssword
+P@ssw0rd
+password!
+Password!
+passw0rd!
+p@ssword!
+Passw0rd!
+P@ssword!
+p@ssw0rd!
+P@ssw0rd!
+```
+
+**Hashcat** y **John the Ripper** incluyen listas de reglas preconstruidas que se pueden usar para generar contraseñas o descifrarlas. Una de las más utilizadas es la regla **`best64.rule`**, ya que con frecuencia produce buenos resultados. `dive.rule` es otro conjunto de reglas poderoso. 
+
+Podemos usar otra herramienta llamada `CeWL` para escanear palabras potenciales de una compañía y guardarlas en una lista aparte. Al crear esta lista, es posible especificar algunos **parámetros clave**, como por ejemplo:
+
+- **`-d`**: Nivel de profundidad del spider (rastreo).
+- **`-m`**: Longitud mínima de las palabras extraídas.
+- **`--lowercase`**: Almacena las palabras encontradas en minúsculas.
+- **`-w`**: Archivo donde se guardarán los resultados.
+
+```shell-session
+amr251@htb[/htb]$ cewl https://www.inlanefreight.com -d 4 -m 6 --lowercase -w inlane.wordlist
+amr251@htb[/htb]$ wc -l inlane.wordlist
+
+326
+```
+
+Aquí hay un resumen de comandos para mutaciones de contraseñas:
+
+| **Comando**                                                                                                                             | **Descripción**                                                                                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `cewl https://www.inlanefreight.com -d 4 -m 6 --lowercase -w inlane.wordlist`                                                           | Genera un diccionario a partir de palabras clave encontradas en un sitio web.                                                  |
+| `hashcat --force password.list -r custom.rule --stdout > mut_password.list`                                                             | Genera una lista de contraseñas basadas en reglas con Hashcat.                                                                 |
+| `./username-anarchy -i /path/to/listoffirstandlastnames.txt`                                                                            | Utiliza la herramienta username-anarchy para generar posibles nombres de usuario a partir de una lista de nombres y apellidos. |
+| `curl -s https://fileinfo.com/filetypes/compressed \| html2text \| awk '{print tolower($1)}' \| grep "\." \| tee -a compressed_ext.txt` | Usa comandos de Linux para extraer extensiones de archivos comprimidos desde la web.                                           |
+|                                                                                                                                         |                                                                                                                                |

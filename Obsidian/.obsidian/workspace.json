@@ -13,29 +13,30 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Herramientas/Metasploit.md",
+                "file": "Herramientas/Netcat.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Metasploit"
+              "title": "Netcat"
             }
           },
           {
-            "id": "b3a3350bfa6e85a2",
+            "id": "d5161bc0c89b4b04",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Protocolos/SMB - Server Message Block.md",
+                "file": "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "SMB - Server Message Block"
+              "title": "Linux - Administración remota de protocolos"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -67,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "crackmape",
+                "query": "crackmap",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -92,7 +93,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 334.5
+    "width": 347.5026054382324
   },
   "right": {
     "id": "e2e59f4aea713209",
@@ -177,25 +178,33 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "6aed747ae172ff7c",
+  "active": "d5161bc0c89b4b04",
   "lastOpenFiles": [
-    "Fundamentos/Passwords",
-    "Fundamentos/Protocolos/SMB - Server Message Block.md",
-    "Herramientas/Metasploit.md",
-    "Herramientas/Metasploit/Meterpreter.md",
-    "Vulnerabilidades/Buffer Overflow/Buffer Overflow.md",
-    "Herramientas/Metasploit",
-    "Fundamentos/Protocolos/DNS - Domain Name Server.md",
-    "Pruebas prácticas/HTB/Máquinas/TwoMillion.md",
-    "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
+    "Herramientas/Netcat.md",
+    "Herramientas/Nmap.md",
+    "Fundamentos/Passwords/Creando wordlists.md",
+    "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
+    "Fundamentos/Passwords/Windows - Administración remota de protocolos.md",
+    "Fundamentos/Passwords/WinRM - Administración remota de Windows.md",
     "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
+    "Fundamentos/Passwords/Hydra.md",
+    "Fundamentos/Shells.md",
+    "Fundamentos/Tests de penetración.md",
+    "Fundamentos/Protocolos/SSH - Secure Shell.md",
+    "Fundamentos/Passwords/John the Ripper.md",
+    "Fundamentos/Protocolos/Oracle TNS - Transparent Network Substrate.md",
+    "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
+    "Fundamentos/Protocolos/SMB - Server Message Block.md",
+    "Pruebas prácticas/HTB/Máquinas/TwoMillion.md",
+    "Herramientas/Docker.md",
+    "Fundamentos/Passwords",
+    "Herramientas/Metasploit.md",
+    "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
     "Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
     "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
     "Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
-    "Herramientas/Netcat.md",
     "Herramientas/IMGs/Pasted image 20250413222241.png",
     "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
-    "Herramientas/Nmap.md",
     "Herramientas/IMGs",
     "Herramientas/IMGs/Pasted image 20250412213121.png",
     "Snippets/BSPWM - Atajos.md",
@@ -209,15 +218,7 @@
     "Pasted image 20250412170226.png",
     "Pruebas prácticas/HTB/Máquinas/Nibbles.md",
     "Vulnerabilidades/OWASP 10/ShellShock.md",
-    "Fundamentos/Shells.md",
-    "Fundamentos/Protocolos/Windows - Administración remota de protocolos.md",
-    "Fundamentos/Tests de penetración.md",
-    "Pruebas prácticas/HTB/Resolución general.md",
-    "Vulnerabilidades/Enumeración/Enumeración del sistema.md",
-    "Vulnerabilidades/OWASP 10/SQL Injection (SQLi).md",
-    "Fundamentos/Protocolos/FTP - Transferencia de datos.md",
     "Transferencia de archivos/Imgs",
-    "Fundamentos/Puertos comunes.md",
     "Transferencia de archivos",
     "Fundamentos/Protocolos",
     "Pruebas prácticas/HTB/Máquinas/IMGs",

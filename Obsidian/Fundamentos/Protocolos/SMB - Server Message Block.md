@@ -144,6 +144,12 @@ SMB         10.129.14.128   445    DEVSMB           [+] \:
 SMB         10.129.14.128   445    DEVSMB           [+] Enumerated shares
 ```
 
+El uso general de esta herramienta es el siguiente:
+
+```shell-session
+amr251@htb[/htb]$ crackmapexec <proto> <target-IP> -u <user or userlist> -p <password or passwordlist>
+```
+
 Otra herramienta interesante se llama [enum4linux-ng](https://github.com/cddmp/enum4linux-ng), que automatiza muchísimas consultas, devolviendo mucha información. Simplemente lo clonamos de github y con `pip3` en un entorno virtual, lo instalamos.
 
 ```shell-session

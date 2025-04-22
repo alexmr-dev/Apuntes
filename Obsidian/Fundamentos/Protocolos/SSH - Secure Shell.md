@@ -117,4 +117,3 @@ Este es el uso básico de `scp`, pero hay muchas formas de trabajar con este com
 | `scp -i /ruta/a/tu/id_rsa usuario@direccion_ip:/ruta/remota/del/archivo usuario@direccion_ip:/ruta/del/destino`           | Copiar un archivo desde un servidor remoto a otro servidor remoto usando una clave privada para la autenticación.                           |
 | `scp -i /ruta/a/tu/id_rsa -P puerto usuario@direccion_ip:/ruta/remota/del/archivo usuario@direccion_ip:/ruta/del/destino` | Copiar un archivo desde un servidor remoto a otro servidor remoto especificando un puerto y usando una clave privada para la autenticación. |
 
-

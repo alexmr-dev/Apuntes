@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
+                "file": "Fundamentos/Passwords/Pass the Hash.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "RDP - Remote Desktop Protocol"
+              "title": "Pass the Hash"
             }
           },
           {
@@ -88,8 +88,7 @@
               "title": "Marcadores"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -180,24 +179,28 @@
   },
   "active": "aef5154be08ce0da",
   "lastOpenFiles": [
+    "Fundamentos/Passwords/Rompiendo contraseñas.md",
+    "Fundamentos/Shells.md",
+    "Fundamentos/Passwords/Pass the Hash.md",
+    "Fundamentos/imgs/Pasted image 20250423175827.png",
+    "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
+    "().md",
     "Fundamentos/Passwords/Windows - Administración remota de protocolos.md",
+    "Fundamentos/imgs/Pasted image 20250423120408.png",
+    "Fundamentos/Protocolos/SSH - Secure Shell.md",
+    "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
     "Fundamentos/Protocolos/SMB - Server Message Block.md",
     "Fundamentos/imgs/Pasted image 20250422125303.png",
     "Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
-    "Fundamentos/Passwords/Rompiendo contraseñas.md",
     "Fundamentos/Passwords/Hydra.md",
     "Fundamentos/Passwords/John the Ripper.md",
     "Fundamentos/Passwords/Creando wordlists.md",
     "Herramientas/Netcat.md",
-    "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
     "Herramientas/Nmap.md",
     "Fundamentos/Passwords/WinRM - Administración remota de Windows.md",
     "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
-    "Fundamentos/Shells.md",
     "Fundamentos/Tests de penetración.md",
-    "Fundamentos/Protocolos/SSH - Secure Shell.md",
     "Fundamentos/Protocolos/Oracle TNS - Transparent Network Substrate.md",
-    "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
     "Pruebas prácticas/HTB/Máquinas/TwoMillion.md",
     "Herramientas/Docker.md",
     "Fundamentos/Passwords",
@@ -206,17 +209,13 @@
     "Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
     "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
     "Herramientas/IMGs/Pasted image 20250413222241.png",
-    "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
     "Herramientas/IMGs",
     "Herramientas/IMGs/Pasted image 20250412213121.png",
-    "Snippets/BSPWM - Atajos.md",
     "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_7.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_6.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_5.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_4.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_3.png",
-    "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_2.png",
-    "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_1.png",
     "Transferencia de archivos/Imgs",
     "Transferencia de archivos",
     "Fundamentos/Protocolos",

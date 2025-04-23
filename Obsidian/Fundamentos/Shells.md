@@ -6,7 +6,7 @@
 ---------
 ## Definición
 
-> Una **shell** es un programa informático que permite al usuario ejecutar comandos para interactuar con el sistema operativo, entre las shells más conocidas tenemos bash y zsh. En este documento se explica el concepto y funcionamiento básico de los shells, además de un ejemplo práctico de su funcionamiento.
+> Una **shell** es un programa informático que permite al usuario ejecutar comandos para interactuar con el sistema operativo, entre las shells más conocidas tenemos bash y zsh. En este documento se explica el concepto y funcionamiento básico de los shells, además de un ejemplo práctico de su funcionamiento. El siguiente recurso viene muy bien para crear reverse shells en función del sistema y lenguaje: https://www.revshells.com/
 
 ## Tipos de shell
 

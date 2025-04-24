@@ -27,15 +27,16 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Passwords/Rompiendo contraseñas.md",
+                "file": "Fundamentos/Passwords/Pass the Hash.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Rompiendo contraseñas"
+              "title": "Pass the Hash"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -177,11 +178,11 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "aef5154be08ce0da",
+  "active": "d5161bc0c89b4b04",
   "lastOpenFiles": [
     "Fundamentos/Passwords/Rompiendo contraseñas.md",
-    "Fundamentos/Shells.md",
     "Fundamentos/Passwords/Pass the Hash.md",
+    "Fundamentos/Shells.md",
     "Fundamentos/imgs/Pasted image 20250423175827.png",
     "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
     "().md",

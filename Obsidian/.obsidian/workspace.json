@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Passwords/Pass the Hash.md",
+                "file": "Fundamentos/Passwords/Pass the Ticket (PtT) - Linux.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Pass the Hash"
+              "title": "Pass the Ticket (PtT) - Linux"
             }
           }
         ],
@@ -68,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "crackmapexec",
+                "query": "DisableRes",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -180,8 +180,13 @@
   },
   "active": "d5161bc0c89b4b04",
   "lastOpenFiles": [
-    "Fundamentos/Passwords/Rompiendo contraseñas.md",
+    "Fundamentos/Passwords/Pass the Ticket (PtT) - Windows.md",
+    "Fundamentos/Passwords/Pass the Ticket (PtT) - Linux.md",
     "Fundamentos/Passwords/Pass the Hash.md",
+    "Fundamentos/imgs/Pasted image 20250425092043.png",
+    "Fundamentos/imgs/Pasted image 20250425083632.png",
+    "Fundamentos/imgs/Pasted image 20250425082807.png",
+    "Fundamentos/Passwords/Rompiendo contraseñas.md",
     "Fundamentos/Shells.md",
     "Fundamentos/imgs/Pasted image 20250423175827.png",
     "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
@@ -208,15 +213,11 @@
     "Herramientas/Metasploit.md",
     "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
     "Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
-    "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
     "Herramientas/IMGs/Pasted image 20250413222241.png",
     "Herramientas/IMGs",
     "Herramientas/IMGs/Pasted image 20250412213121.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_7.png",
     "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_6.png",
-    "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_5.png",
-    "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_4.png",
-    "Pruebas prácticas/HTB/Máquinas/IMGs/TwoMillion_3.png",
     "Transferencia de archivos/Imgs",
     "Transferencia de archivos",
     "Fundamentos/Protocolos",

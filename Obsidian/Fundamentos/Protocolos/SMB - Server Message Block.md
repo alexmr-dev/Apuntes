@@ -150,6 +150,18 @@ El uso general de esta herramienta es el siguiente:
 amr251@htb[/htb]$ crackmapexec <proto> <target-IP> -u <user or userlist> -p <password or passwordlist>
 ```
 
+Por ejemplo:
+
+```bash
+crackmapexec smb 10.129.62.212 -u "root" -p "123456" --shares
+```
+
+Si conseguimos obtener los shares, podríamos conectarnos usando `smbclient` 
+
+```bash
+smbclient -U user \\\\<target_IP>\\SHAREDRIVE
+```
+
 Otra herramienta interesante se llama [enum4linux-ng](https://github.com/cddmp/enum4linux-ng), que automatiza muchísimas consultas, devolviendo mucha información. Simplemente lo clonamos de github y con `pip3` en un entorno virtual, lo instalamos.
 
 ```shell-session

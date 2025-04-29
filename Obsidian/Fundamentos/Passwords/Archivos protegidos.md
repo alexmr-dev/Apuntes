@@ -130,3 +130,78 @@ PDF.pdf:1234
 1 password hash cracked, 0 left
 ```
 
+##### ZIPs
+
+```shell-session
+amr251@htb[/htb]$ zip2john ZIP.zip > zip.hash
+```
+
+Una vez tenemos extraído el hash, podemos usar `john` otra vez para romperlo con la lista de contraseñas que queramos. 
+
+```bash
+john --wordlist=rockyou.txt zip.hash
+...SNIP...
+john zip.hash --show
+```
+
+##### Rompiendo archivos encriptados de OpenSSL
+
+Además, no siempre es evidente de forma directa si un archivo comprimido (archivo de tipo "archive") está protegido por contraseña, especialmente cuando se utiliza una extensión de archivo que no admite protección por contraseña. Como ya hemos comentado anteriormente, _openssl_ puede utilizarse, por ejemplo, para cifrar archivos en formato gzip.
+
+```shell-session
+amr251@htb[/htb]$ file GZIP.gzip 
+
+GZIP.gzip: openssl enc'd data with salted password
+```
+
+Al intentar descifrar archivos y archivos comprimidos cifrados con OpenSSL, podemos encontrarnos con muchas dificultades que generarán falsos positivos o incluso harán que no se adivine la contraseña correcta. Por ello, la opción más segura para tener éxito es utilizar la herramienta _openssl_ dentro de un bucle `for`, que intente extraer los archivos directamente del archivo comprimido si se adivina la contraseña correctamente.
+
+El siguiente _one-liner_ (línea de comando) mostrará muchos errores relacionados con el formato GZIP, los cuales podemos ignorar. Si hemos utilizado la lista de contraseñas correcta, como en este ejemplo, veremos que hemos logrado extraer correctamente otro archivo del archivo comprimido.
+
+```shell-session
+amr251@htb[/htb]$ for i in $(cat rockyou.txt);do openssl enc -aes-256-cbc -d -in GZIP.gzip -k $i 2>/dev/null| tar xz;done
+
+gzip: stdin: not in gzip format
+tar: Child returned status 1
+tar: Error is not recoverable: exiting now
+
+gzip: stdin: not in gzip format
+tar: Child returned status 1
+tar: Error is not recoverable: exiting now
+
+<SNIP>
+```
+
+Una vez que el bucle ha finalizado, podemos comprobar si el cracking ha sido exitoso
+
+```shell-session
+amr251@htb[/htb]$ ls
+
+customers.csv  GZIP.gzip  rockyou.txt
+```
+
+##### Descifrando drives encriptados de BitLocker
+
+**BitLocker** es un programa de cifrado para particiones completas y unidades externas, desarrollado por Microsoft para el sistema operativo Windows. Está disponible desde Windows Vista y utiliza el algoritmo de cifrado AES con una longitud de 128 o 256 bits. Si se olvida la contraseña o el PIN de BitLocker, se puede usar una clave de recuperación para descifrar la partición o unidad. Esta clave de recuperación es una cadena de 48 dígitos numéricos que se genera durante la configuración de BitLocker y que también puede ser objeto de ataques por fuerza bruta.
+
+A menudo se crean unidades virtuales donde se almacena información personal, notas y documentos en el equipo o portátil proporcionado por la empresa, con el fin de evitar el acceso por parte de terceros. Para estos casos, se puede usar un script llamado **bitlocker2john** para extraer el hash necesario para intentar descifrar la clave. Se extraen cuatro tipos distintos de hash, los cuales pueden utilizarse con diferentes modos de Hashcat. En nuestro ejemplo, trabajaremos con el primero, que hace referencia a la contraseña de BitLocker.
+
+```shell-session
+amr251@htb[/htb]$ bitlocker2john -i Backup.vhd > backup.hashes
+amr251@htb[/htb]$ grep "bitlocker\$0" backup.hashes > backup.hash
+amr251@htb[/htb]$ cat backup.hash
+```
+
+##### Usando hashcat descifrar romper el backup.hash
+
+```shell-session
+amr251@htb[/htb]$ hashcat -m 22100 backup.hash /opt/useful/seclists/Passwords/Leaked-Databases/rockyou.txt -o backup.cracked
+
+hashcat (v6.1.1) starting...
+
+<SNIP>
+```
+
+Una vez que hayamos descifrado la contraseña, podremos abrir las unidades cifradas. La forma más sencilla de montar una unidad virtual cifrada con BitLocker es transferirla a un sistema Windows y montarla. Para ello, basta con hacer doble clic en la unidad virtual. Dado que está protegida por contraseña, Windows mostrará un error inicialmente. Tras montar la unidad, podremos hacer doble clic nuevamente sobre ella y BitLocker nos pedirá la contraseña.
+
+![[Pasted image 20250429180552.png]]

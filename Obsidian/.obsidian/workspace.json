@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Puertos comunes.md",
+                "file": "Fundamentos/Passwords/Archivos protegidos.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Puertos comunes"
+              "title": "Archivos protegidos"
             }
           },
           {
@@ -177,8 +177,10 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "aef5154be08ce0da",
+  "active": "6aed747ae172ff7c",
   "lastOpenFiles": [
+    "Fundamentos/imgs/Pasted image 20250429180552.png",
+    "Fundamentos/Puertos comunes.md",
     "Fundamentos/Passwords/Pass the Ticket (PtT) - Linux.md",
     "Fundamentos/Passwords/Pass the Hash.md",
     "Fundamentos/Passwords/Rompiendo contraseñas.md",
@@ -209,8 +211,6 @@
     "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
     "Fundamentos/Tests de penetración.md",
     "Fundamentos/Protocolos/Oracle TNS - Transparent Network Substrate.md",
-    "Pruebas prácticas/HTB/Máquinas/TwoMillion.md",
-    "Herramientas/Docker.md",
     "Fundamentos/Passwords",
     "Herramientas/IMGs/Pasted image 20250413222241.png",
     "Herramientas/IMGs",

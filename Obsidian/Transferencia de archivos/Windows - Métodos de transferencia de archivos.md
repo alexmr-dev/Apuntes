@@ -344,7 +344,7 @@ Parece muy sencillo, pero igual nos da problemas. Verificamos primero que existe
 Con esto ya podríamos usar RDP sin problema. El uso es el siguiente:
 
 ```bash
-xfreerdp /v:<IP_REMOTA> /u:Usuario /p:Password
+xfreerdp /v:<IP_REMOTA> /u:Usuario /p:Password /dynamic-resolution
 ```
 
 ### Transferencia de archivos por sesión de PowerShell
@@ -397,7 +397,7 @@ PS C:\htb> Copy-Item -Path "C:\Users\Administrator\Desktop\DATABASE.txt" -Destin
 ##### Montando un directorio Linux usando xfreerdp
 
 ```shell-session
-xfreerdp /v:10.10.10.132 /d:HTB /u:administrator /p:'Password0@' /drive:linux,/home/plaintext/htb/academy/filetransfer
+xfreerdp /v:10.10.10.132 /d:HTB /u:administrator /p:'Password0@' /drive:linux,/home/plaintext/htb/academy/filetransfer /dynamic-resolution
 ```
 
 Para acceder al directorio desde el Windows remoto, podemos conectarnos a `\\tsclient\`.

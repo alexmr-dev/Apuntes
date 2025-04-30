@@ -42,7 +42,7 @@ Además, podemos usar `--packet-trace` para seguir los paquetes individuales e i
 La autenticación a dichos servidores RDP puede realizarse de muchas formas. Por ejemplo, podemos conectarnos a servidores RDP desde Linux usando `xfreerdp`, `rdesktop`, o `Remmina` e interactuar con la GUI del servidor:
 
 ```bash
-xfreerdp /u:cry0l1t3 /p:"P455w0rd!" /v:10.129.201.248
+xfreerdp /u:cry0l1t3 /p:"P455w0rd!" /v:10.129.201.248 /dynamic-resolution
 ```
 
 ### RDP - Ataques a contraseñas

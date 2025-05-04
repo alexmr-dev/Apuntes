@@ -275,3 +275,19 @@ scp /etc/passwd htb-student@10.129.86.90:/home/htb-student/
 htb-student@10.129.86.90's password: 
 passwd     
 ```
+
+##### Subida nc
+
+Puede que `scp` no nos funcione para transferir un archivo. Vamos a ver cómo transferir archivos con `nc`:
+
+**1. Preparando la máquina a recibir el archivo**
+
+```bash
+nc -lvp 4444 > filename
+```
+
+**2. Enviando el archivo (Máquina que lo enviará)**
+
+```bash
+nc <IP_Maquina_Recibe> 4444 < filename
+```

@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Operadores de búsqueda.md",
+                "file": "Fundamentos/Passwords/Rompiendo contraseñas.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Operadores de búsqueda"
+              "title": "Rompiendo contraseñas"
             }
           }
         ],
@@ -68,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "payload",
+                "query": "medusa",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -180,6 +180,14 @@
   },
   "active": "d5161bc0c89b4b04",
   "lastOpenFiles": [
+    "Fundamentos/Passwords/Archivos protegidos.md",
+    "Fundamentos/Protocolos/FTP - Transferencia de datos.md",
+    "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
+    "Fundamentos/Passwords/Rompiendo contraseñas.md",
+    "Fundamentos/Protocolos/IPMI - Intelligent Platform Management Interface.md",
+    "Pruebas prácticas/HTB/Máquinas/TwoMillion.md",
+    "Fundamentos/Shells.md",
+    "Fundamentos/Operadores de búsqueda.md",
     "Snippets/BSPWM - Atajos.md",
     "Fundamentos/Redes.md",
     "Fundamentos/Tests de penetración.md",
@@ -189,31 +197,23 @@
     "Herramientas/Metasploit.md",
     "Vulnerabilidades/Buffer Overflow/Buffer Overflow.md",
     "Fundamentos/Protocolos/SMB - Server Message Block.md",
-    "Fundamentos/Passwords/Rompiendo contraseñas.md",
-    "Fundamentos/Shells.md",
     "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
     "Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
     "Vulnerabilidades/OWASP 10/Cross-Site Scripting (XSS).md",
     "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
     "Fundamentos/imgs/Pasted image 20250430103104.png",
     "Fundamentos/imgs/Pasted image 20250430103037.png",
-    "Fundamentos/Protocolos/FTP - Transferencia de datos.md",
     "Fundamentos/Protocolos/DNS - Domain Name Server.md",
     "Fundamentos/Passwords/Pass the Ticket (PtT) - Linux.md",
     "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
     "Fundamentos/Passwords/Pass the Hash.md",
-    "Fundamentos/Passwords/Archivos protegidos.md",
     "Fundamentos/imgs/Pasted image 20250429180552.png",
     "Fundamentos/Puertos comunes.md",
     "Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
-    "Fundamentos/Passwords/Pass the Ticket (PtT) - Windows.md",
     "Fundamentos/imgs/Pasted image 20250425092043.png",
     "Fundamentos/imgs/Pasted image 20250425083632.png",
     "Fundamentos/imgs/Pasted image 20250425082807.png",
     "Fundamentos/imgs/Pasted image 20250423175827.png",
-    "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
-    "().md",
-    "Fundamentos/Passwords/Windows - Administración remota de protocolos.md",
     "Fundamentos/imgs/Pasted image 20250423120408.png",
     "Fundamentos/imgs/Pasted image 20250422125303.png",
     "Fundamentos/Passwords",

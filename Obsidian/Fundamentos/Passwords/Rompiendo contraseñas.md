@@ -216,18 +216,13 @@ amr251@htb[/htb]$ cat mut_password.list
 password
 Password
 passw0rd
-Passw0rd
-p@ssword
-P@ssword
-P@ssw0rd
-password!
-Password!
-passw0rd!
-p@ssword!
-Passw0rd!
-P@ssword!
-p@ssw0rd!
-P@ssw0rd!
+...
+```
+
+Hashcat ya incluye muchas reglas dentro de `/usr/share/hashcat/rules`, como por ejemplo, `best64.rule`. Veamos un ejemplo. Primero, añadimos a un archivo txt la palabra o palabras para las que queremos crear la wordlist. Después, usamos la regla:
+
+```bash
+❯ hashcat --force words.txt -r /usr/share/hashcat/rules/best64.rule --stdout > wordlist.txt
 ```
 
 **Hashcat** y **John the Ripper** incluyen listas de reglas preconstruidas que se pueden usar para generar contraseñas o descifrarlas. Una de las más utilizadas es la regla **`best64.rule`**, ya que con frecuencia produce buenos resultados. `dive.rule` es otro conjunto de reglas poderoso. 

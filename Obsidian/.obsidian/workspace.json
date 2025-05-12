@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Passwords/Rompiendo contraseñas.md",
+                "file": "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Rompiendo contraseñas"
+              "title": "Escalada de privilegios"
             }
           }
         ],
@@ -180,10 +180,10 @@
   },
   "active": "d5161bc0c89b4b04",
   "lastOpenFiles": [
+    "Fundamentos/Passwords/Rompiendo contraseñas.md",
     "Fundamentos/Passwords/Archivos protegidos.md",
     "Fundamentos/Protocolos/FTP - Transferencia de datos.md",
     "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
-    "Fundamentos/Passwords/Rompiendo contraseñas.md",
     "Fundamentos/Protocolos/IPMI - Intelligent Platform Management Interface.md",
     "Pruebas prácticas/HTB/Máquinas/TwoMillion.md",
     "Fundamentos/Shells.md",

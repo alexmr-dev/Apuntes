@@ -196,3 +196,4 @@ app.inlanefreight.htb.  604800  IN      A       10.129.18.15
 
 Existen muchas herramientas para esto, y prácticamente todas funcionan de la misma manera. Una herramienta poderosa para hacer la enumeración es [DNSEnum](https://github.com/fwaeytens/dnsenum)
 
+a

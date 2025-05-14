@@ -6,14 +6,10 @@ Al llegar al servidor SMTP de destino, los paquetes de datos se reensamblan para
 
 El proceso de entrega de correo electrónico sigue esta secuencia:​
 
-1. **Cliente (MUA)**: El usuario redacta y envía un correo electrónico utilizando un cliente de correo electrónico, conocido como **Agente de Usuario de Correo** (_Mail User Agent_ o MUA).​
-    
+1. **Cliente (MUA)**: El usuario redacta y envía un correo electrónico utilizando un cliente de correo electrónico, conocido como **Agente de Usuario de Correo** (_Mail User Agent_ o MUA).​    
 2. **Agente de Envío (MSA)**: El MUA se comunica con el **Agente de Envío de Correo** (_Mail Submission Agent_ o MSA), que recibe el correo y lo prepara para su transmisión.​
-    
-3. **Relé Abierto (MTA)**: El MSA entrega el correo al **Agente de Transferencia de Correo** (_Mail Transfer Agent_ o MTA), que retransmite el mensaje a través de la red hacia el servidor de correo del destinatario.​[Wikipedia, la enciclopedia libre](https://es.wikipedia.org/wiki/Protocolo_para_transferencia_simple_de_correo?utm_source=chatgpt.com)
-    
-4. **Agente de Entrega de Correo (MDA)**: Una vez que el MTA del servidor de destino recibe el correo, lo pasa al **Agente de Entrega de Correo** (_Mail Delivery Agent_ o MDA), que lo coloca en el buzón del destinatario.​
-    
+3. **Relé Abierto (MTA)**: El MSA entrega el correo al **Agente de Transferencia de Correo** (_Mail Transfer Agent_ o MTA), que retransmite el mensaje a través de la red hacia el servidor de correo del destinatario.​    
+4. **Agente de Entrega de Correo (MDA)**: Una vez que el MTA del servidor de destino recibe el correo, lo pasa al **Agente de Entrega de Correo** (_Mail Delivery Agent_ o MDA), que lo coloca en el buzón del destinatario.​    
 5. **Buzón (POP3/IMAP)**: Finalmente, el destinatario accede a su buzón para leer el correo utilizando protocolos como POP3 o IMAP.
 
 Sin embargo, SMTP presenta dos desventajas inherentes al protocolo de red:​

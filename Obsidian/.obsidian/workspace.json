@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Protocolos/DNS - Domain Name Server.md",
+                "file": "Fundamentos/Shells.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "DNS - Domain Name Server"
+              "title": "Shells"
             }
           }
         ],
@@ -68,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "xfreerdp",
+                "query": "expor",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -89,7 +89,8 @@
               "title": "Marcadores"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -180,7 +181,22 @@
   },
   "active": "d5161bc0c89b4b04",
   "lastOpenFiles": [
-    "Fundamentos/Protocolos/Oracle TNS - Transparent Network Substrate.md",
+    "Fundamentos/Protocolos/SQL - Structured Query Language.md",
+    "Fundamentos/Shells.md",
+    "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
+    "Snippets/Comandos Linux.md",
+    "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
+    "Fundamentos/Protocolos/DNS - Domain Name Server.md",
+    "Fundamentos/imgs/Pasted image 20250514120645.png",
+    "Fundamentos/imgs/Pasted image 20250514120504.png",
+    "Fundamentos/imgs/Pasted image 20250514120346.png",
+    "Fundamentos/imgs/Pasted image 20250514114534.png",
+    "Fundamentos/Protocolos/SMB - Server Message Block.md",
+    "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
+    "Fundamentos/Protocolos/IPMI - Intelligent Platform Management Interface.md",
+    "Fundamentos/Protocolos/SSH - Secure Shell.md",
+    "Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
+    "Fundamentos/Protocolos/TNS - Transparent Network Substrate.md",
     "Fundamentos/Passwords/Pass the Hash.md",
     "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
     "Fundamentos/imgs/Pasted image 20250514095217.png",
@@ -188,34 +204,18 @@
     "Fundamentos/imgs/Pasted image 20250514094856.png",
     "Fundamentos/imgs/Pasted image 20250514094443.png",
     "Fundamentos/imgs/Pasted image 20250514083332.png",
-    "Fundamentos/Protocolos/SSH - Secure Shell.md",
-    "Fundamentos/Protocolos/DNS - Domain Name Server.md",
-    "Fundamentos/Protocolos/SQL - Structured Query Language.md",
-    "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
     "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
-    "Fundamentos/Protocolos/SMB - Server Message Block.md",
-    "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
     "Fundamentos/Passwords/Rompiendo contraseñas.md",
     "Fundamentos/Passwords/Archivos protegidos.md",
     "Fundamentos/Protocolos/FTP - Transferencia de datos.md",
     "Fundamentos/Passwords/Linux - Administración remota de protocolos.md",
-    "Fundamentos/Protocolos/IPMI - Intelligent Platform Management Interface.md",
     "Pruebas prácticas/HTB/Máquinas/TwoMillion.md",
-    "Fundamentos/Shells.md",
     "Fundamentos/Operadores de búsqueda.md",
     "Snippets/BSPWM - Atajos.md",
     "Fundamentos/Redes.md",
     "Fundamentos/Tests de penetración.md",
-    "Snippets/Comandos Linux.md",
     "Snippets/imgs/Pasted image 20250511204833.png",
     "Snippets/Scripts.md",
-    "Herramientas/Metasploit.md",
-    "Vulnerabilidades/Buffer Overflow/Buffer Overflow.md",
-    "Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
-    "Fundamentos/imgs/Pasted image 20250430103104.png",
-    "Fundamentos/imgs/Pasted image 20250430103037.png",
-    "Fundamentos/imgs/Pasted image 20250429180552.png",
-    "Fundamentos/imgs/Pasted image 20250425092043.png",
     "Fundamentos/Passwords",
     "Herramientas/IMGs",
     "Transferencia de archivos/Imgs",

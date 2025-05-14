@@ -115,76 +115,7 @@ Hay muchas formas en las que un servidor DNS puede ser atacado. Por ejemplo, una
 ### Footprinting al servicio DNS
 
 El footprinting en los servidores DNS se realiza como resultado de las solicitudes que enviamos. Por lo tanto, lo primero que podemos hacer es consultar al servidor DNS sobre qué otros servidores de nombres se conocen. Hacemos esto utilizando el registro NS y la especificación del servidor DNS que queremos consultar mediante el carácter @. Esto se debe a que, si existen otros servidores DNS, también podemos utilizarlos y consultar los registros. Sin embargo, otros servidores DNS pueden estar configurados de manera diferente y, además, pueden ser permanentes para otras zonas.
-
-#### DIG - NS Query
-
-```shell-session
-amr251@htb[/htb]$ dig ns inlanefreight.htb @10.129.14.128
-
-; <<>> DiG 9.16.1-Ubuntu <<>> ns inlanefreight.htb @10.129.14.128
-;; global options: +cmd
-;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 45010
-;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 2
-```
-
-#### DIG - Version Query
-
-```shell-session
-amr251@htb[/htb]$ dig CH TXT version.bind 10.129.120.85
-
-; <<>> DiG 9.10.6 <<>> CH TXT version.bind
-;; global options: +cmd
-;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 47786
-;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
-```
-
-#### DIG - Any Query
-
-```shell-session
-amr251@htb[/htb]$ dig any inlanefreight.htb @10.129.14.128
-
-; <<>> DiG 9.16.1-Ubuntu <<>> any inlanefreight.htb @10.129.14.128
-;; global options: +cmd
-;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 7649
-;; flags: qr aa rd ra; QUERY: 1, ANSWER: 5, AUTHORITY: 0, ADDITIONAL: 2
-```
-
-#### DIG - Zona de transferencia AXRF 
-
-La transferencia de zona (AXFR) es el proceso de copiar archivos de zona DNS entre servidores para asegurar que todos los servidores tengan la misma información. El servidor principal (master) contiene los datos originales, mientras que los servidores secundarios (slave) los obtienen para mejorar la confiabilidad y distribuir la carga. Los cambios en la zona generalmente solo se realizan en el servidor principal. Los servidores secundarios sincronizan sus datos mediante la transferencia de zona y verifican los números de serie del registro SOA para detectar discrepancias.
-
-```shell-session
-amr251@htb[/htb]$ dig axfr inlanefreight.htb @10.129.14.128
-
-; <<>> DiG 9.16.1-Ubuntu <<>> axfr inlanefreight.htb @10.129.14.128
-;; global options: +cmd
-inlanefreight.htb.      604800  IN      SOA     inlanefreight.htb. root.inlanefreight.htb. 2 604800 86400 2419200 604800
-inlanefreight.htb.      604800  IN      TXT     "MS=ms97310371"
-...SNIP..
-```
-
-Si el administrador usó una subred para la opción allow-transfer con fines de prueba o como una solución provisional, o la configuró en "any", cualquiera podría consultar todo el archivo de zona en el servidor DNS. Además, se podrían consultar otras zonas, lo que incluso podría mostrar direcciones IP internas y nombres de host.
-
-#### DIG - Zona de transferencia AXFR - Interna
-
-```shell-session
-amr251@htb[/htb]$ dig axfr internal.inlanefreight.htb @10.129.14.128
-
-; <<>> DiG 9.16.1-Ubuntu <<>> axfr internal.inlanefreight.htb @10.129.14.128
-;; global options: +cmd
-internal.inlanefreight.htb. 604800 IN   SOA     inlanefreight.htb. root.inlanefreight.htb. 2 604800 86400 2419200 604800
-internal.inlanefreight.htb. 604800 IN   TXT     "MS=ms97310371"
-internal.inlanefreight.htb. 604800 IN   TXT     "atlassian-domain-verification=t1rKCy68JFszSdCKVpw64A1QksWdXuYFUeSXKU"
-internal.inlanefreight.htb. 604800 IN   TXT     "v=spf1 include:mailgun.org include:_spf.google.com include:spf.protection.outlook.com include:_spf.atlassian.net ip4:10.129.124.8 ip4:10.129.127.2 ip4:10.129.42.106 ~all"
-internal.inlanefreight.htb. 604800 IN   NS      ns.inlanefreight.htb.
-
-...SNIP...
-```
-
-### Enumeración por fuerza bruta de subdominios
+##### Enumeración por fuerza bruta de subdominios
 
 ```shell-session
 amr251@htb[/htb]$ for sub in $(cat /opt/useful/seclists/Discovery/DNS/subdomains-top1million-110000.txt);do dig $sub.inlanefreight.htb @10.129.14.128 | grep -v ';\|SOA' | sed -r '/^\s*$/d' | grep $sub | tee -a subdomains.txt;done
@@ -194,6 +125,93 @@ mail1.inlanefreight.htb. 604800 IN      A       10.129.18.201
 app.inlanefreight.htb.  604800  IN      A       10.129.18.15
 ```
 
-Existen muchas herramientas para esto, y prácticamente todas funcionan de la misma manera. Una herramienta poderosa para hacer la enumeración es [DNSEnum](https://github.com/fwaeytens/dnsenum)
+Existen muchas herramientas para esto, y prácticamente todas funcionan de la misma manera. Una herramienta poderosa para hacer la enumeración es [DNSEnum](https://github.com/fwaeytens/dnsenum) o `dnsrecon`
 
-a
+```bash
+dnsrecon -d <Dominio> -a 
+```
+
+##### Toma de dominios y enumeración de subdominios
+
+Consiste en registrar un nombre de dominio inexistente para obtener el control sobre otro dominio. Si los atacantes encuentran un dominio expirado, pueden reclamar ese dominio para realizar ataques adicionales, como alojar contenido malicioso en un sitio web o enviar correos electrónicos de phishing aprovechando el dominio reclamado.
+
+La toma de dominio también es posible con subdominios, lo que se denomina toma de subdominio. El registro de nombre canónico (CNAME) de un DNS se utiliza para mapear diferentes dominios a un dominio principal. Muchas organizaciones utilizan servicios de terceros como AWS, GitHub, Akamai, Fastly y otras redes de distribución de contenido (CDN) para alojar su contenido. En este caso, suelen crear un subdominio y hacer que apunte a esos servicios. Por ejemplo:
+
+```shell-session
+sub.target.com.   60   IN   CNAME   anotherdomain.com
+```
+
+##### Enumeración de subdominios
+
+Antes de realizar una toma de subdominio deberíamos enumerar subdominios para un dominio objetivo con herramientas como Subfinder, DNSdumpster, sublist3r o gobuster:
+
+```bash
+gobuster dns -d inlanefreight.com -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt 
+```
+
+```bash
+subfinder -d xirio-online.com -v
+```
+
+Otra alternativa excelente es subsurte, que nos permite usar nuestros propios resolvers y realizar puros ataques de fuerza bruta durante un pentesting interno en hosts a los que no tenemos acceso a Internet.
+
+```shell-session
+amr251@htb[/htb]$ git clone https://github.com/TheRook/subbrute.git >> /dev/null 2>&1
+amr251@htb[/htb]$ cd subbrute
+amr251@htb[/htb]$ echo "ns1.inlanefreight.com" > ./resolvers.txt
+amr251@htb[/htb]$ ./subbrute inlanefreight.com -s ./names.txt -r ./resolvers.txt
+
+Warning: Fewer than 16 resolvers per process, consider adding more nameservers to resolvers.txt.
+inlanefreight.com
+ns2.inlanefreight.com
+www.inlanefreight.com
+ms1.inlanefreight.com
+support.inlanefreight.com
+
+<SNIP>
+```
+
+A veces, las configuraciones físicas internas están mal aseguradas, lo que podemos aprovechar para cargar nuestras herramientas desde una memoria USB. Otro escenario sería que hayamos accedido a un host interno mediante pivoting y queramos trabajar desde allí. Por supuesto, existen otras alternativas, pero no está de más conocer formas y posibilidades alternativas.
+
+La herramienta ha encontrado cuatro subdominios asociados con inlanefreight.com. Usando el comando `nslookup` o `host`, podemos enumerar los registros CNAME de esos subdominios.
+
+```shell-session
+amr251@htb[/htb]# host support.inlanefreight.com
+
+support.inlanefreight.com is an alias for inlanefreight.s3.amazonaws.com
+```
+
+El subdominio _support_ tiene un registro de alias que apunta a un bucket de AWS S3. Sin embargo, la URL [https://support.inlanefreight.com](https://support.inlanefreight.com) muestra un error _NoSuchBucket_, lo que indica que el subdominio es potencialmente vulnerable a una toma de subdominio. Ahora, podemos tomar el control del subdominio creando un bucket de AWS S3 con el mismo nombre que el subdominio.
+
+![[Pasted image 20250514114534.png]]
+
+### DNS Spoofing
+
+El DNS spoofing también se conoce como envenenamiento de caché DNS (_DNS Cache Poisoning_). Este ataque consiste en alterar registros DNS legítimos con información falsa para redirigir el tráfico en línea hacia un sitio web fraudulento. Ejemplos de rutas de ataque para el envenenamiento de caché DNS son los siguientes:
+
+Un atacante podría interceptar la comunicación entre un usuario y un servidor DNS para redirigir al usuario a un destino fraudulento en lugar de uno legítimo, realizando un ataque de Hombre en el Medio (_Man-in-the-Middle_, MITM).
+
+Explotar una vulnerabilidad encontrada en un servidor DNS podría darle al atacante el control sobre dicho servidor para modificar los registros DNS.
+
+##### Envenenamiento de la caché del DNS local
+
+Desde la perspectiva de una red local, un atacante también puede realizar envenenamiento de caché DNS utilizando herramientas MITM como Ettercap o Bettercap. Para explotar el envenenamiento de caché DNS mediante Ettercap, primero debemos editar el archivo `/etc/ettercap/etter.dns` para mapear el nombre de dominio objetivo (por ejemplo, _inlanefreight.com_) que se desea suplantar y la dirección IP del atacante (por ejemplo, _192.168.225.110_) a la que se desea redirigir al usuario:
+
+```shell-session
+amr251@htb[/htb]# cat /etc/ettercap/etter.dns
+
+inlanefreight.com      A   192.168.225.110
+*.inlanefreight.com    A   192.168.225.110
+```
+
+Después, arrancamos la herramienta `Ettercap` y escaneamos hosts dentro de la red navegando a `Hosts > Scan for Hosts`. Una vez completado, añadimos la IP objetivo (por ejemplo, 192.168.152.129) a Target1 y la puerta de enlace por defecto a Target2
+
+![[Pasted image 20250514120346.png | 600]]
+
+Activamos `dns_spoof` navegando a `Plugins > Manage Plugins`. Esto envía a la máquina objetivo responses falsas DNS que resolverán `inlanefreight.com` en la IP 192.168.225.110
+
+![[Pasted image 20250514120504.png | 600]]
+
+Después de un ataque exitoso de spoof DNS, si un usuario víctima que viene desde la máquina objetivo `192.168.152.129` visita el dominio de `inlanefreight.com`, será redirigido a una web falsa con IP 192.168.225.110
+
+![[Pasted image 20250514120645.png | 600]]

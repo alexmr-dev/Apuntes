@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Protocolos/SQL - Structured Query Language.md",
+                "file": "Fundamentos/Protocolos/DNS - Domain Name Server.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "SQL - Structured Query Language"
+              "title": "DNS - Domain Name Server"
             }
           }
         ],
@@ -68,7 +68,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "smbclient",
+                "query": "xfreerdp",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -180,9 +180,19 @@
   },
   "active": "d5161bc0c89b4b04",
   "lastOpenFiles": [
+    "Fundamentos/Protocolos/Oracle TNS - Transparent Network Substrate.md",
+    "Fundamentos/Passwords/Pass the Hash.md",
+    "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
+    "Fundamentos/imgs/Pasted image 20250514095217.png",
+    "Fundamentos/imgs/Pasted image 20250514095110.png",
+    "Fundamentos/imgs/Pasted image 20250514094856.png",
+    "Fundamentos/imgs/Pasted image 20250514094443.png",
+    "Fundamentos/imgs/Pasted image 20250514083332.png",
+    "Fundamentos/Protocolos/SSH - Secure Shell.md",
+    "Fundamentos/Protocolos/DNS - Domain Name Server.md",
+    "Fundamentos/Protocolos/SQL - Structured Query Language.md",
     "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
     "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
-    "Fundamentos/Protocolos/SQL - Structured Query Language.md",
     "Fundamentos/Protocolos/SMB - Server Message Block.md",
     "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
     "Fundamentos/Passwords/Rompiendo contraseñas.md",
@@ -202,20 +212,10 @@
     "Herramientas/Metasploit.md",
     "Vulnerabilidades/Buffer Overflow/Buffer Overflow.md",
     "Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
-    "Vulnerabilidades/OWASP 10/Cross-Site Scripting (XSS).md",
-    "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
     "Fundamentos/imgs/Pasted image 20250430103104.png",
     "Fundamentos/imgs/Pasted image 20250430103037.png",
-    "Fundamentos/Protocolos/DNS - Domain Name Server.md",
-    "Fundamentos/Passwords/Pass the Ticket (PtT) - Linux.md",
-    "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
     "Fundamentos/imgs/Pasted image 20250429180552.png",
     "Fundamentos/imgs/Pasted image 20250425092043.png",
-    "Fundamentos/imgs/Pasted image 20250425083632.png",
-    "Fundamentos/imgs/Pasted image 20250425082807.png",
-    "Fundamentos/imgs/Pasted image 20250423175827.png",
-    "Fundamentos/imgs/Pasted image 20250423120408.png",
-    "Fundamentos/imgs/Pasted image 20250422125303.png",
     "Fundamentos/Passwords",
     "Herramientas/IMGs",
     "Transferencia de archivos/Imgs",

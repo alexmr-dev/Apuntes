@@ -13,15 +13,30 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Pruebas prácticas/HTB/Máquinas/TwoMillion/TwoMillion.md",
+                "file": "Pruebas prácticas/HTB/Máquinas/Titanic/Titanic.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "TwoMillion"
+              "title": "Titanic"
+            }
+          },
+          {
+            "id": "f6694a5fe1d82a1a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Pruebas prácticas/HTB/Máquinas/Support/Support.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Support"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -163,14 +178,15 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "6aed747ae172ff7c",
+  "active": "f6694a5fe1d82a1a",
   "lastOpenFiles": [
+    "Pruebas prácticas/HTB/Máquinas/Code/Code.md",
+    "Pruebas prácticas/HTB/Máquinas/Titanic/Titanic.md",
+    "Pruebas prácticas/HTB/Máquinas/TwoMillion/TwoMillion.md",
     "Pruebas prácticas/HTB/Máquinas/Code/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Code",
     "Snippets/Scripts.md",
     "Fundamentos/Shells.md",
-    "Pruebas prácticas/HTB/Máquinas/TwoMillion/TwoMillion.md",
-    "Pruebas prácticas/HTB/Máquinas/Titanic/Titanic.md",
     "Pruebas prácticas/HTB/Máquinas/Titanic/IMGs/Titanic_6.png",
     "Pruebas prácticas/HTB/Máquinas/Titanic/IMGs/Titanic_5.png",
     "Pruebas prácticas/HTB/Máquinas/Titanic/IMGs/Titanic_4.png",
@@ -209,7 +225,6 @@
     "Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
     "Fundamentos/Protocolos/TNS - Transparent Network Substrate.md",
     "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
-    "Fundamentos/Passwords",
-    "Herramientas/IMGs"
+    "Fundamentos/Passwords"
   ]
 }

@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Pruebas prácticas/HTB/Máquinas/Support/Support.md",
+                "file": "Fundamentos/Protocolos/DNS - Domain Name Server.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Support"
+              "title": "DNS - Domain Name Server"
             }
           }
         ],
@@ -178,8 +178,9 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "6aed747ae172ff7c",
+  "active": "d5161bc0c89b4b04",
   "lastOpenFiles": [
+    "Pruebas prácticas/HTB/Máquinas/Support/Support.md",
     "Pruebas prácticas/HTB/Máquinas/Support/IMGs/Support_2.png",
     "Pruebas prácticas/HTB/Máquinas/Sin título.md",
     "Pruebas prácticas/HTB/Máquinas/Support/IMGs",
@@ -189,7 +190,6 @@
     "Pruebas prácticas/HTB/Máquinas/Support/IMGs/Support_1.png",
     "Pruebas prácticas/HTB/Máquinas/Nibbles/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Nibbles",
-    "Pruebas prácticas/HTB/Máquinas/Support/Support.md",
     "Pruebas prácticas/HTB/Máquinas/IMG.md",
     "Pruebas prácticas/HTB/Máquinas/TwoMillion/TwoMillion.md",
     "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
@@ -217,7 +217,6 @@
     "Fundamentos/imgs/Pasted image 20250514095217.png",
     "Fundamentos/imgs/Pasted image 20250514095110.png",
     "Fundamentos/imgs/Pasted image 20250514094856.png",
-    "Fundamentos/imgs/Pasted image 20250514094443.png",
     "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
     "Fundamentos/Passwords/Rompiendo contraseñas.md",
     "Fundamentos/Passwords/Archivos protegidos.md",

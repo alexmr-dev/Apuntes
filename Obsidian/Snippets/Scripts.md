@@ -76,3 +76,15 @@ pip install libreria
 	Una vez que hayas terminado, puedes salir del entorno virtual simplemente ejecutando `deactivate`
 
 
+##### Shell más intuitiva
+
+Cuando logremos realizar una shell (sea del tipo que sea), no tendremos una terminal funcional completa (no podremos hacer `Ctrl+L`, dar al tabulador, etc...), podemos conseguirlo siguiendo estos pasos:
+1. Realizamos la shell correspondiente
+2. `script /dev/null -c bash` 
+3. Presionamos `Ctrl+Z`
+4. `stty raw -echo; fg`
+5. En este momento, puede que no se vea lo que estamos escribiendo. Si esto sucede, escribimos `reset xterm`
+6. `export xterm`
+7. `export TERM=xterm`
+8. `export SHELL=bash`
+9. `stty rows <ROWS> columns <COLUMNS>`. Los valores de rows y columns los obtenemos escribiendo `stty size` en nuestro terminal

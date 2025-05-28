@@ -8,49 +8,20 @@
         "type": "tabs",
         "children": [
           {
-            "id": "aef5154be08ce0da",
+            "id": "98446d938b069241",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Pruebas prácticas/HTB/Máquinas/TwoMillion/TwoMillion.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "TwoMillion"
-            }
-          },
-          {
-            "id": "f6694a5fe1d82a1a",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Pruebas prácticas/HTB/Máquinas/Forest/Forest.md",
+                "file": "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
               "title": "Forest"
             }
-          },
-          {
-            "id": "98446d938b069241",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Fundamentos/Protocolos/SMB - Server Message Block.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "SMB - Server Message Block"
-            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -82,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "rpcclie",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -192,52 +163,53 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "f6694a5fe1d82a1a",
+  "active": "98446d938b069241",
   "lastOpenFiles": [
-    "Pruebas prácticas/HTB/Máquinas/Forest/IMGs/Forest_5.png",
-    "Pruebas prácticas/HTB/Máquinas/Forest/Forest.md",
-    "Pruebas prácticas/HTB/Máquinas/Forest/IMGs/Forest_4.png",
-    "Pruebas prácticas/HTB/Máquinas/Forest/IMGs/Forest_3.png",
-    "Pruebas prácticas/HTB/Máquinas/Forest/IMGs/Forest_2.png",
-    "Pruebas prácticas/HTB/Máquinas/Forest/IMGs/Forest_1.png",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/Planning.md",
+    "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Code/Code.md",
+    "Pruebas prácticas/HTB/Máquinas/Fácil/Planning/Planning.md",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_5.png",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_7.png",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_6.png",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_4.png",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_3.png",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_2.png",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_1.png",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/TwoMillion.md",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs/Titanic_6.png",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs/Titanic_1.png",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs/Titanic_5.png",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/Titanic.md",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/IMGs",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Nibbles/Nibbles.md",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Nibbles/IMGs",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Nibbles",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Code",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/IMGs",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Support/Support.md",
+    "Pruebas prácticas/HTB/Máquinas/Fácil/TwoMillion/TwoMillion.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat/Redirección Socat con una Reverse Shell.md",
+    "Pruebas prácticas/HTB/Resolución general.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Port Forwarding dinámico.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat/Redirección Socat con una Bind Shell.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Meterpreter Tunneling y Port Forwarding.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Reverse o Remote Port Forwarding con SSH.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Conceptos generales.md",
+    "Pruebas prácticas/HTB/Máquinas/Fácil/Forest/Forest.md",
     "Fundamentos/Protocolos/SMB - Server Message Block.md",
-    "Pruebas prácticas/HTB/Máquinas/TwoMillion/TwoMillion.md",
     "Fundamentos/Passwords/Rompiendo contraseñas.md",
-    "Pruebas prácticas/HTB/Máquinas/Forest/IMGs",
-    "Pruebas prácticas/HTB/Máquinas/Forest",
     "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
-    "Pruebas prácticas/HTB/Máquinas/Support/Support.md",
+    "Pruebas prácticas/HTB/Máquinas/Fácil/Support/Support.md",
     "Fundamentos/Protocolos/SQL - Structured Query Language.md",
     "Fundamentos/Passwords/Pass the Hash.md",
     "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
-    "Herramientas/Nmap.md",
-    "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
-    "Fundamentos/Protocolos/SSH - Secure Shell.md",
-    "Snippets/Comandos Linux.md",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Port Forwarding.md",
-    "Fundamentos/imgs/Pasted image 20250521091836.png",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Conceptos generales.md",
-    "Fundamentos/imgs/Pasted image 20250521083240.png",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos",
-    "Pruebas prácticas/HTB/Máquinas/Nibbles/Nibbles.md",
-    "Fundamentos/Shells.md",
-    "Pruebas prácticas/HTB/Máquinas/Code/Code.md",
-    "Pruebas prácticas/HTB/Máquinas/Titanic/Titanic.md",
-    "Pruebas prácticas/HTB/Máquinas/Code/IMGs",
-    "Pruebas prácticas/HTB/Máquinas/Code",
-    "Snippets/Scripts.md",
-    "Pruebas prácticas/HTB/Máquinas/Titanic/IMGs/Titanic_6.png",
-    "Pruebas prácticas/HTB/Máquinas/Titanic/IMGs/Titanic_5.png",
-    "Pruebas prácticas/HTB/Máquinas/Titanic/IMGs/Titanic_4.png",
-    "Fundamentos/Protocolos/DNS - Domain Name Server.md",
-    "Pruebas prácticas/HTB/Máquinas/Titanic/IMGs",
-    "Pruebas prácticas/HTB/Máquinas/Titanic",
-    "Pruebas prácticas/HTB/Máquinas/Support/IMGs",
-    "Pruebas prácticas/HTB/Máquinas/Support",
-    "Pruebas prácticas/HTB/Máquinas/TwoMillion",
-    "Pruebas prácticas/HTB/Máquinas/IMG.md",
-    "Fundamentos/Passwords/Pass the Ticket (PtT) - Windows.md",
-    "Fundamentos/Passwords/Windows - Administración remota de protocolos.md",
-    "Herramientas/Metasploit.md"
+    "Herramientas/Nmap.md"
   ]
 }

@@ -205,7 +205,7 @@ Similar al proceso de ataque de SAM, con LSASS sería aconsejable crear primero 
 
 **1. Administrador de tareas**
 
-![[Pasted image 20250422125303.png | 800]]
+![[dump_LSASS.png| 800]]
 
 Un archivo llamado `lsass.DMP` es creado y guardado en `AppData\Local\Temp`.
 
@@ -322,7 +322,7 @@ En este ejemplo, CrackMapExec está utilizando SMB para intentar iniciar sesión
 
 ##### Logs de evento del ataque
 
-![[Pasted image 20250423120408.png | 800]]
+![[keys.png| 800]]
 
 Puede ser útil saber qué podría haber quedado atrás tras un ataque. Conocer esto puede hacer que nuestras recomendaciones de remediación sean más impactantes y valiosas para el cliente con el que estamos trabajando. En cualquier sistema operativo Windows, un administrador puede acceder al Visor de eventos y revisar los eventos de Seguridad para ver las acciones exactas que se registraron. Esto puede informar decisiones para implementar controles de seguridad más estrictos y asistir en cualquier investigación potencial que pueda estar involucrada tras una brecha de seguridad.
 

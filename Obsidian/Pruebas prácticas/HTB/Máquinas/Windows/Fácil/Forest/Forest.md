@@ -323,10 +323,11 @@ Esto:
 
 ![[Forest_1.png| 800]]
 
-El siguiente paso es iniciar Bloodhound como tal, que es la app GUI. Para ello, instalamos con `sudo apt install bloodhound`. Tras ello, lo ejecutamos y nos pedirá editar el archivo `bhapi.json` . Las credenciales de Neo4j son `neo4j:1573`. Después de esto, lanzamos Bloodhound de manera normal. Si bienla contraseña por defecto es admin, nos dará el coñazo con poner una hiper segura. Hemos establecido
+El siguiente paso es iniciar Bloodhound como tal, que es la app GUI. Para ello, instalamos con `sudo apt install bloodhound`. Tras ello, lo ejecutamos y nos pedirá editar el archivo `bhapi.json` . Las credenciales de Neo4j son `neo4j:1573`. Después de esto, lanzamos Bloodhound de manera normal. Si bien la contraseña por defecto es admin, nos dará el coñazo con poner una hiper segura. Hemos establecido
 
 ```
-BloodAdmin1573_
+	Usuario:    admin
+	Contraseña: BloodAdmin1573*
 ```
 
 Al cargar el zip generado con SharpHound, obtenemos esta información:

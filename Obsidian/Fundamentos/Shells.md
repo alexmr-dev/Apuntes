@@ -18,7 +18,7 @@ Es una técnica que permite a un atacante conectarse a una máquina remota desde
 
 En este caso, es el servidor web quien se conecta a la maquina del atacante (antes referenciada como cliente). Para ello, lo que hacemos es levantar un servicio en la maquina del atacante, en un puerto de escucha. Luego el servidor web se conecta a esta pasándole como referencia la shell del mismo servidor.
 
-![[Pasted image 20250409220234.png | 700]]
+![[reverse_shell3.png| 700]]
 
 Los atacantes que realizan una reverse shell, muchas veces hacen uso de los servicios de VPS, en donde pueden tener direcciones IP publicas y configurar las 
 reglas del gateway, para poder establecer la conexión entrante de la víctima y así poder ejecutar comandos en el sistema operativo. Las reverse shell con [[Netcat]] se pueden crear de la siguiente forma:
@@ -264,7 +264,7 @@ Esta técnica es el opuesto de la Reverse Shell, ya que en lugar de que la máqu
 
  El usuario el cual proporciona la shell, espera una conexión en un puerto en específico. Cuando un cliente se conecta a este puerto, se entabla una comunicación, en la cual todo lo que envía el usuario se considera un comando que se inserta en la shell del usuario.
 
-![[Pasted image 20250409210001.png | 700]]
+![[bind_shell3.png| 700]]
 
 Como se ve en la imagen, nos conectaríamos directamente con la dirección IP y el puerto que está escuchando en el objetivo. Sin embargo, este método puede presentar varios desafíos. Aquí hay algunos a tener en cuenta:
 

@@ -220,7 +220,7 @@ amr251@htb[/htb]$ smbmap -H 10.129.14.128 --upload test.txt "notes\test.txt"
 
 Podemos usar `rpcclient` con una sesión nula para enumerar un workstation o controlador de dominio. A continuación se proporciona un cheatsheet: 
 
-![[Pasted image 20250430103037.png | 800]]![[Pasted image 20250430103104.png | 1000]]
+![[rpcclient_1.png| 800]]![[rpcclient_2.png| 1000]]
 
 ```shell-session
 amr251@htb[/htb]$ rpcclient -U'%' 10.10.110.17

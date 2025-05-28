@@ -4,7 +4,7 @@
 
 > Durante una auditoría red team, una prueba de penetración o una evaluación de Active Directory, a menudo nos encontraremos en situaciones en las que ya hemos comprometido credenciales, claves SSH, hashes o tokens de acceso que nos permiten acceder a otro sistema, **pero ese sistema no es directamente accesible desde nuestra máquina atacante**.
 
-![[Pasted image 20250521083240.png | 700]]
+![[pivoting.png| 700]]
 
 En estos casos, necesitaremos usar un **host pivot** (una máquina ya comprometida) para encontrar una forma de alcanzar el siguiente objetivo.
 Uno de los pasos más importantes al acceder a una máquina por primera vez es comprobar:

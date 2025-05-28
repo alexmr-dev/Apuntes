@@ -183,7 +183,7 @@ support.inlanefreight.com is an alias for inlanefreight.s3.amazonaws.com
 
 El subdominio _support_ tiene un registro de alias que apunta a un bucket de AWS S3. Sin embargo, la URL [https://support.inlanefreight.com](https://support.inlanefreight.com) muestra un error _NoSuchBucket_, lo que indica que el subdominio es potencialmente vulnerable a una toma de subdominio. Ahora, podemos tomar el control del subdominio creando un bucket de AWS S3 con el mismo nombre que el subdominio.
 
-![[Pasted image 20250514114534.png]]
+![[xml.png]]
 
 ### DNS Spoofing
 
@@ -206,12 +206,12 @@ inlanefreight.com      A   192.168.225.110
 
 Después, arrancamos la herramienta `Ettercap` y escaneamos hosts dentro de la red navegando a `Hosts > Scan for Hosts`. Una vez completado, añadimos la IP objetivo (por ejemplo, 192.168.152.129) a Target1 y la puerta de enlace por defecto a Target2
 
-![[Pasted image 20250514120346.png | 600]]
+![[ettercap.png| 600]]
 
 Activamos `dns_spoof` navegando a `Plugins > Manage Plugins`. Esto envía a la máquina objetivo responses falsas DNS que resolverán `inlanefreight.com` en la IP 192.168.225.110
 
-![[Pasted image 20250514120504.png | 600]]
+![[ettercap2.png| 600]]
 
 Después de un ataque exitoso de spoof DNS, si un usuario víctima que viene desde la máquina objetivo `192.168.152.129` visita el dominio de `inlanefreight.com`, será redirigido a una web falsa con IP 192.168.225.110
 
-![[Pasted image 20250514120645.png | 600]]
+![[dns_spoofing.png| 600]]

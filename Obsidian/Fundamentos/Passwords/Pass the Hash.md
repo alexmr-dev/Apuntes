@@ -46,7 +46,7 @@ NTLM    : 64F12CDDAA88057E06A81B54E73B949B
 
 Ahora podríamos usar cmd para ejecutar comandos en el contexto del usuario. En el siguiente ejemplo vemos como el usuario `julio` puede conectarse a un directorio compartido llamado `julio` en el DC (controlador de dominio, $Domain Controller$): 
 
-![[Pasted image 20250423175827.png | 800]]
+![[mimikatz.png| 800]]
 
 ### Pass the Hash con PowerShell Invoke-TheHash (Windows)
 
@@ -76,7 +76,7 @@ VERBOSE: Service EGDKNNLQVOLFHRQTQMAU deleted on 172.16.1.10
 
 También podemos hacer una reverse shell. Consultar [[Shells]]. Otra página muy interesante para hacer reverse shells es [https://www.revshells.com/](https://www.revshells.com/), que nos permite crear tanto el listener como el payload. 
 
-![[Pasted image 20250425092043.png | 800]]
+![[reverse_shell_generator.png| 800]]
 
 ##### Invoke-TheHash con WMI
 
@@ -87,7 +87,7 @@ PS c:\tools\Invoke-TheHash> Invoke-WMIExec -Target DC01 -Domain inlanefreight.ht
 [+] Command executed with process id 520 on DC01
 ```
 
-![[Pasted image 20250425082807.png | 800]]
+![[wmiexec.png| 800]]
 ### Pass the Hash con Impacket (Linux)
 
 [Impacket](https://github.com/SecureAuthCorp/impacket) tiene múltiples herramientas para distintas operaciones como ejecución de comandos y volcado de credenciales, enumeración, etc. Veamos un ejemplo con `PsExec`:
@@ -161,7 +161,7 @@ Si usamos `xfreerdp` o `rdesktop`, puede que nos encontremos con el modo de admi
 c:\tools> reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f
 ```
 
-![[Pasted image 20250425083632.png | 800]]
+![[LSA.png| 800]]
 
 Una vez la clave de registro ha sido añadida, podemos usar `xfreerdp` con el flag `/pth` y el hash:
 

@@ -204,4 +204,4 @@ hashcat (v6.1.1) starting...
 
 Una vez que hayamos descifrado la contraseña, podremos abrir las unidades cifradas. La forma más sencilla de montar una unidad virtual cifrada con BitLocker es transferirla a un sistema Windows y montarla. Para ello, basta con hacer doble clic en la unidad virtual. Dado que está protegida por contraseña, Windows mostrará un error inicialmente. Tras montar la unidad, podremos hacer doble clic nuevamente sobre ella y BitLocker nos pedirá la contraseña.
 
-![[Pasted image 20250429180552.png]]
+![[bitlocker.png]]

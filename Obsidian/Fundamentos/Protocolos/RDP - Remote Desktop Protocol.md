@@ -93,7 +93,7 @@ Imaginemos que logramos acceder exitosamente a una máquina y tenemos una cuenta
 
 Como se muestra en el siguiente ejemplo, estamos conectados como el usuario **juurena** (UserID = 2), quien tiene privilegios de administrador. Nuestro objetivo es secuestrar la sesión del usuario **lewen** (UserID = 4), quien también está conectado mediante RDP.
 
-![[Pasted image 20250514083332.png | 800]]
+![[usuarios_windows.png| 800]]
 
 Para suplantar exitosamente a un usuario sin su contraseña, necesitamos tener privilegios de `SYSTEM` y usar `tscon.exe` (Binario de Microsoft) que permite a los usuarios conectarse a otra sesión de escritorio. Esto funciona especificando a qué **ID de SESIÓN** (en nuestro ejemplo, el 4 correspondiente a la sesión de **lewen**) queremos conectarnos, y a qué **nombre de sesión** (por ejemplo, **rdp-tcp#13**, que corresponde a nuestra sesión actual).
 
@@ -121,7 +121,7 @@ C:\htb> sc.exe create sessionhijack binpath= "cmd.exe /k tscon 2 /dest:rdp-tcp#1
 [SC] CreateService SUCCESS
 ```
 
-![[Pasted image 20250514094443.png]]
+![[usuarios_windows2.png]]
 
 Para ejecutar el comando, podemos empezar el servicio `sessionhijack`:
 
@@ -131,7 +131,7 @@ C:\htb> net start sessionhijack
 
 Una vez que el servicio ha comenzado, aparecerá una nueva terminal con la sesión de usuario `lewen`. Con esta nueva cuenta, podemos intentar descubrir qué tipo de privilegios tiene en la red, y quizá si tenemos suerte, el usuario es miembro del grupo Help Desk con derechos de admin en varios hosts y incluso un dominio de administrador. 
 
-![[Pasted image 20250514094856.png | 700]]
+![[usuarios_windows3.png| 700]]
 
 > *Esto ya no funciona en Server 2019*
 
@@ -145,7 +145,7 @@ Hay algunas advertencias importantes a tener en cuenta para este tipo de ataque:
 
 - El **modo de administración restringido (Restricted Admin Mode)**, que está **deshabilitado por defecto**, debe estar **habilitado en el host de destino**. De lo contrario, al intentar la conexión, se nos mostrará el siguiente error:
 
-![[Pasted image 20250514095110.png | 500]]
+![[account_restrictions.png| 500]]
 
 Esto puede ser habilitado añadiendo una nueva clave de registro `DisableRestrictedAdmin` (REG_DWORD) bajo `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Lsa`. Se puede encontrar con el siguiente comando:
 
@@ -153,7 +153,7 @@ Esto puede ser habilitado añadiendo una nueva clave de registro `DisableRestric
 C:\htb> reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f
 ```
 
-![[Pasted image 20250514095217.png]]
+![[LSA2.png]]
 
 Una vez la clave de registro ha sido añadida, podemos usar `xfreerdp3` con la opción `/pth` para ganar acceso RDP, siendo el valor adherido a `/pth` el hash NTLM obtenido previamente.
 

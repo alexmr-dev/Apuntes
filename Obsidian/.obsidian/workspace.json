@@ -13,15 +13,44 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
+                "file": "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Forest"
+              "title": "Socat"
+            }
+          },
+          {
+            "id": "9624fe0a443b8faf",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Web Server Pivoting.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Web Server Pivoting"
+            }
+          },
+          {
+            "id": "437269fb4fbe03d5",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/Planning.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Planning"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -163,10 +192,23 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "98446d938b069241",
+  "active": "6aed747ae172ff7c",
   "lastOpenFiles": [
+    "Fundamentos/imgs/rpivot.png",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Web Server Pivoting.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Port Forwarding dinámico.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Meterpreter Tunneling y Port Forwarding.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Conceptos generales.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Reverse o Remote Port Forwarding con SSH.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/SSH Pivoting.md",
+    "Fundamentos/imgs/plink.png",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/Planning.md",
-    "Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
+    "Fundamentos/imgs/socat_2.png",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat/Redirección Socat con una Reverse Shell.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat/Redirección Socat con una Bind Shell.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
+    "Fundamentos/Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Code/Code.md",
     "Pruebas prácticas/HTB/Máquinas/Fácil/Planning/Planning.md",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_5.png",
@@ -180,8 +222,6 @@
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs/Titanic_6.png",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs/Titanic_1.png",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs/Titanic_5.png",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/Titanic.md",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic",
@@ -192,24 +232,13 @@
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Nibbles",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Code",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/IMGs",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Support/Support.md",
     "Pruebas prácticas/HTB/Máquinas/Fácil/TwoMillion/TwoMillion.md",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat/Redirección Socat con una Reverse Shell.md",
     "Pruebas prácticas/HTB/Resolución general.md",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Port Forwarding dinámico.md",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat/Redirección Socat con una Bind Shell.md",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Meterpreter Tunneling y Port Forwarding.md",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Reverse o Remote Port Forwarding con SSH.md",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Conceptos generales.md",
     "Pruebas prácticas/HTB/Máquinas/Fácil/Forest/Forest.md",
     "Fundamentos/Protocolos/SMB - Server Message Block.md",
     "Fundamentos/Passwords/Rompiendo contraseñas.md",
     "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
-    "Pruebas prácticas/HTB/Máquinas/Fácil/Support/Support.md",
-    "Fundamentos/Protocolos/SQL - Structured Query Language.md",
-    "Fundamentos/Passwords/Pass the Hash.md",
-    "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
-    "Herramientas/Nmap.md"
+    "Pruebas prácticas/HTB/Máquinas/Fácil/Support/Support.md"
   ]
 }

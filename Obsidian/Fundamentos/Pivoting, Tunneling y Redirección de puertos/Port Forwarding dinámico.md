@@ -221,5 +221,7 @@ chisel client <IP_del_Servidor>:8000 R:9999:127.0.0.1:3389
 
 🔁 Esto permite conectarte desde tu equipo al puerto 9999 del servidor Chisel, y terminaremos accediendo al servicio RDP (puerto 3389) de la máquina comprometida.
 
+### Port Forwarding con Windows Netsh
+
 
 

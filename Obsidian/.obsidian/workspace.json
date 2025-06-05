@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Herramientas/Docker.md",
+                "file": "Active Directory/Fundamentos de AD.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Docker"
+              "title": "Fundamentos de AD"
             }
           },
           {
@@ -82,7 +82,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "nxc",
+                "query": "proxychains",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -194,6 +194,18 @@
   },
   "active": "9624fe0a443b8faf",
   "lastOpenFiles": [
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Port Forwarding dinámico.md",
+    "Active Directory/Fundamentos de AD.md",
+    "Active Directory",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Meterpreter Tunneling y Port Forwarding.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Web Server Pivoting.md",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Conceptos generales.md",
+    "Fundamentos/Protocolos/SMB - Server Message Block.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Support/Support.md",
+    "Fundamentos/Passwords/Rompiendo contraseñas.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
+    "Herramientas/Nmap.md",
+    "Herramientas/Docker.md",
     "Fundamentos/Shells.md",
     "Fundamentos/Puertos comunes.md",
     "Fundamentos/Operadores de búsqueda.md",
@@ -202,8 +214,6 @@
     "Herramientas/Metasploit.md",
     "Herramientas/Burpsuite.md",
     "Fundamentos/Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
-    "Fundamentos/Protocolos/SMB - Server Message Block.md",
-    "Herramientas/Nmap.md",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/Planning.md",
     "Fundamentos/Protocolos/SSH - Secure Shell.md",
     "Fundamentos/Protocolos/SQL - Structured Query Language.md",
@@ -211,16 +221,7 @@
     "Fundamentos/Pivoting, Tunneling y Redirección de puertos/SSH Pivoting.md",
     "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
     "Fundamentos/Protocolos/FTP - Transferencia de datos.md",
-    "Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
-    "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
-    "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
-    "Fundamentos/Passwords/Pass the Hash.md",
-    "Vulnerabilidades/Privilegios/Escalada de privilegios.md",
-    "Vulnerabilidades/Buffer Overflow/Buffer Overflow.md",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Web Server Pivoting.md",
     "Fundamentos/imgs/rpivot.png",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat.md",
     "Fundamentos/imgs/plink.png",
     "Fundamentos/imgs/socat_2.png",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_5.png",
@@ -238,7 +239,6 @@
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Nibbles/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Nibbles",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Code",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/IMGs"
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Code"
   ]
 }

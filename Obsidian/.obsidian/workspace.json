@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat.md",
+                "file": "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Socat"
+              "title": "Forest"
             }
           },
           {
@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Active Directory/Fundamentos de AD.md",
+                "file": "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Support/Support.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Fundamentos de AD"
+              "title": "Support"
             }
           },
           {
@@ -41,12 +41,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/Planning.md",
+                "file": "Fundamentos/Protocolos/SMB - Server Message Block.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Planning"
+              "title": "SMB - Server Message Block"
             }
           }
         ],
@@ -82,7 +82,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "proxychains",
+                "query": "stty raw",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -194,51 +194,51 @@
   },
   "active": "9624fe0a443b8faf",
   "lastOpenFiles": [
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Port Forwarding dinámico.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/Active.md",
     "Active Directory/Fundamentos de AD.md",
+    "Fundamentos/Protocolos/SSH - Secure Shell.md",
+    "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
+    "Fundamentos/Protocolos/SMTP - Simple Mail Transfer Protocol.md",
+    "Fundamentos/Protocolos/NFS - Network File System.md",
+    "Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
+    "Fundamentos/Shells.md",
+    "Fundamentos/Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
+    "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
+    "Snippets/Scripts.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs/Active_2 1.png",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs/Active_2.png",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs/Active_4.png",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs/Active_3.png",
+    "Fundamentos/Protocolos/SMB - Server Message Block.md",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/Planning.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs/Active_1.png",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active",
+    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Port Forwarding dinámico.md",
     "Active Directory",
     "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Meterpreter Tunneling y Port Forwarding.md",
     "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Web Server Pivoting.md",
     "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Conceptos generales.md",
-    "Fundamentos/Protocolos/SMB - Server Message Block.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Support/Support.md",
     "Fundamentos/Passwords/Rompiendo contraseñas.md",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
     "Herramientas/Nmap.md",
     "Herramientas/Docker.md",
-    "Fundamentos/Shells.md",
     "Fundamentos/Puertos comunes.md",
     "Fundamentos/Operadores de búsqueda.md",
     "Fundamentos/Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
-    "Herramientas/Netcat.md",
-    "Herramientas/Metasploit.md",
-    "Herramientas/Burpsuite.md",
-    "Fundamentos/Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/Planning.md",
-    "Fundamentos/Protocolos/SSH - Secure Shell.md",
-    "Fundamentos/Protocolos/SQL - Structured Query Language.md",
-    "Fundamentos/Protocolos/NFS - Network File System.md",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/SSH Pivoting.md",
-    "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
-    "Fundamentos/Protocolos/FTP - Transferencia de datos.md",
     "Fundamentos/imgs/rpivot.png",
     "Fundamentos/imgs/plink.png",
     "Fundamentos/imgs/socat_2.png",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_5.png",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_7.png",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_6.png",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_4.png",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_3.png",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_2.png",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_1.png",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Nibbles/IMGs",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Nibbles",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Code"
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Nibbles/IMGs"
   ]
 }

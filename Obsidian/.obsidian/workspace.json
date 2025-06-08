@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Support/Support.md",
+                "file": "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/Driver.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Support"
+              "title": "Driver"
             }
           },
           {
@@ -194,7 +194,13 @@
   },
   "active": "9624fe0a443b8faf",
   "lastOpenFiles": [
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/IMGs/Driver_2.png",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/IMGs/Driver_1.png",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/Driver.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/IMGs",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Support/Support.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/Active.md",
     "Active Directory/Fundamentos de AD.md",
     "Fundamentos/Protocolos/SSH - Secure Shell.md",
@@ -221,24 +227,18 @@
     "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Meterpreter Tunneling y Port Forwarding.md",
     "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Web Server Pivoting.md",
     "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Conceptos generales.md",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Support/Support.md",
     "Fundamentos/Passwords/Rompiendo contraseñas.md",
     "Herramientas/Nmap.md",
     "Herramientas/Docker.md",
     "Fundamentos/Puertos comunes.md",
-    "Fundamentos/Operadores de búsqueda.md",
-    "Fundamentos/Transferencia de archivos/Windows - Métodos de transferencia de archivos.md",
     "Fundamentos/imgs/rpivot.png",
     "Fundamentos/imgs/plink.png",
     "Fundamentos/imgs/socat_2.png",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_5.png",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_7.png",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/IMGs",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Nibbles/IMGs"
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/IMGs"
   ]
 }

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
+                "file": "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/Active.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Forest"
+              "title": "Active"
             }
           },
           {
@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/Driver.md",
+                "file": "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/Fluffy.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Driver"
+              "title": "Fluffy"
             }
           },
           {
@@ -192,16 +192,24 @@
       "command-palette:Abrir paleta de comandos": false
     }
   },
-  "active": "9624fe0a443b8faf",
+  "active": "6aed747ae172ff7c",
   "lastOpenFiles": [
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_5.png",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_4.png",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_3.png",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/Active.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/Fluffy.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_2.png",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_1.png",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/Driver.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/IMGs/Driver_2.png",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/IMGs/Driver_1.png",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/Driver.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Support/Support.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/Active.md",
     "Active Directory/Fundamentos de AD.md",
     "Fundamentos/Protocolos/SSH - Secure Shell.md",
     "Fundamentos/Protocolos/SNMP - Simple Network Management Protocol.md",
@@ -218,7 +226,6 @@
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs/Active_3.png",
     "Fundamentos/Protocolos/SMB - Server Message Block.md",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/Planning.md",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs/Active_1.png",
     "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active",
@@ -230,15 +237,8 @@
     "Fundamentos/Passwords/Rompiendo contraseñas.md",
     "Herramientas/Nmap.md",
     "Herramientas/Docker.md",
-    "Fundamentos/Puertos comunes.md",
-    "Fundamentos/imgs/rpivot.png",
-    "Fundamentos/imgs/plink.png",
-    "Fundamentos/imgs/socat_2.png",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs/TwoMillion_5.png",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/IMGs"
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs"
   ]
 }

@@ -88,3 +88,9 @@ Cuando logremos realizar una shell (sea del tipo que sea), no tendremos una term
 7. `export TERM=xterm`
 8. `export SHELL=bash`
 9. `stty rows <ROWS> columns <COLUMNS>`. Los valores de rows y columns los obtenemos escribiendo `stty size` en nuestro terminal
+
+Puede que no necesitemos toda esta parafernalia y simplemente con el siguiente comando de Python (si la bash remota admite Python) logremos ganar una TTY funcional:
+
+```python
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+```

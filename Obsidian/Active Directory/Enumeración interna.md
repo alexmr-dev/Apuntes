@@ -55,3 +55,113 @@ Aunque en redes conmutadas solo vemos el tráfico del dominio de broadcast, pode
 
 Esto ayuda a entender la red sin generar ruido y planificar los siguientes pasos.
 
+### Usando fping
+
+`fping` es similar a `ping`, pero más eficiente para escaneos en red. Permite enviar peticiones ICMP a múltiples direcciones a la vez, lo que lo hace útil en auditorías internas.
+
+- Acepta rangos o listas de IPs.    
+- Funciona en modo round-robin, sin esperar respuesta completa de cada host antes de continuar.    
+- Es scriptable y rápido.    
+
+Aunque ICMP no muestra toda la actividad posible, permite tener una primera visión de los hosts activos. A partir de ahí, se puede combinar con escaneos más profundos por puertos y servicios. Aquí iniciaremos `fping` con algunos flags:
+
+- `a` para mostrar los objetivos que están activos,    
+- `s` para imprimir estadísticas al final del escaneo,    
+- `g` para generar una lista de objetivos a partir de una red en formato CIDR,    
+- y `q` para no mostrar resultados por cada objetivo.
+
+```shell-session
+amr251@htb[/htb]$ fping -asgq 172.16.5.0/23
+
+172.16.5.5
+172.16.5.25
+172.16.5.50
+172.16.5.100
+172.16.5.125
+172.16.5.200
+172.16.5.225
+172.16.5.238
+172.16.5.240
+...SNIP...
+```
+
+El comando anterior valida qué hosts están activos en la red `/23` y lo hace de forma silenciosa, en lugar de saturar la terminal con resultados para cada IP de la lista objetivo. Podemos combinar los resultados exitosos con la información obtenida en las comprobaciones pasivas para crear una lista y realizar un escaneo más detallado con Nmap. A partir del comando `fping`, podemos ver 9 "hosts vivos", incluyendo nuestro host de ataque.
+
+### Identificando usuarios
+
+Si el cliente no nos proporciona una cuenta de usuario para comenzar las pruebas (lo cual es habitual), necesitaremos encontrar una forma de **obtener acceso al dominio** mediante alguno de estos métodos:
+
+- Credenciales en texto claro    
+- Un **hash NTLM** de un usuario    
+- Una **shell SYSTEM** en un host unido al dominio    
+- Una shell en el **contexto de un usuario de dominio**    
+
+Conseguir un usuario válido con sus credenciales es un paso **crítico** en las fases iniciales de una auditoría interna. Incluso con acceso de bajo nivel, se abren muchas posibilidades para realizar **enumeración más avanzada** e incluso lanzar ataques posteriores.
+
+Veamos una forma de empezar a construir una lista de usuarios válidos en un dominio, que podremos usar más adelante en la evaluación.
+
+### Kerbrute - Enumeración de usuarios desde dentro en AD
+
+Kerbrute es una opción más discreta para **enumerar cuentas de dominio**, ya que se basa en errores de preautenticación de Kerberos, los cuales **normalmente no generan logs ni alertas**.
+
+Se utiliza junto a diccionarios como `jsmith.txt` o `jsmith2.txt` del repositorio de **Insidetrust**, que incluye múltiples listas de usuarios muy útiles para esta fase cuando partimos sin autenticación.
+
+Apuntamos Kerbrute contra el **controlador de dominio (DC)** identificado previamente y le pasamos una wordlist. Es rápido y nos indica si los usuarios existen o no, lo cual sirve como punto de partida para ataques como **password spraying** (que veremos más adelante).
+
+```shell-session
+kerbrute userenum -d INLANEFREIGHT.LOCAL --dc 172.16.5.5 jsmith.txt -o valid_ad_users
+
+2021/11/17 23:01:46 >  Using KDC(s):
+2021/11/17 23:01:46 >   172.16.5.5:88
+2021/11/17 23:01:46 >  [+] VALID USERNAME:       jjones@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:46 >  [+] VALID USERNAME:       sbrown@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:46 >  [+] VALID USERNAME:       tjohnson@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:50 >  [+] VALID USERNAME:       evalentin@INLANEFREIGHT.LOCAL
+
+ <SNIP>
+ 
+2021/11/17 23:01:51 >  [+] VALID USERNAME:       sgage@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:51 >  [+] VALID USERNAME:       jshay@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:51 >  [+] VALID USERNAME:       jhermann@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:51 >  [+] VALID USERNAME:       whouse@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:51 >  [+] VALID USERNAME:       emercer@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:52 >  [+] VALID USERNAME:       wshepherd@INLANEFREIGHT.LOCAL
+2021/11/17 23:01:56 >  Done! Tested 48705 usernames (56 valid) in 9.940 seconds
+```
+
+
+### Cuenta LOCAL SYSTEM (`NT AUTHORITY\SYSTEM`) en entornos Windows
+
+`NT AUTHORITY\SYSTEM` es una cuenta interna del sistema operativo Windows con el **máximo nivel de privilegios**. Es la cuenta que utilizan muchos servicios de Windows (y algunos de terceros) para ejecutarse por defecto.
+
+En un host unido a un dominio, obtener acceso como SYSTEM permite **enumerar el Active Directory** actuando como la **cuenta del equipo**, que también es un objeto de usuario dentro del dominio.
+
+Tener acceso SYSTEM en una máquina unida al dominio es, en la práctica, casi equivalente a tener una cuenta de usuario del dominio.
+
+---
+
+### Formas comunes de obtener acceso SYSTEM:
+
+- Explotar vulnerabilidades remotas: **MS08-067**, **EternalBlue**, **BlueKeep**    
+- Abusar de servicios que se ejecutan como SYSTEM o del privilegio `SeImpersonate` mediante herramientas como **Juicy Potato** (funciona en sistemas antiguos, pero no en versiones modernas como Server 2019)    
+- Usar fallos de escalada de privilegios locales (por ejemplo, 0-day del programador de tareas en Windows 10)    
+- Tener acceso administrador en una máquina del dominio y usar **PsExec** para lanzar una shell como SYSTEM    
+
+---
+
+### Qué puedes hacer con acceso SYSTEM en un host unido al dominio:
+
+- Enumerar el dominio con herramientas como **BloodHound** o **PowerView**    
+- Lanzar ataques de **Kerberoasting** o **ASREPRoasting**    
+- Ejecutar **Inveigh** para capturar hashes Net-NTLMv2 o hacer SMB relay    
+- Realizar **impersonación de tokens** para secuestrar sesiones de usuarios privilegiados    
+- Ejecutar ataques sobre **permisos ACL** en objetos de AD
+
+Ten en cuenta el **alcance y estilo de la auditoría** al elegir las herramientas a utilizar.
+Si estás realizando una **auditoría no evasiva** (todo comunicado y visible, con el personal del cliente al tanto), no importa demasiado el nivel de ruido que generes en la red.
+Sin embargo, en una **auditoría evasiva**, una **evaluación adversarial** o un **ejercicio Red Team**, el objetivo es simular los TTPs de un atacante real, y en ese contexto la **discreción es fundamental**.
+Lanzar Nmap contra toda la red no es precisamente sigiloso, y muchas de las herramientas habituales de pentesting pueden generar alertas si el cliente tiene un SOC preparado o un equipo Blue con experiencia.
+Por eso, **asegúrate siempre de aclarar los objetivos y el estilo de la prueba con el cliente por escrito antes de comenzar**.
+
+
+

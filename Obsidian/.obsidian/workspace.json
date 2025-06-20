@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Active Directory/Enumeración interna.md",
+                "file": "Active Directory/Password Spraying/Creando una lista de usuarios objetivo.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Enumeración interna"
+              "title": "Creando una lista de usuarios objetivo"
             }
           },
           {
@@ -194,8 +194,18 @@
   },
   "active": "9624fe0a443b8faf",
   "lastOpenFiles": [
+    "Active Directory/Password Spraying/Enumerando y obteniendo políticas de contraseñas.md",
+    "Active Directory/Password Spraying/Creando una lista de usuarios objetivo.md",
     "Active Directory/Enumeración externa.md",
+    "Active Directory/LLMNR-NBT-NS Poisoning.md",
+    "Active Directory/Password Spraying",
+    "Active Directory/IMGs/inveight4.png",
+    "Active Directory/IMGs/inveight3.png",
+    "Active Directory/IMGs/inveight2.png",
+    "Active Directory/IMGs",
+    "Active Directory/IMGs/inveigh.png",
     "Active Directory/Enumeración interna.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/Driver.md",
     "Active Directory/Fundamentos de AD.md",
     "Snippets/Scripts.md",
     "Fundamentos/Passwords/Rompiendo contraseñas.md",
@@ -211,11 +221,9 @@
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_2.png",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_1.png",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/Driver.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/IMGs/Driver_2.png",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/IMGs/Driver_1.png",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Support/Support.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver",
@@ -227,18 +235,10 @@
     "Fundamentos/Shells.md",
     "Fundamentos/Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
     "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs/Active_2 1.png",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs/Active_2.png",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs/Active_4.png",
     "Fundamentos/Protocolos/SMB - Server Message Block.md",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Planning/Planning.md",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Socat.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active",
     "Active Directory",
-    "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Web Server Pivoting.md",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Titanic/IMGs"
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs"
   ]
 }

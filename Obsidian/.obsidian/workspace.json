@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Active Directory/Password Spraying/Creando una lista de usuarios objetivo.md",
+                "file": "Active Directory/Password Spraying/Password Spraying interno.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Creando una lista de usuarios objetivo"
+              "title": "Password Spraying interno"
             }
           },
           {
@@ -73,7 +73,7 @@
                 "autoReveal": false
               },
               "icon": "lucide-folder-closed",
-              "title": "Explorador de archivos"
+              "title": "Files"
             }
           },
           {
@@ -184,20 +184,24 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "switcher:Abrir selector rápido": false,
-      "graph:Abrir vista gráfica": false,
-      "canvas:Crear nuevo lienzo": false,
-      "daily-notes:Abrir la nota de hoy": false,
-      "templates:Insertar plantilla": false,
-      "command-palette:Abrir paleta de comandos": false
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
     }
   },
   "active": "9624fe0a443b8faf",
   "lastOpenFiles": [
-    "Active Directory/Password Spraying/Enumerando y obteniendo políticas de contraseñas.md",
     "Active Directory/Password Spraying/Creando una lista de usuarios objetivo.md",
-    "Active Directory/Enumeración externa.md",
+    "Active Directory/Password Spraying/Password Spraying interno.md",
+    "Active Directory/Password Spraying/Enumerando y obteniendo políticas de contraseñas.md",
     "Active Directory/LLMNR-NBT-NS Poisoning.md",
+    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Nibbles/Nibbles.md",
+    "Fundamentos/Protocolos/SMB - Server Message Block.md",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/Active.md",
+    "Active Directory/Enumeración externa.md",
     "Active Directory/Password Spraying",
     "Active Directory/IMGs/inveight4.png",
     "Active Directory/IMGs/inveight3.png",
@@ -217,7 +221,6 @@
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_5.png",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_4.png",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_3.png",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/Active.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_2.png",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_1.png",
@@ -233,9 +236,6 @@
     "Fundamentos/Protocolos/NFS - Network File System.md",
     "Fundamentos/Protocolos/IMAP & POP3 - Internet Mapping Access Protocol.md",
     "Fundamentos/Shells.md",
-    "Fundamentos/Transferencia de archivos/Linux - Métodos de transferencia de archivos.md",
-    "Fundamentos/Protocolos/RDP - Remote Desktop Protocol.md",
-    "Fundamentos/Protocolos/SMB - Server Message Block.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active",
     "Active Directory",

@@ -60,7 +60,7 @@ Herramientas como `windapsearch` hacen más fácil esto (aunque deberíamos ente
 ##### Usando windapsearch
 
 ```shell-session
-[!bash!]$ ./windapsearch.py --dc-ip 172.16.5.5 -u "" -U
+$ ./windapsearch.py --dc-ip 172.16.5.5 -u "" -U
 
 [+] No username provided. Will try anonymous bind.
 [+] Using Domain Controller at: 172.16.5.5
@@ -85,7 +85,7 @@ Se puede probar con listas como `jsmith.txt`, que contiene más de 48.000 usuari
 ##### Enumeración de usuarios con kerbrute
 
 ```shell-session
-[!bash!]$  kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt 
+$ kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt 
 ```
 
 Con Kerbrute, hemos comprobado más de 48.000 nombres de usuario en solo 12 segundos, descubriendo más de 50 válidos. Aunque este método no genera eventos de fallo de inicio de sesión, sí provoca el **evento 4768** ("se solicitó un ticket de autenticación Kerberos") si el registro de eventos de Kerberos está habilitado por directiva de grupo. Los defensores pueden configurar su SIEM para detectar un pico de estos eventos, lo que podría delatar la actividad.
@@ -99,7 +99,7 @@ Con credenciales válidas, podemos emplear cualquiera de las herramientas mencio
 ##### Usando crackmapexec con credenciales válidas
 
 ```shell-session
-[!bash!]$ sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
+$ sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
 
 [sudo] password for htb-student: 
 SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)

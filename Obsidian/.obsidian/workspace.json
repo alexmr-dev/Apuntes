@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Active Directory/Password Spraying/Password Spraying interno.md",
+                "file": "Active Directory/LLMNR-NBT-NS Poisoning.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Password Spraying interno"
+              "title": "LLMNR-NBT-NS Poisoning"
             }
           },
           {
@@ -73,7 +73,7 @@
                 "autoReveal": false
               },
               "icon": "lucide-folder-closed",
-              "title": "Files"
+              "title": "Explorador de archivos"
             }
           },
           {
@@ -184,49 +184,50 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "switcher:Open quick switcher": false,
-      "graph:Open graph view": false,
-      "canvas:Create new canvas": false,
-      "daily-notes:Open today's daily note": false,
-      "templates:Insert template": false,
-      "command-palette:Open command palette": false
+      "switcher:Abrir selector rápido": false,
+      "graph:Abrir vista gráfica": false,
+      "canvas:Crear nuevo lienzo": false,
+      "daily-notes:Abrir la nota de hoy": false,
+      "templates:Insertar plantilla": false,
+      "command-palette:Abrir paleta de comandos": false
     }
   },
   "active": "9624fe0a443b8faf",
   "lastOpenFiles": [
-    "Active Directory/Password Spraying/Creando una lista de usuarios objetivo.md",
-    "Active Directory/Password Spraying/Password Spraying interno.md",
-    "Active Directory/Password Spraying/Enumerando y obteniendo políticas de contraseñas.md",
+    "Active Directory/Fundamentos de AD.md",
+    "Active Directory/Enumeración/Enumeración interna.md",
+    "Active Directory/Enumeración/Enumeración con credenciales - Windows.md",
+    "Active Directory/Enumeración/Enumeración con credenciales - Linux.md",
+    "Active Directory/IMGs/Bloodhound1.png",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/Fluffy.md",
     "Active Directory/LLMNR-NBT-NS Poisoning.md",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/Nibbles/Nibbles.md",
-    "Fundamentos/Protocolos/SMB - Server Message Block.md",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/Active.md",
-    "Active Directory/Enumeración externa.md",
+    "Active Directory/Enumeración",
+    "Active Directory/Password Spraying/Enumerando y obteniendo políticas de contraseñas.md",
+    "Active Directory/Password Spraying/Password Spraying interno.md",
+    "Active Directory/Password Spraying/Creando una lista de usuarios objetivo.md",
+    "Active Directory/Enumeración/Enumeración externa.md",
     "Active Directory/Password Spraying",
     "Active Directory/IMGs/inveight4.png",
     "Active Directory/IMGs/inveight3.png",
     "Active Directory/IMGs/inveight2.png",
     "Active Directory/IMGs",
     "Active Directory/IMGs/inveigh.png",
-    "Active Directory/Enumeración interna.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/Driver.md",
-    "Active Directory/Fundamentos de AD.md",
     "Snippets/Scripts.md",
     "Fundamentos/Passwords/Rompiendo contraseñas.md",
     "Fundamentos/Pivoting, Tunneling y Redirección de puertos/SSH Pivoting.md",
     "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Port Forwarding dinámico.md",
     "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Meterpreter Tunneling y Port Forwarding.md",
     "Fundamentos/Pivoting, Tunneling y Redirección de puertos/Conceptos generales.md",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/Fluffy.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_5.png",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_4.png",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_3.png",
+    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/Active.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Forest/Forest.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_2.png",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs/Fluffy_1.png",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Fluffy",
-    "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/IMGs/Driver_2.png",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Support/Support.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Driver",
@@ -238,7 +239,6 @@
     "Fundamentos/Shells.md",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active/IMGs",
     "Pruebas prácticas/HTB/Máquinas/Windows/Fácil/Active",
-    "Active Directory",
-    "Pruebas prácticas/HTB/Máquinas/Linux/Fácil/TwoMillion/IMGs"
+    "Active Directory"
   ]
 }

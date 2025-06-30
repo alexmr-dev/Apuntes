@@ -245,3 +245,118 @@ La elección de una u otra dependerá del objetivo de la auditoría, si hay que 
 |Ventana de reinicio del contador de bloqueos|No configurado|
 
 Esto deja claro que muchas organizaciones no modifican la política por defecto, manteniendo valores fácilmente explotables si no se implementan medidas adicionales.
+
+---
+
+##### Windows Defender
+
+Podemos usar el cmdlet de PowerShell [Get-MpComputerStatus](https://docs.microsoft.com/en-us/powershell/module/defender/get-mpcomputerstatus?view=win10-ps) para comprobar el estado actual de Defender. Aquí, en concreto, podemos comprobar que `RealTimeProtectionEnabled` se encuentra como `true`, lo que significa que Defender está habilitado en el sistema.
+
+```powershell-session
+PS C:\htb> Get-MpComputerStatus
+```
+
+---
+
+### AppLocker
+
+Una lista blanca de aplicaciones es un control que define qué programas pueden instalarse y ejecutarse en un sistema, evitando malware y software no autorizado. En Windows, AppLocker permite gestionar de forma granular permisos sobre ejecutables, scripts, instaladores, DLLs y apps empaquetadas. Aunque muchas organizaciones bloquean cmd.exe o PowerShell.exe, suelen pasar por alto rutas alternativas como SysWOW64 o PowerShell_ISE.exe, lo que permite ejecutar PowerShell desde ubicaciones no contempladas en la regla. En entornos con políticas AppLocker más estrictas harán falta técnicas avanzadas para eludirlas.
+
+##### Usando Get-AppLockerPolicy
+
+```powershell-session
+PS C:\htb> Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
+
+PathConditions      : {%SYSTEM32%\WINDOWSPOWERSHELL\V1.0\POWERSHELL.EXE}
+PathExceptions      : {}
+PublisherExceptions : {}
+HashExceptions      : {}
+Id                  : 3d57af4a-6cf8-4e5b-acfc-c2c2956061fa
+Name                : Block PowerShell
+Description         : Blocks Domain Users from using PowerShell on workstations
+UserOrGroupSid      : S-1-5-21-2974783224-3764228556-2640795941-513
+Action              : Deny
+
+PathConditions      : {%PROGRAMFILES%\*}
+PathExceptions      : {}
+PublisherExceptions : {}
+HashExceptions      : {}
+Id                  : 921cc481-6e17-4653-8f75-050b80acca20
+Name                : (Default Rule) All files located in the Program Files folder
+Description         : Allows members of the Everyone group to run applications that are located in the Program Files folder.
+UserOrGroupSid      : S-1-1-0
+Action              : Allow
+
+PathConditions      : {%WINDIR%\*}
+PathExceptions      : {}
+PublisherExceptions : {}
+HashExceptions      : {}
+Id                  : a61c8b2c-a319-4cd0-9690-d2177cad7b51
+Name                : (Default Rule) All files located in the Windows folder
+Description         : Allows members of the Everyone group to run applications that are located in the Windows folder.
+UserOrGroupSid      : S-1-1-0
+Action              : Allow
+
+PathConditions      : {*}
+PathExceptions      : {}
+PublisherExceptions : {}
+HashExceptions      : {}
+Id                  : fd686d83-a829-4351-8ff4-27c7de5755d2
+Name                : (Default Rule) All files
+Description         : Allows members of the local Administrators group to run all applications.
+UserOrGroupSid      : S-1-5-32-544
+Action              : Allow
+```
+
+---
+### PowerShell Contrained Language
+
+PowerShell Constrained Language Mode restringe muchas de las funcionalidades necesarias para usar PowerShell con eficacia, como el bloqueo de objetos COM, permitir únicamente tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell y más. Podemos comprobar rápidamente si estamos en Full Language Mode o en Constrained Language Mode.
+
+```powershell-session
+PS C:\htb> $ExecutionContext.SessionState.LanguageMode
+
+ConstrainedLanguage
+```
+
+---
+
+### LAPS
+
+La Microsoft Local Administrator Password Solution (LAPS) se utiliza para aleatorizar y rotar las contraseñas de administrador local en hosts Windows y prevenir el movimiento lateral. Podemos enumerar qué usuarios de dominio pueden leer la contraseña LAPS configurada en los equipos con LAPS instalado y qué equipos no lo tienen. El LAPSToolkit lo facilita enormemente con varias funciones. Una de ellas analiza los ExtendedRights de todos los equipos con LAPS habilitado. Esto mostrará los grupos específicamente delegados para leer las contraseñas LAPS, que suelen ser usuarios de grupos protegidos. Una cuenta que ha unido un equipo al dominio recibe todos los Extended Rights sobre ese host, y este derecho le permite leer las contraseñas. La enumeración puede revelar una cuenta de usuario capaz de leer la contraseña LAPS en un equipo, lo que nos ayuda a enfocar ataques en usuarios de AD específicos que pueden acceder a esas contraseñas.
+
+##### Usando Find-LAPSDelegatedGroups
+
+```powershell-session
+PS C:\htb> Find-LAPSDelegatedGroups
+```
+
+El cmdlet `Find-AdmPwdExtendedRights` comprueba los permisos en cada equipo con LAPS habilitado para detectar grupos con acceso de lectura y usuarios con “All Extended Rights”. Los usuarios con “All Extended Rights” pueden leer las contraseñas LAPS y, a menudo, están menos protegidos que los usuarios en grupos delegados, por lo que merece la pena comprobarlo.
+
+```powershell-session
+PS C:\htb> Find-AdmPwdExtendedRights
+
+ComputerName                Identity                    Reason
+------------                --------                    ------
+EXCHG01.INLANEFREIGHT.LOCAL INLANEFREIGHT\Domain Admins Delegated
+EXCHG01.INLANEFREIGHT.LOCAL INLANEFREIGHT\LAPS Admins   Delegated
+SQL01.INLANEFREIGHT.LOCAL   INLANEFREIGHT\Domain Admins Delegated
+SQL01.INLANEFREIGHT.LOCAL   INLANEFREIGHT\LAPS Admins   Delegated
+WS01.INLANEFREIGHT.LOCAL    INLANEFREIGHT\Domain Admins Delegated
+WS01.INLANEFREIGHT.LOCAL    INLANEFREIGHT\LAPS Admins   Delegated
+```
+
+Podemos usar la función **Get-LAPSComputers** para buscar los equipos que tienen LAPS habilitado cuando expiran las contraseñas e incluso obtener las contraseñas aleatorias en texto claro si nuestro usuario tiene acceso.
+
+##### Usando Get-LAPSComputers
+
+```powershell-session
+PS C:\htb> Get-LAPSComputers
+
+ComputerName                Password       Expiration
+------------                --------       ----------
+DC01.INLANEFREIGHT.LOCAL    6DZ[+A/[]19d$F 08/26/2020 23:29:45
+EXCHG01.INLANEFREIGHT.LOCAL oj+2A+[hHMMtj, 09/26/2020 00:51:30
+SQL01.INLANEFREIGHT.LOCAL   9G#f;p41dcAe,s 09/26/2020 00:30:09
+WS01.INLANEFREIGHT.LOCAL    TCaG-F)3No;l8C 09/26/2020 00:46:04
+```

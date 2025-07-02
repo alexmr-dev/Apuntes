@@ -125,10 +125,10 @@ PowerView es un módulo de PowerShell que, al igual que BloodHound, nos permite 
 
 ##### Funciones de GPO
 
-| Comando               | Descripción                                                                 |
-|-----------------------|-----------------------------------------------------------------------------|
-| `Get-DomainGPO`       | Devuelve todas las GPO o GPO específicas en AD                              |
-| `Get-DomainPolicy`    | Devuelve la política predeterminada de dominio o la política del controlador |
+| Comando            | Descripción                                                                  |
+| ------------------ | ---------------------------------------------------------------------------- |
+| `Get-DomainGPO`    | Devuelve todas las GPO o GPO específicas en AD                               |
+| `Get-DomainPolicy` | Devuelve la política predeterminada de dominio o la política del controlador |
 
 ##### Funciones de Enumeración de Equipos
 
@@ -201,9 +201,126 @@ GroupName               : Domain Admins
 
 Arriba realizamos una exploración recursiva del grupo **Domain Admins** para listar sus miembros. Ahora sabemos a quién dirigirnos para intentar una elevación de privilegios. Al igual que con el módulo de PowerShell de AD, también podemos enumerar los mapeos de confianza de dominio.
 
+##### Enumeración de confianza
 
+```powershell-session
+PS C:\htb> Get-DomainTrustMapping
 
+SourceName      : INLANEFREIGHT.LOCAL
+TargetName      : LOGISTICS.INLANEFREIGHT.LOCAL
+```
 
+Podemos utilizar la función [Test-AdminAccess](https://powersploit.readthedocs.io/en/latest/Recon/Test-AdminAccess/) para probar acceso como administrador local en la máquina actual o una remota
+
+```powershell-session
+PS C:\htb> Test-AdminAccess -ComputerName ACADEMY-EA-MS01
+
+ComputerName    IsAdmin
+------------    -------
+ACADEMY-EA-MS01    True 
+```
+
+Arriba determinamos que el usuario que estamos usando actualmente es administrador en el host **ACADEMY-EA-MS01**. Podemos realizar la misma comprobación en cada equipo para ver dónde disponemos de acceso administrativo. Más adelante veremos cómo BloodHound automatiza este tipo de verificación. Ahora podemos buscar usuarios con el atributo **ServicePrincipalName** configurado, lo cual indica que la cuenta podría ser objetivo de un ataque Kerberoasting.
+
+##### Buscando usuarios con SPN activo
+
+```powershell-session
+PS C:\htb> Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
+
+serviceprincipalname                          samaccountname
+--------------------                          --------------
+adfsconnect/azure01.inlanefreight.local       adfs
+backupjob/veam001.inlanefreight.local         backupagent
+d0wngrade/kerberoast.inlanefreight.local      d0wngrade
+kadmin/changepw                               krbtgt
+MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433 sqldev
+MSSQLSvc/SPSJDB.inlanefreight.local:1433      sqlprod
+MSSQLSvc/SQL-CL01-01inlanefreight.local:49351 sqlqa
+sts/inlanefreight.local                       solarwindsmonitor
+testspn/kerberoast.inlanefreight.local        testspn
+testspn2/kerberoast.inlanefreight.local       testspn2
+```
+
+### SharpView
+
+PowerView, aunque parte del obsoleto PowerSploit, sigue vivo gracias a BC-Security dentro de Empire 4, ofreciendo funciones mejoradas (como `Get-NetGmsa`) y compatibilidad con redes AD modernas. SharpView es su equivalente en .NET: un port que mantiene la mayoría de las mismas capacidades y permite ver la ayuda de cada método con `-Help`. Ambas versiones merecen explorarse para comparar sus matices y ventajas.
+
+```powershell-session
+PS C:\htb> .\SharpView.exe Get-DomainUser -Help
+```
+
+Aquí podemos usar SharpView para obtener información sobre un usuario concreto, como el usuario **forend**, sobre el que tenemos control.
+
+```powershell-session
+PS C:\htb> .\SharpView.exe Get-DomainUser -Identity forend
+
+[Get-DomainSearcher] search base: LDAP://ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIG
+```
+
+### Unidades compartidas
+
+Las unidades compartidas de dominio facilitan el acceso a recursos, pero si sus permisos son demasiado amplios pueden exponer datos sensibles (por ejemplo, configuraciones, claves SSH o contraseñas). Un atacante con un usuario estándar capaz de acceder a shares como los de TI podría filtrar información crítica. Debemos verificar que las carpetas compartidas exijan autenticación de dominio y privilegios adecuados, y cumplir normativas como HIPAA o PCI. Herramientas como PowerView permiten buscar shares y explorarlas, aunque puede ser tedioso; Snaffler nos ayudará a automatizar y agilizar esta detección de manera más precisa.
+
+### Snaffler
+
+Snaffler es una herramienta que, desde un equipo unido al dominio o con un contexto de usuario de dominio, obtiene la lista de hosts del dominio, enumera sus recursos compartidos y directorios accesibles, y busca en ellos ficheros que contengan credenciales u otra información sensible para mejorar nuestra posición en la evaluación.
+
+```bash
+Snaffler.exe -s -d inlanefreight.local -o snaffler.log -v data
+```
+
+Los parámetros de Snaffler funcionan así:
+
+- `-s`: muestra los resultados por consola.    
+- `-d`: especifica el dominio en el que se va a buscar.    
+- `-o`: indica el fichero de salida donde se guardarán los resultados.    
+- `-v`: ajusta el nivel de verbosidad.    
+
+Normalmente se recomienda usar el nivel `data`, ya que solo muestra directamente los hallazgos en pantalla y facilita revisar la salida inicial. Dado que Snaffler puede generar gran cantidad de información, es habitual redirigir toda la salida a un fichero y analizarlo después con calma. Además, proporcionar el fichero bruto al cliente como dato suplementario puede ayudarle a identificar rápidamente qué recursos compartidos de alto valor deberían protegerse primero.
+
+```powershell-session
+PS C:\htb> .\Snaffler.exe  -d INLANEFREIGHT.LOCAL -s -v data
+
+ .::::::.:::.    :::.  :::.    .-:::::'.-:::::':::    .,:::::: :::::::..
+;;;`    ``;;;;,  `;;;  ;;`;;   ;;;'''' ;;;'''' ;;;    ;;;;'''' ;;;;``;;;;
+'[==/[[[[, [[[[[. '[[ ,[[ '[[, [[[,,== [[[,,== [[[     [[cccc   [[[,/[[['
+  '''    $ $$$ 'Y$c$$c$$$cc$$$c`$$$'`` `$$$'`` $$'     $$""   $$$$$$c
+ 88b    dP 888    Y88 888   888,888     888   o88oo,.__888oo,__ 888b '88bo,
+  'YMmMY'  MMM     YM YMM   ''` 'MM,    'MM,  ''''YUMMM''''YUMMMMMMM   'W'
+                         by l0ss and Sh3r4 - github.com/SnaffCon/Snaffler
+```
+
+Con Snaffler podemos extraer contraseñas, claves SSH, archivos de configuración y otros datos valiosos, con salida coloreada y categorización de tipos de ficheros. Con toda esa información recopilada de INLANEFREIGHT.LOCAL, BloodHound nos permitirá correlarla y visualizar rutas de ataque de forma efectiva.
+
+### BloodHound
+
+BloodHound es una herramienta de código abierto que, analizando las relaciones entre objetos de AD, identifica rutas de ataque complejas y de alto impacto. Tanto pentesters como defensores pueden aprovecharla para visualizar vulnerabilidades difíciles de detectar. Para usarla, basta con autenticarse como usuario de dominio desde un host Windows (no necesariamente unido al dominio) o transferir SharpHound.exe a un equipo unido. Una vez en el host, con `SharpHound.exe --help` se accede a todas las opciones disponibles para ejecutar la recolección de datos.
+
+Empezaremos ejecutando `SharpHound.exe` desde el host de ataque MS01
+
+```powershell-session
+PS C:\htb> .\SharpHound.exe -c All --zipfilename ILFREIGHT
+
+2022-04-18T13:58:22.1163680-07:00|INFORMATION|Resolved Collection Methods: Group, LocalAdmin, GPOLocalGroup, Session, LoggedOn, Trusts, ACL, Container, RDP, ObjectProps, DCOM, SPNTargets, PSRemote
+2022-04-18T13:58:22.1163680-07:00|INFORMATION|Initializing SharpHound at 1:58 PM on 4/18/2022
+...SNIP...
+```
+
+Tras generar el ZIP con los JSON de SharpHound, lo subes en MS01 ejecutando `bloodhound` y, si pide credenciales, usas `neo4j:HTB_@cademy_stdnt!`. Luego, en la GUI, buscas el dominio `INLANEFREIGHT.LOCAL` y exploras la pestaña Database Info. En Analysis, la consulta “Find Computers with Unsupported Operating Systems” te muestra hosts con SO obsoletos (por ejemplo, Windows 7 o Server 2008), que suelen ser vulnerables y críticos. Antes de incluirlos en el informe, verifica si siguen activos; si no pueden retirarse aún, recomienda segmentarlos y planificar su reemplazo.
+
+##### SO no soportados
+
+![[AD_BloodHound_exe.png | 800]]
+
+En muchos entornos detectamos usuarios con derechos de administrador local en sus equipos —ya sea por permiso temporal nunca revocado o por su rol— e incluso casos extremos como el grupo **Domain Users** con admin local en varios hosts. Con la consulta **Find Computers where Domain Users are Local Admin** identificamos rápidamente estos equipos, lo que significa que cualquier cuenta de dominio podría acceder y extraer credenciales o datos sensibles de esos sistemas.
+
+##### Administradores locales
+
+![[AD_BloodHound_exe_2.png | 800]]
+
+Esto es solo una muestra de las consultas útiles que podemos ejecutar. A medida que avancemos en este módulo, verás muchas más que pueden ayudar a descubrir otras debilidades en el dominio. Para un estudio más profundo de BloodHound, consulta el módulo Active Directory Bloodhound. Tómate tu tiempo para probar cada una de las consultas en la pestaña Analysis y familiarizarte con la herramienta. También merece la pena experimentar con consultas Cypher personalizadas pegándolas en el cuadro Raw Query situado en la parte inferior de la pantalla.
+
+Ten en cuenta que, a lo largo de la auditoría, debemos documentar cada archivo que transfiramos hacia y desde los hosts del dominio y la ubicación en disco donde se almacenó. Esto es buena práctica por si necesitamos justificar nuestras acciones ante el cliente. Además, según el alcance del compromiso, conviene cubrir bien nuestras huellas y limpiar todo lo que hayamos dejado en el entorno al finalizar la auditoría.
 
 
 

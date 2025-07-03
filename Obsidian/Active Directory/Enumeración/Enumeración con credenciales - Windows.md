@@ -132,13 +132,13 @@ PowerView es un módulo de PowerShell que, al igual que BloodHound, nos permite 
 
 ##### Funciones de Enumeración de Equipos
 
-| Comando                  | Descripción                                                                                  |
-|--------------------------|----------------------------------------------------------------------------------------------|
-| `Get-NetLocalGroup`      | Enumera los grupos locales en el equipo local o remoto                                       |
-| `Get-NetLocalGroupMember`| Enumera los miembros de un grupo local específico                                           |
-| `Get-NetShare`           | Muestra los recursos compartidos abiertos en el equipo local o remoto                        |
-| `Get-NetSession`         | Devuelve información de sesiones en el equipo local o remoto                                 |
-| `Test-AdminAccess`       | Comprueba si el usuario actual tiene acceso administrativo al equipo local o remoto          |
+| Comando                   | Descripción                                                                         |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| `Get-NetLocalGroup`       | Enumera los grupos locales en el equipo local o remoto                              |
+| `Get-NetLocalGroupMember` | Enumera los miembros de un grupo local específico                                   |
+| `Get-NetShare`            | Muestra los recursos compartidos abiertos en el equipo local o remoto               |
+| `Get-NetSession`          | Devuelve información de sesiones en el equipo local o remoto                        |
+| `Test-AdminAccess`        | Comprueba si el usuario actual tiene acceso administrativo al equipo local o remoto |
 
 ##### 'Meta'-Funciones Hilo-basadas
 

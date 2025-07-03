@@ -215,7 +215,7 @@ Y dentro, añadir un script como este:
 
 ```powershell
 $regkey = "HKLM:SYSTEM\CurrentControlSet\services\NetBT\Parameters\Interfaces"
-Get-ChildItem $regkey |foreach { Set-ItemProperty -Path "$regkey\$($_.pschildname)" -Name NetbiosOptions -Value 2 -Verbose}
+Get-ChildItem $regkey | foreach { Set-ItemProperty -Path "$regkey\$($_.pschildname)" -Name NetbiosOptions -Value 2 -Verbose}
 ```
 
 En el **Editor de directivas de grupo local**, será necesario hacer doble clic en **Inicio**, ir a la pestaña **Scripts de PowerShell**, y seleccionar la opción **"Para esta GPO, ejecutar scripts en el siguiente orden"** para que se ejecuten **primero los scripts de PowerShell de Windows**.

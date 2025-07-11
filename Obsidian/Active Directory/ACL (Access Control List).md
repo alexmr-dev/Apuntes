@@ -47,7 +47,7 @@ Cuando el sistema evalúa una lista de control de acceso, recorre las entradas d
 
 ##### ¿Por qué los ACEs son importantes?
 
-os atacantes aprovechan las entradas ACE para ampliar su acceso o establecer persistencia. Esto es muy útil para nosotros como pentesters, ya que muchas organizaciones desconocen qué ACEs se han aplicado a cada objeto o el impacto que pueden tener si se configuran incorrectamente. Estas configuraciones no pueden detectarse con herramientas de escaneo de vulnerabilidades y a menudo permanecen sin revisarse durante años, especialmente en entornos grandes y complejos. En una auditoría en la que el cliente ya ha corregido los “low hanging fruit” de AD, el abuso de ACLs puede ser una vía excelente para moverse lateral o verticalmente e incluso lograr la compromi­sión total del dominio. Algunos ejemplos de permisos de seguridad sobre objetos de Active Directory son:
+Los atacantes aprovechan las entradas ACE para ampliar su acceso o establecer persistencia. Esto es muy útil para nosotros como pentesters, ya que muchas organizaciones desconocen qué ACEs se han aplicado a cada objeto o el impacto que pueden tener si se configuran incorrectamente. Estas configuraciones no pueden detectarse con herramientas de escaneo de vulnerabilidades y a menudo permanecen sin revisarse durante años, especialmente en entornos grandes y complejos. En una auditoría en la que el cliente ya ha corregido los “low hanging fruit” de AD, el abuso de ACLs puede ser una vía excelente para moverse lateral o verticalmente e incluso lograr la compromi­sión total del dominio. Algunos ejemplos de permisos de seguridad sobre objetos de Active Directory son:
 
 - **ForceChangePassword**: abusado con `Set-DomainUserPassword`    
 - **Add Members**: abusado con `Add-DomainGroupMember`    
@@ -96,3 +96,37 @@ PS C:\htb> Find-InterestingDomainAcl
 ```
 
 Si intentamos revisar todos estos datos durante una auditoría con tiempo limitado, probablemente no lleguemos a nada interesante antes de que termine. Sin embargo, existe una forma de usar herramientas como PowerView de manera más eficaz: realizar una enumeración dirigida empezando por un usuario sobre el que ya tengamos control. Centrémonos en el usuario **wley**, cuya cuenta obtuvimos tras resolver la última cuestión en la sección “LLMNR/NBT-NS Poisoning – desde Linux”. Profundicemos y veamos si este usuario tiene algún permiso ACL interesante que podamos explotar. Primero necesitamos obtener el SID de nuestro usuario objetivo para buscar de forma efectiva.
+
+```powershell-session
+PS C:\htb> Import-Module .\PowerView.ps1
+PS C:\htb> $sid = Convert-NameToSid wley
+```
+
+A continuación podemos usar la función `Get-DomainObjectACL` para realizar nuestra búsqueda dirigida. En el ejemplo siguiente, empleamos esta función para encontrar todos los objetos del dominio sobre los que nuestro usuario tiene permisos, asignando el SID del usuario (almacenado en la variable `$sid`) a la propiedad `SecurityIdentifier`, que indica quién posee cada permiso sobre un objeto.
+
+Un punto a tener en cuenta: si ejecutamos la búsqueda sin el parámetro `-ResolveGUIDs`, obtendremos resultados como el que se muestra más abajo, donde el permiso `ExtendedRight` no nos aclara qué entrada ACE concreta tiene **wley** sobre **damundsen**. Esto ocurre porque la propiedad `ObjectAceType` devuelve un valor GUID que no es legible por humanos.
+
+> **Aviso:** Este comando puede tardar bastante en ejecutarse, especialmente en entornos grandes. En nuestro laboratorio, puede tardar entre 1 y 2 minutos en completarse.
+
+##### Usando Get-DomainObjectACL
+
+```powershell-session
+PS C:\htb> Get-DomainObjectACL -Identity * | ? {$_.SecurityIdentifier -eq $sid}
+```
+
+Podríamos buscar en Google el GUID **00299570-246d-11d0-a768-00aa006e0529** y dar con una página que indica que el usuario tiene el derecho de forzar el cambio de contraseña de otro usuario. Alternativamente, podríamos hacer una búsqueda inversa con PowerShell para mapear el nombre del permiso de vuelta al valor GUID.
+
+> Si PowerView ya ha sido importado, el cmdlet mostrado debajo resultará en error. Por tanto, puede que necesitemos ejecutarlo desde una nueva sesión de PowerShell.
+
+##### Realizando una búsqueda inversa y mapeando a un valor GUID
+
+```powershell-session
+PS C:\htb> $guid= "00299570-246d-11d0-a768-00aa006e0529"
+PS C:\htb> Get-ADObject -SearchBase "CN=Extended-Rights,$((Get-ADRootDSE).ConfigurationNamingContext)" -Filter {ObjectClass -like 'ControlAccessRight'} -Properties * |Select Name,DisplayName,DistinguishedName,rightsGuid| ?{$_.rightsGuid -eq $guid} | fl
+
+Name              : User-Force-Change-Password
+DisplayName       : Reset Password
+DistinguishedName : CN=User-Force-Change-Password,CN=Extended-Rights,CN=Configuration,DC=INLANEFREIGHT,DC=LOCAL
+rightsGuid        : 00299570-246d-11d0-a768-00aa006e0529
+```
+

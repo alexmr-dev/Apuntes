@@ -9,7 +9,7 @@ Ataque que prueba contraseñas comunes desde un diccionario. Es eficaz si las co
 
 ##### 🛠️ Ataques de Fuerza Bruta (Brute Force Attacks)
 
-Los ataques de fuerza bruta prueban todas las combinaciones posibles de caracteres para encontrar una contraseña. Este proceso es muy lento y se usa solo cuando no hay otra opción. Cuanto más larga y compleja sea una contraseña, más difícil será romperla. Se recomienda usar contraseñas de al menos 8 caracteres que incluyan letras, números y símbolos.
+Los ataques de fuerza bruta prueban todas las combinaciones posibles de caracteres para encontrar una contraseña. Este proceso es muy lento y se usa solo cuando no hay otra opción. Cuanto más larga y compleja sea una contraseña, más difícil será romperla. Se recomienda usar contraseñas de al menos 8 caracteres que incluyan letras, números y símbolos. 
 
 ##### 🌈 Ataques con Tablas Rainbow (Rainbow Table Attacks)
 

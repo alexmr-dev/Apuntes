@@ -153,7 +153,6 @@ smb: \> dir
 Intentamos ahora descargarnos todo el contenido, y comprobamos que tenemos tanto la flag como alguna otra información interesante. Llama la atención que hay carpetas a las que no tenemos acceso. La flag se encuentra en `SVC_TGS\Desktop`
 ### 3. Escalada de privilegios
 
-
 Kerberos es un protocolo de autenticación que se usa en entornos de Active Directory de Windows (aunque también puede emplearse para autenticar a hosts Linux). En 2014, Tim Medin presentó un ataque sobre Kerberos al que llamó Kerberoasting. Merece la pena revisar su presentación, ya que utiliza buenos gráficos para ilustrar el proceso, pero aquí va un resumen sencillo.
 
 Cuando quieres autenticarte en algún servicio usando Kerberos, contactas con el controlador de dominio (DC) y le indicas a qué servicio del sistema deseas acceder. El DC cifra una respuesta para ti usando el hash de la contraseña del usuario del servicio. A continuación, envías esa respuesta cifrada al servicio, que la descifra con su propia contraseña, verifica quién eres y decide si te permite el acceso.

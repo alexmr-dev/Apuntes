@@ -4,7 +4,7 @@
 ----
 - Tags: #CTF #LFI #ReverseShell
 ----
-## 1. Enumeración
+### 1. Enumeración
 
 La máquina tiene los puertos 22 (ssh) y 80 (http) abiertos:
 
@@ -51,7 +51,7 @@ Seguimos buscando en las carpetas que ha enumerado gobuster, y vamos a la ruta `
 ```
 
 Sabemos que el usuario admin es válido, pero desconocemos su contraseña. Además, vemos con `<blacklist>` que si intentamos iniciar sesión erroneamente muchas veces nos banean la IP, por lo que el acceso por fuerza bruta en el panel lo descartamos. Podemos navegar al archivo `config.xml` para continuar obteniendo información. Vemos que la palabra _nibbles_ se menciona en dos ocasiones, siendo además el dominio del mail del blog. Podemos intentar iniciar sesión como admin con dicha contraseña, y tras intentarlo, vemos que, efectivamente, podemos iniciar sesión. 
-## 2. Foothold
+### 2. Explotación
 
 ![[Nibbles_4.png|550]]
 
@@ -89,7 +89,7 @@ Antes de mandarlo, nos ponemos en escucha en un terminal con `nc -nvlp 443`. Man
 
 Navegamos a la ruta `/home/nibbler` y obtenemos la flag del usuario (user.txt).
 
-## 3. Escalada de privilegios
+### 3. Escalada de privilegios
 
 Ya hemos ganado acceso como usuario al sistema, pero ahora necesitamos escalar privilegios hasta conseguir ser root. Previamente, al hacer un `ls` sobre la ruta home del usuario, hemos visto un archivo zip. Vamos a descomprimirlo y ver qué contiene. 
 

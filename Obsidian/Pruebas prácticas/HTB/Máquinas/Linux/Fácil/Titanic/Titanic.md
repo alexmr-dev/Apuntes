@@ -275,7 +275,7 @@ gcc -fPIC -shared -o ./libxcb.so.1 exploit.c -nostartfiles
 Y ya tenemos acceso a comandos como root, así que obtenemos la flag.
 
 ```bash
-developer@titanic:/opt/app/static/assets/images$ sudo cat /root/root.txt
+developer@titanic:/ sudo cat /root/root.txt
 c9ebdb51ba74a579b7c04ce0c3c741b2
 ```
 

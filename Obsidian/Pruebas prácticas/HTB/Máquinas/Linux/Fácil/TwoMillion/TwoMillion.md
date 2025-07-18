@@ -229,9 +229,9 @@ Lo comprobamos rápidamente con la llamada GET previa:
 }
 ```
 
-### 2. Foothold
+### 2. Explotación
 
-Bien, si recordamos los endpoints como admi, había uno del tipo POST que generaba un VPN para el admin. Si lo lanzamos nos dice esto:
+Bien, si recordamos los endpoints como admin, había uno del tipo POST que generaba un VPN para el admin. Si lo lanzamos nos dice esto:
 
 ```bash
 ❯ curl -sv -X POST "http://2million.htb/api/v1/admin/vpn/generate" -b "PHPSESSID=36ugo7rihvpr97shtmkuhe05g0" --header "Content-Type: application/json" | jq

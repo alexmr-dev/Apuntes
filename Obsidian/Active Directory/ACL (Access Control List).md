@@ -130,3 +130,60 @@ DistinguishedName : CN=User-Force-Change-Password,CN=Extended-Rights,CN=Configur
 rightsGuid        : 00299570-246d-11d0-a768-00aa006e0529
 ```
 
+Esto nos dio nuestra respuesta, pero sería muy ineficiente durante una auditoría PowerView cuenta con el flag `ResolveGUIDs`, que hace esto por nosotros. Fíjemonos en cómo el output cambia cuando incluimos este flag para mostrar el formato legible de la propiedad `ObjectAceType` como `User-Force-Change-Password`.
+
+##### Usando el flag `-ResolveGUIDs`
+
+```powershell-session
+PS C:\htb> Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid} 
+```
+
+> ¿Por qué recorrimos este ejemplo cuando podríamos haber buscado usando `-ResolveGUIDs` desde el principio?
+
+Es fundamental comprender qué hacen nuestras herramientas y disponer de métodos alternativos en nuestra caja de herramientas por si una herramienta falla o queda bloqueada. Antes de continuar, veamos rápidamente cómo podríamos hacer esto usando los cmdlets `Get-Acl` y `Get-ADUser`, que quizá estén disponibles en un sistema del cliente. Saber realizar este tipo de búsquedas sin depender de herramientas como PowerView es muy valioso y puede marcar la diferencia frente a otros profesionales. Podríamos usar este conocimiento para obtener resultados cuando el cliente nos limite a los comandos ya presentes en su sistema y no podamos cargar nuestras propias utilidades.
+
+Este ejemplo no es muy eficiente y el comando puede tardar mucho en ejecutarse, especialmente en entornos grandes. Llevará mucho más tiempo que el comando equivalente con PowerView. En este comando, primero hemos generado una lista de todos los usuarios del dominio con el siguiente comando:
+
+##### Creando una lista de usuarios de dominio
+
+```powershell-session
+PS C:\htb> Get-ADUser -Filter * | Select-Object -ExpandProperty SamAccountName > ad_users.txt
+```
+
+A continuación leemos cada línea del fichero con un bucle `foreach` y para cada usuario:
+
+1. Ejecutamos `Get-ADUser` pasándole el nombre de usuario (desde cada línea de `ad_users.txt`).    
+2. Con `Get-Acl` obtenemos la información de ACL de ese objeto usuario.    
+3. Seleccionamos únicamente la propiedad `Access`, que contiene los derechos de acceso.    
+4. Filtramos por la propiedad `IdentityReference` estableciéndola en el usuario bajo nuestro control (en este caso, **wley**) para ver a qué objetos tiene permisos.
+
+```powershell-session
+PS C:\htb> foreach($line in [System.IO.File]::ReadLines("C:\Users\htb-student\Desktop\ad_users.txt")) {get-acl  "AD:\$(Get-ADUser $line)" | Select-Object Path -ExpandProperty Access | Where-Object {$_.IdentityReference -match 'INLANEFREIGHT\\wley'}}
+
+Path                  : Microsoft.ActiveDirectory.Management.dll\ActiveDirectory:://RootDSE/CN=Dana 
+                        Amundsen,OU=DevOps,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+ActiveDirectoryRights : ExtendedRight
+InheritanceType       : All
+ObjectType            : 00299570-246d-11d0-a768-00aa006e0529
+InheritedObjectType   : 00000000-0000-0000-0000-000000000000
+ObjectFlags           : ObjectAceTypePresent
+AccessControlType     : Allow
+IdentityReference     : INLANEFREIGHT\wley
+IsInherited           : False
+InheritanceFlags      : ContainerInherit
+PropagationFlags      : None
+```
+
+Una vez dispongamos de estos datos, podríamos seguir los métodos mostrados más arriba para convertir el GUID a un formato legible y entender qué permisos tenemos sobre el usuario objetivo.
+
+En resumen, partimos del usuario **wley** y ahora tenemos control sobre la cuenta **damundsen** gracias al derecho extendido **User-Force-Change-Password**. Usemos Powerview para buscar hacia dónde —si es que en algún sitio— nos puede llevar el control de la cuenta **damundsen**.
+
+##### Enumeración exhaustiva sobre los privilegios usando damundsen
+
+```powershell-session
+PS C:\htb> $sid2 = Convert-NameToSid damundsen
+PS C:\htb> Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid2} -Verbose
+```
+
+Nuestro usuario **damundsen** tiene **GenericWrite** sobre el grupo **Help Desk Level 1**, lo que le permite añadirse (o añadir a otros) y heredar sus permisos. Además, ese grupo está anidado dentro de **Information Technology**, por lo que al ponernos en **Help Desk Level 1** automáticamente obtenemos todos los derechos que concede **Information Technology**.
+

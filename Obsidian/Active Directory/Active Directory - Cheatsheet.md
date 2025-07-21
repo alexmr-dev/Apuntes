@@ -183,9 +183,10 @@ Get-DomainGPOComputerLocalGroupMapping -ComputerName <NombreDelEquipo>
   ```
 
 - **Enumerar OUs:**
-  ```powershell
-  Get-DomainOU -Properties Name | Sort-Object -Property Name
-  ```
+
+```powershell
+Get-DomainOU -Properties Name | Sort-Object -Property Name
+```
 
 - **Enumerar ACLs:**
 

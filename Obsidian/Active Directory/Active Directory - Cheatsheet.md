@@ -90,25 +90,25 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 - **Obtener SID de dominio:** `Get-DomainSID`
 - **Obtener política de dominio:**
 
-  ```powershell
+```powershell
 #Obtener la política del dominio
 Get-DomainPolicy
 
 #Mostrará las configuraciones de política del dominio relacionadas con el acceso al sistema o Kerberos
 Get-DomainPolicy | Select-Object -ExpandProperty SystemAccess
 Get-DomainPolicy | Select-Object -ExpandProperty KerberosPolicy
-  ```
+```
 
 - **Obtener controladores de dominio:**
 
-  ```powershell
-  Get-DomainController
-  Get-DomainController -Domain <DomainName>
-  ```
+```powershell
+Get-DomainController
+Get-DomainController -Domain <DomainName>
+```
 
 - **Obtener usuarios de dominio**
 
-  ```powershell
+```powershell
 #Guardar todos los usuarios del dominio en un archivo
 Get-DomainUser | Out-File -FilePath .\DomainUsers.txt
 
@@ -123,22 +123,20 @@ Get-NetSession -ComputerName <NombreDelEquipo>
 
 #Enumerar las máquinas del dominio actual o especificado donde están conectados usuarios concretos
 Find-DomainUserLocation -Domain <NombreDelDominio> | Select-Object UserName, SessionFromName
-
-  ```
+```
 
 - **Enumerar ordenadores de dominio**
 
-  ```powershell
+```powershell
 Get-DomainComputer -Properties OperatingSystem, Name, DnsHostName | Sort-Object -Property DnsHostName
 
 #Enumerar máquinas activas
 Get-DomainComputer -Ping -Properties OperatingSystem, Name, DnsHostName | Sort-Object -Property DnsHostName
-
-  ```
+```
 
 - **Enumerar grupos y miembros de grupo:**
 
-  ```powershell
+```powershell
 #Guardar todos los grupos del dominio en un archivo:
 Get-DomainGroup | Out-File -FilePath .\DomainGroup.txt
 

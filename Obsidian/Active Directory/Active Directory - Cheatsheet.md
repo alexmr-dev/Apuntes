@@ -29,7 +29,7 @@
     - [[#Kerberoasting]]
     - [[#ASREPRoasting]]
     - [[#Password Spraying Attack]]
-    - [[#Forzar el seteo del SPN|Forzar SPN]]
+    - [[#Force Set SPN|Forzar SPN]]
     - [[#Abuso de Shadow Copies (Copias de Sombra)|Explotar Shadow Copies]]
     - [[#Listar y Descifrar Credenciales Almacenadas con Mimikatz]]
     - [[#Unconstrained Delegation|Delegación no restringida]]

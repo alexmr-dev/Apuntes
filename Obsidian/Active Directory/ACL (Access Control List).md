@@ -402,9 +402,9 @@ Sabemos que podemos usar este acceso para iniciar una cadena de ataque que nos p
 
 Para ejecutar esta cadena de ataque, debemos hacer lo siguiente:
 
-1. Usar el usuario `wley` para **cambiar la contraseña** del usuario `damundsen`.    
-2. Autenticarnos como `damundsen` y aprovechar los **permisos GenericWrite** para añadir un usuario bajo nuestro control al grupo **Help Desk Level 1**.   
-3. Aprovechar la **membresía en grupos anidados** del grupo **Information Technology** y los **permisos GenericAll** para tomar el control del usuario `adunn`.    
+1. Usar el usuario `wley` para **cambiar la contraseña** del usuario `damundsen`.
+2. Autenticarnos como `damundsen` y aprovechar los **permisos GenericWrite** para añadir un usuario bajo nuestro control al grupo **Help Desk Level 1**.
+3. Aprovechar la **membresía en grupos anidados** del grupo **Information Technology** y los **permisos GenericAll** para tomar el control del usuario `adunn`.
 
 Por tanto, lo primero es autenticarnos como `wley` y forzar el cambio de contraseña del usuario `damundsen`. Podemos empezar abriendo una consola de PowerShell y autenticándonos como el usuario `wley`, a menos que ya estemos ejecutando la sesión bajo esa identidad. Para ello, podemos crear un objeto `PSCredential`.
 

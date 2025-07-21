@@ -1,4 +1,4 @@
-> En este documento se reflejan los distintos atajos para manejarse por el sistema Linux. El entorno se ha descargado desde [aquí](https://github.com/thegoodhackertv/**hackerpwm)
+> En este documento se reflejan los distintos atajos para manejarse por el sistema Linux. El entorno se ha descargado desde [aquí](https://github.com/thegoodhackertv/hackerpwm)
 ### BSPWM
 
 - Crear una nueva ventana: `Win + Enter`

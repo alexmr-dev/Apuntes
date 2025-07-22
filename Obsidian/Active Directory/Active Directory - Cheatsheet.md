@@ -422,18 +422,25 @@ $DomainUsers | ? {$_.name -match "NombreDelUsuario"}
 
 ### Escalada de privilegios local
 
-- [**Windows Local Privilege Escalation Cookbook**](https://github.com/nickvourd/Windows-Local-Privilege-Escalation-Cookbook): Recopilación de técnicas para la escalada local de privilegios en Windows.    
+- [**Windows Local Privilege Escalation Cookbook**](https://github.com/nickvourd/Windows-Local-Privilege-Escalation-Cookbook): Recopilación de técnicas para la escalada local de privilegios en Windows.  
+
 - [**Juicy Potato**](https://github.com/ohpe/juicy-potato): Abusa de los privilegios `SeImpersonate` o `SeAssignPrimaryToken` para suplantar al sistema.  
     ⚠️ Solo funciona hasta Windows Server 2016 y Windows 10 versión 1803.    
+
 - [**Lovely Potato**](https://github.com/TsukiCTF/Lovely-Potato): Versión automatizada de Juicy Potato.  
     ⚠️ Solo funciona hasta Windows Server 2016 y Windows 10 versión 1803.    
+
 - [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer): Explota la vulnerabilidad PrinterBug para suplantar al sistema.  
     ⚠️ Funciona en Windows Server 2019 y Windows 10.    
+
 - [**RoguePotato**](https://github.com/antonioCoco/RoguePotato): Evolución de Juicy Potato.  
     ⚠️ Funciona en Windows Server 2019 y Windows 10.    
-- [**Abusing Token Privileges**](https://foxglovesecurity.com/2017/08/25/abusing-token-privileges-for-windows-local-privilege-escalation/): Artículo sobre cómo abusar de privilegios de token para escalada local.    
+
+- [**Abusing Token Privileges**](https://foxglovesecurity.com/2017/08/25/abusing-token-privileges-for-windows-local-privilege-escalation/): Artículo sobre cómo abusar de privilegios de token para escalada local.   
+
 - [**SMBGhost CVE-2020-0796**](https://blog.zecops.com/vulnerabilities/exploiting-smbghost-cve-2020-0796-for-a-local-privilege-escalation-writeup-and-poc/): Vulnerabilidad en SMB que permite escalada local.  
     [PoC](https://github.com/danigargu/CVE-2020-0796)    
+
 - [**CVE-2021-36934 (HiveNightmare / SeriousSAM)**](https://github.com/cube0x0/CVE-2021-36934): Vulnerabilidad que permite acceso no autorizado a los archivos del registro de Windows.
 
 ### Herramientas útiles para Escalada de Privilegios Local
@@ -577,6 +584,7 @@ mimikatz # sekurlsa::logonpasswords
 - LSA como Proceso Protegido (Bypass desde Userland "Fileless")
 
 - [**PPLdump**](https://github.com/itm4n/PPLdump): herramienta para volcar LSASS protegido sin necesidad de driver, aprovechando mecanismos desde userland.    
+
 - [**Artículo: Bypassing LSA Protection in Userland**](https://blog.scrt.ch/2021/04/22/bypassing-lsa-protection-in-userland): explicación detallada del enfoque.
 
 - LSA ejecutándose como proceso virtualizado (LSAISO) por Credential Guard

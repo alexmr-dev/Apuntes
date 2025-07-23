@@ -356,8 +356,6 @@ Invoke-BloodHound -CollectionMethod All `
 
 > ✅ **→ Termina correctamente con:** `Terminating successfully`
 
----
-
 **¿Errores comunes?**
 
 🔒 **Error de certificado (x509 unknown authority)**

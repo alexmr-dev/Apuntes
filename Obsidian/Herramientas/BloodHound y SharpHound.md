@@ -76,7 +76,46 @@ sudo ./bloodhound-cli running
 
 Consultar la [guía oficial](https://bloodhound.readthedocs.io/en/latest/installation/windows.html). Tendremos que tener instalados previamente JAVA y neo4j. Para esto último, es recomendable instalar la versión 4.4. Finalmente descargamos `BloodHound.exe` desde el repositorio oficial: [https://github.com/BloodHoundAD/BloodHound/releases](https://github.com/BloodHoundAD/BloodHound/releases)
 
-Las credenciales serán las mismas que hayamos puesto durante la instalación de neo4j. 
+Las credenciales serán las mismas que hayamos puesto durante la instalación de neo4j. De la tortura de instalar BloodHound no nos libramos en Windows tampoco, y tenemos que seguir estos pasos.
+
+Primero, descargamos el JDK 11 del siguiente [enlace](https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.23%2B9/OpenJDK11U-jdk_x64_windows_hotspot_11.0.23_9.zip). Lo ponemos en alguna ruta que vayamos a recordar, como por ejemplo, `C:\Program Files\Java\jdk-11\jdk-11.0.23+9`. Ahora modificamos las variables de entorno, y establecemos `JAVA_HOME` apuntando a dicha ruta, y la ponemos también en el PATH de esta manera:
+
+![[Pasted image 20250725222841.png]]
+
+Posteriormente, descargamos neo4j 4.4 desde [aquí]([https://neo4j.com/download-center/#community](https://neo4j.com/download-center/#community)):
+
+![[Pasted image 20250725222934.png | 400]]
+
+Lo ponemos en alguna ruta. En mi caso, la he puesto en `C:\WinOffTools`, y he añadido dicha carpeta como exclusión para Windows Defender para evitar problemas. Abrimos PoweShell como administrador y hacemos esto:
+
+```powershell
+PS C:\WinOffTools\neo4j-community-4.4.44\bin> .\neo4j.bat install-service
+Neo4j service installed.
+```
+
+> Tendremos que ponernos en la ruta `bin`
+
+Si todo ha ido bien, no dará ningún fallo. El siguiente paso es lanzar Neo4j:
+
+```powershell
+net start neo4j
+El servicio de Neo4j Graph Database - neo4j está iniciándose.
+El servicio de Neo4j Graph Database - neo4j se ha iniciado correctamente.
+```
+
+Si todo ha ido bien, no habrá dado ningún fallo. Nos vamos a http://localhost:7474/ e iniciamos sesión con las credenciales `neo4j:neo4j`. Nos pedirá cambiar la contraseña, yo he puesto `bloodhound` por conveniencia. Tendremos el panel listo.
+
+![[Pasted image 20250725223312.png]]
+
+> Muy importante crear las variables de entorno `NEO4J_CONF` y `NEO4J_HOME`, apuntando a `C:\WinOffTools\neo4j-community-4.4.44`
+
+Ahora, descargamos BloodHound del repositorio oficial: [https://github.com/BloodHoundAD/BloodHound/releases](https://github.com/BloodHoundAD/BloodHound/releases) y lo añadimos a la ruta excluida por el Defender, en mi caso, `C:\WinOffTools\BloodHound-win32-x64`. Para descargarlo de forma sencilla podemos tirar de `certutil` con PS como administrador:
+
+```powershell
+certutil -urlcache -split -f "https://github.com/SpecterOps/BloodHound-Legacy/releases/download/v4.3.1/BloodHound-win32-x64.zip" C:\WinOffTools\BloodHound.zip
+```
+
+Ejecutamos BloodHound.exe y nos conectamos con las credenciales establecidas. (`neo4j`:`bloodhound`)
 
 ##### SharpHound
 

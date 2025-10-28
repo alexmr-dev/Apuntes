@@ -87,6 +87,12 @@ Fase inicial en una intrusión en entorno Active Directory. Consiste en recopila
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 
+Y después, importar el módulo:
+
+```powershell
+PS C:\htb> import-module .\PowerView.ps1
+```
+
 - **Obtener dominio actual:** `Get-Domain`
 - **Enumerar otros dominios** `Get-Domain -Domain <DomainName>`
 - **Obtener SID de dominio:** `Get-DomainSID`

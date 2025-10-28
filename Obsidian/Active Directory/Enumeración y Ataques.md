@@ -6,6 +6,7 @@
 	- [[#Desde Windows]]
 - [[#Password Spraying]]
 	- [[#Enumerando política de contraseñas]]
+		- [[#Usando PowerView]]
 	- [[#Password Spraying interno]]
 - [[#Enumeración con credenciales - Linux]]
 - [[#Enumeración con credenciales - Windows]]
@@ -23,6 +24,7 @@
 	- [[#NoPac (SamAccountName Spoofing)]]
 	- [[#PrintNightmare]]
 	- [[#PetitPotam (MS-EFSRPC)]]
+- [[#Misconfiguraciones variadas]]
 
 Antes de comenzar cualquier prueba de penetración, **realizar una fase de reconocimiento externo** puede ser muy beneficioso. Esta fase cumple varias funciones clave:
 
@@ -4158,4 +4160,116 @@ D0ntSl@ckonN0P@c!
 ```
 
 # Misconfiguraciones variadas
+
+En esta sección nos moveremos entre un host atacante Windows y uno Linux mientras trabajamos los distintos ejemplos. Puedes levantar los hosts al final de esta sección e iniciar sesión por RDP en el host atacante Windows **MS01**. Para las partes que requieran interacción desde un host Linux, abre una consola de PowerShell en **MS01** y conéctate por SSH a `172.16.5.225` usando las credenciales `htb-student:HTB_@cademy_stdnt!`.
+
+##### Pertenencia a grupos relacionados con Exchange
+
+La instalación por defecto de Exchange suele otorgar privilegios peligrosos: el grupo **Exchange Windows Permissions** puede escribir DACLs en el objeto dominio (permitiendo, por ejemplo, DCSync) y con frecuencia contiene usuarios y equipos innecesarios; **Organization Management** es el “Domain Admins” de Exchange y puede acceder a todos los buzones y controlar el OU que contiene al anterior. Resultado: cuentas de soporte o equipos comprometidos permiten escalada masiva.
+
+##### Viendo los permisos de los administradores de la organización
+
+![[Pasted image 20251028080323.png|800]]
+
+Si podemos comprometer un servidor Exchange, esto usualmente llevará a privilegios de admin de dominio. Adicionalmente, volcar credenciales en memoria de un servidor exchange producirá entre 10 y 100 credenciales en texto claro de hashes NTLM. Esto es debido a que los usuaurios tienden a iniciar sesión a _Outlook Web Access_ y Exchange cacheando sus credenciales en memoria después de un login exitoso.
+##### PrivExchange
+
+PrivExchange es un fallo en la función **PushSubscription** de Exchange que permite a cualquier usuario con buzón forzar al servidor Exchange a autenticarse contra un host controlado por el atacante. Dado que el servicio Exchange corre como **SYSTEM** y (antes del CU de 2019) tenía privilegios de **WriteDACL** sobre el dominio, esto permite relays a LDAP para extraer la base NTDS o autenticarse en otros hosts del dominio, posibilitando la obtención de privilegios de **Domain Admin** partiendo de cualquier cuenta de dominio autenticada.
+##### Printer Bug
+
+El **Printer Bug** (fallo en MS-RPRN) permite a cualquier usuario de dominio conectar con la tubería del spooler y forzar al servicio (que corre como **SYSTEM**) a autenticarse hacia un host controlado por el atacante vía SMB; con ello se puede relayar esa autenticación a LDAP para obtener **DCSync** (hashes AD) o para conceder RBCD a una cuenta de equipo bajo nuestro control, posibilitando suplantación local y compromisos cross-forest si existen trusts y delegación. El spooler viene instalado por defecto en servidores con Desktop Experience. Herramientas como _Get-SpoolStatus_ permiten detectar máquinas vulnerables.
+
+```powershell
+PS C:\htb> Import-Module .\SecurityAssessment.ps1
+PS C:\htb> Get-SpoolStatus -ComputerName ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+
+ComputerName                        Status
+------------                        ------
+ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL   True
+```
+##### MS14-068
+
+Fue una vulnerabilidad del protocolo Kerberos que permitía aceptar un **PAC** (Privilege Attribute Certificate) forjado como legítimo; con esto un usuario de dominio estándar podía presentarse como miembro de **Domain Admins** u otros grupos privilegiados. Se explotaba creando un PAC falso (herramientas: PyKEK, Impacket, etc.) y la única defensa efectiva fue aplicar el parche correspondiente. En HTB, la máquina **Mantis** ilustra práctica y didácticamente este fallo.
+##### Husmeando credenciales LDAP
+
+Muchas aplicaciones e impresoras guardan credenciales LDAP en su consola web —a menudo con contraseñas débiles o por defecto— y en algunos casos pueden verse en texto claro. Si tienen una función de "test connection" se puede abusar cambiando la IP LDAP por la del atacante y escuchando en el puerto 389 (por ejemplo con netcat) para capturar las credenciales cuando el dispositivo las envíe; esas cuentas suelen tener privilegios y pueden dar un punto de entrada al dominio. En otros escenarios hace falta montar un servidor LDAP completo para replicar la interacción y extraer las credenciales. Podemos ver más información en este [post](https://grimhacker.com/2018/03/09/just-a-printer/)
+##### Enumerando registros DNS
+
+Con una cuenta de usuario de dominio válida podemos usar **adidnsdump** para extraer todos los registros DNS de la zona AD —muy útil cuando los nombres de equipo son poco descriptivos— porque por defecto cualquier usuario puede listar los hijos de una zona DNS y las consultas LDAP no devuelven todos los registros. Esto permite descubrir entradas interesantes (p. ej. `JENKINS.INLANEFREIGHT.LOCAL`) que orientan el ataque. En la primera ejecución pueden aparecer registros en blanco o con formatos raros (por ejemplo `?,LOGISTICS,?`). Veamos diferentes formas de realizar esto:
+
+**Usando adidnsdump**
+
+```shell
+amr251@htb[/htb]$ adidnsdump -u inlanefreight\\forend ldap://172.16.5.5 
+
+Password: 
+
+[-] Connecting to host...
+[-] Binding to host
+[+] Bind OK
+[-] Querying zone for records
+[+] Found 27 records
+```
+
+**Viendo los contenidos del archivo records.csv**
+
+```shell-session
+amr251@htb[/htb]$ head records.csv 
+
+type,name,value
+?,LOGISTICS,?
+AAAA,ForestDnsZones,dead:beef::7442:c49d:e1d7:2691
+AAAA,ForestDnsZones,dead:beef::231
+A,ForestDnsZones,10.129.202.29
+A,ForestDnsZones,172.16.5.240
+A,ForestDnsZones,172.16.5.5
+AAAA,DomainDnsZones,dead:beef::7442:c49d:e1d7:2691
+AAAA,DomainDnsZones,dead:beef::231
+A,DomainDnsZones,10.129.202.29
+```
+
+Si lanzamos de nuevo con la flag `-r` la herramienta intentará resolver registros desconocidos haciendo uso de una consulta al registro `A`. Ahora podemos ver que la dirección IP de `172.16.5.240` mostró LOGISTICS. Esto es un pequeño ejemplo, pero merece la pena usar esta herramienta en entornos más grandes. Puede que descubramos registros ocultos que pueden llevarnos a descubrir hosts interesantes
+
+```shell
+amr251@htb[/htb]$ adidnsdump -u inlanefreight\\forend ldap://172.16.5.5 -r
+
+Password: 
+
+[-] Connecting to host...
+[-] Binding to host
+[+] Bind OK
+[-] Querying zone for records
+[+] Found 27 records
+```
+
+Luego volveríamos a mostrar el contenido del `.csv` obtenido. 
+##### Otras misconfiguraciones
+
+Información sensible como contraseñas a veces se encuentran en los campos de `descripción` o `notas` y pueden ser rápidamente enumeradas usando PowerView. Para dominios más grandes, es útil exportar esta información a un archivo CSV para su lectura offline.
+
+```powershell
+PS C:\htb> Get-DomainUser * | Select-Object samaccountname,description |Where-Object {$_.Description -ne $null}
+
+samaccountname description
+-------------- -----------
+administrator  Built-in account for administering the computer/domain
+guest          Built-in account for guest access to the computer/domain
+krbtgt         Key Distribution Center Service Account
+ldap.agent     *** DO NOT CHANGE ***  3/12/2012: Sunsh1ne4All!
+```
+
+### Campo PASSWD_NOTREQD
+
+Algunos usuarios de dominio pueden tener el flag **passwd_notreqd** en `userAccountControl`, lo que indica que no se aplica la política de longitud de contraseña y podría permitir contraseñas muy cortas o incluso en blanco (si el dominio lo permite). Esto puede ser intencional (comodidad administrativa), accidental (error al cambiar la contraseña) o un remanente de una instalación de un producto de un proveedor. No implica necesariamente que la cuenta esté sin contraseña, pero sí merece enumerarse y probarse: he visto casos explotables en auditorías. Si buscas exhaustividad, inclúyelo en el informe del cliente.
+
+```powershell-
+PS C:\HTB> Import-Module ActiveDirectory
+PS C:\HTB> Get-ADUser -Filter * -Properties userAccountControl | Where-Object { ($_.userAccountControl -band 0x20) } | Select-Object SamAccountName, userAccountControl
+
+SamAccountName userAccountControl
+-------------- ------------------
+Invitado                    66082
+```
+
+### Credenciales en SMB Shares y scripts SYSVOL
 

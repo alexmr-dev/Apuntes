@@ -4273,3 +4273,40 @@ Invitado                    66082
 
 ### Credenciales en SMB Shares y scripts SYSVOL
 
+El recurso **SYSVOL** suele ser muy valioso: es legible por cualquier usuario autenticado y a menudo contiene scripts (batch, VBScript, PowerShell) donde puede haber contraseñas —a veces antiguas e inútiles, otras veces credenciales todavía válidas—, así que merece inspeccionarse siempre (p. ej. `reset_local_admin_pass.vbs`).
+
+```powershell-session
+Mode                LastWriteTime         Length Name                                                                 
+----                -------------         ------ ----                                                                 
+-a----       11/18/2021  10:44 AM            174 daily-runs.zip                                                       
+-a----        2/28/2022   9:11 PM            203 disable-nbtns.ps1                                                    
+-a----         3/7/2022   9:41 AM         144138 Logon Banner.htm                                                     
+-a----         3/8/2022   2:56 PM            979 reset_local_admin_pass.vbs 
+```
+
+El script contiene la contraseña del administrador local; hay que comprobar si sigue activa en hosts del dominio (por ejemplo con CrackMapExec y `--local-auth`).
+
+**Buscando una contraseña dentro del script**
+
+```powershell-session
+PS C:\htb> cat \\academy-ea-dc01\SYSVOL\INLANEFREIGHT.LOCAL\scripts\reset_local_admin_pass.vbs
+
+On Error Resume Next
+strComputer = "."
+ 
+Set oShell = CreateObject("WScript.Shell") 
+sUser = "Administrator"
+sPwd = "!ILFREIGHT_L0cALADmin!"
+ 
+Set Arg = WScript.Arguments
+If  Arg.Count > 0 Then
+sPwd = Arg(0) 'Pass the password as parameter to the script
+End if
+ 
+'Get the administrator name
+Set objWMIService = GetObject("winmgmts:\\" & strComputer & "\root\cimv2")
+```
+
+##### GPP Passwords
+
+Cuando se crea un GPP, se crea un archivo XML en el share SYSVOL, 

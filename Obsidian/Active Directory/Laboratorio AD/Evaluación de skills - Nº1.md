@@ -30,8 +30,7 @@ El puerto 80 se encuentra abierto, por lo que navegamos mediante `http` a `http:
 type C:\Users\Administrator\Desktop\flag.txt
 ```
 
-> **Respuesta**: JusT_g3tt1ng_st@rt3d!
-
+>**Respuesta**: JusT_g3tt1ng_st@rt3d!
 ##### 2. _Realiza Kerberoast a una cuenta con el SPN MSSQLSvc/SQL01.inlanefreight.local:1433 y envía el nombre de la cuenta como respuesta_
 
 Esta shell supone un absoluto tostón. Cambiemos a una reverse shell. Lo primero es identificar el tipo de sistema de la máquina víctima. Con el comando `systeminfo` lo podemos saber:
@@ -87,9 +86,9 @@ setspn -T INLANEFREIGHT.LOCAL -Q */*
  - `-Q */*` → Query all SPNs (buscar todos los SPNs registrados) 
  - `*/*` → Wildcard para servicio/host (cualquier servicio en cualquier host)
 
-![[Pasted image 20251213015416.png]]
+![[Pasted image 20251213015416.png | 600]]
 
-> **Respuesta**: svc_sql
+>**Respuesta**: svc_sql
 
 ##### 3. _Crackea la contraseña de la cuenta. Envía el valor en texto claro._
 
@@ -179,7 +178,7 @@ De cualquier forma, una vez tengamos el hash, lo desciframos con hashcat:
 hashcat -m 13100 svc_sql_hash.txt /usr/share/wordlists/rockyou.txt 
 ```
 
-> **Respuesta**: lucky7
+>**Respuesta**: lucky7
 
 ##### 4. _Envía el contenido del archivo flag.txt en el escritorio del Administrator en MS01_
 
@@ -256,7 +255,7 @@ mimikatz # sekurlsa::logonpasswords
 
 El usuario `tpetty` muestra que en wdigest no hay contraseña. 
 
-> **Respuesta**: tpetty
+>**Respuesta**: tpetty
 
 ##### 6. _Envía la contraseña en texto claro de este usuario._
 
@@ -291,7 +290,7 @@ Y volvemos a iniciar sesión. Repetimos el mismo proceso que antes con mimikatz.
 
 ![[Pasted image 20251219105520.png]]
 
-> **Respuesta**: Sup3rS3cur3D0m@inU2eR
+>**Respuesta**: Sup3rS3cur3D0m@inU2eR
 
 ##### 7. _¿Qué ataque puede realizar este usuario?_
 
@@ -433,7 +432,7 @@ Obtendremos la flag en el escritorio del administrador.
 
 ![[Pasted image 20251219120905.png]]
 
-> **Respuesta**: r3plicat1on_m@st3r!
+>**Respuesta**: r3plicat1on_m@st3r!
 
 ## Resumen del ataque completo
 

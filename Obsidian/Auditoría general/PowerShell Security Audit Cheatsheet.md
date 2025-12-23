@@ -1,7 +1,7 @@
-## Auditoría de Seguridad en Windows Server 2025 + Active Directory
+## Auditoría de Seguridad en Windows Server + Active Directory
 
 **Objetivo:** Comandos detallados para auditoría de caja blanca (White Box) con acceso administrativo  
-**Entorno:** Windows Server 2025, Active Directory, entorno multisitio  
+**Entorno:** Windows Server, Active Directory, entorno multisitio  
 **Nota:** Ejecutar PowerShell como Administrador
 
 ---

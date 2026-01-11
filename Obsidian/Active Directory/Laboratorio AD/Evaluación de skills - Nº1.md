@@ -434,37 +434,38 @@ Obtendremos la flag en el escritorio del administrador.
 
 >**Respuesta**: r3plicat1on_m@st3r!
 
+
 ## Resumen del ataque completo
 
-### 1. **Punto de entrada inicial**
+### 1. Punto de entrada inicial
 
 - Web shell en `/uploads` → Reverse shell con Meterpreter
 
-### 2. **Kerberoasting**
+### 2. Kerberoasting
 
 - Enumeración de SPNs: `setspn -T INLANEFREIGHT.LOCAL -Q */*`
 - Usuario encontrado: **svc_sql** con SPN
 - Extracción de hash TGS con **Rubeus** y **PowerView**
 - Crackeo con hashcat: `svc_sql:lucky7`
 
-### 3. **Movimiento lateral a MS01**
+### 3. Movimiento lateral a MS01
 
 - Acceso con credenciales de svc_sql
 - Port forwarding con `netsh` para RDP
 - Ejecución de Mimikatz para dump de memoria
 
-### 4. **Enumeración de permisos ACL**
+### 4. Enumeración de permisos ACL
 
 - Usuario encontrado: **tpetty**
 - Permisos: **ExtendedRight** (DS-Replication-Get-Changes)
 - Ataque identificado: **DCSync**
 
-### 5. **DCSync Attack**
+### 5. DCSync Attack
 
 - Extracción de hash NTLM del Administrator: `27dedb1dab4d8545c6e1c66fba077da0`
 - Mimikatz: `lsadump::dcsync /user:administrator`
 
-### 6. **Compromiso del dominio**
+### 6. Compromiso del dominio
 
 - Pivoting con **autoroute** de Meterpreter a subred 172.16.6.0/24
 - Port forwarding WinRM: puerto 6666 → 172.16.6.3:5985
